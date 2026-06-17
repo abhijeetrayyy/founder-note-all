@@ -1,0 +1,38 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(deep-research)",
+      "Workflow(deep-research)",
+      "WebSearch",
+      "WebFetch(domain:mindlabneuroscience.com)",
+      "WebFetch(domain:nesslabs.com)",
+      "WebFetch(domain:thedecisionlab.com)",
+      "WebFetch(domain:www.additudemag.com)",
+      "WebFetch(domain:arxiv.org)",
+      "WebFetch(domain:en.wikipedia.org)",
+      "WebFetch(domain:pmc.ncbi.nlm.nih.gov)",
+      "WebFetch(domain:profiles.wustl.edu)",
+      "WebFetch(domain:gc-bs.org)",
+      "WebFetch(domain:www.frontiersin.org)",
+      "WebFetch(domain:www.tandfonline.com)",
+      "WebFetch(domain:www.annualreviews.org)",
+      "WebFetch(domain:www.ncbi.nlm.nih.gov)",
+      "WebFetch(domain:progressprinciple.com)",
+      "WebFetch(domain:get-alfred.ai)",
+      "WebFetch(domain:www.creativityatwork.com)",
+      "WebFetch(domain:kops.uni-konstanz.de)",
+      "WebFetch(domain:www.researchgate.net)",
+      "WebFetch(domain:www.behaviormodel.org)",
+      "WebFetch(domain:sparq.stanford.edu)",
+      "WebFetch(domain:goalsandprogress.com)",
+      "WebFetch(domain:link.springer.com)",
+      "WebFetch(domain:www.prismaticstrategy.com)",
+      "WebFetch(domain:www.sciencedirect.com)",
+      "WebFetch(domain:pham315.pbworks.com)",
+      "WebFetch(domain:hbr.org)",
+      "WebFetch(domain:www.cambridge.org)",
+      "WebFetch(domain:stephenslighthouse.com)",
+      "WebFetch(domain:journals.sagepub.com)"
+    ]
+  }
+}

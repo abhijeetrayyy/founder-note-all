@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-sans: "Inter", "SF Pro Display", "Segoe UI", system-ui, sans-serif;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-bg dark:bg-dark-bg text-text dark:text-dark-text;
+  }
+
+  /* Scrollbar (desktop) */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+  }
+  .dark ::-webkit-scrollbar-thumb {
+    background: #2a2a3a;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-card bg-surface dark:bg-dark-surface border border-border dark:border-dark-border shadow-card;
+  }
+  .card-hover {
+    @apply hover:shadow-card-hover transition-shadow;
+  }
+  .pill {
+    @apply inline-flex items-center gap-1.5 rounded-pill border border-border dark:border-dark-border px-3 h-9 text-sm font-semibold transition-colors;
+  }
+  .pill-active {
+    @apply bg-primary text-white border-primary;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-2xl font-semibold text-sm transition-all active:scale-[0.98];
+  }
+  .btn-primary {
+    @apply btn bg-primary text-white hover:bg-primary-deep px-5 h-11 shadow-primary;
+  }
+  .btn-ghost {
+    @apply btn text-text dark:text-dark-text hover:bg-surface-alt dark:hover:bg-dark-surface-alt px-4 h-11;
+  }
+  .input {
+    @apply w-full rounded-xl bg-surface-alt dark:bg-dark-surface-alt border-0 px-4 h-12 text-[15px] outline-none focus:ring-2 focus:ring-primary/40 transition;
+  }
+  .label-section {
+    @apply text-[10px] font-extrabold tracking-[1.4px] text-text-muted dark:text-dark-text-muted;
+  }
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-bg dark:focus-visible:ring-offset-dark-bg;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+  .safe-bottom { padding-bottom: max(env(safe-area-inset-bottom), 1rem); }
+  .safe-top { padding-top: max(env(safe-area-inset-top), 0.5rem); }
+}

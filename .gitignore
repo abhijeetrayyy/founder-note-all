@@ -1,0 +1,47 @@
+# Secrets
+.env.local
+.env
+*.env
+notes app/lib/config/supabase_config.dart
+
+# Nested git repos (we manage everything from root)
+founder-web/.git/
+
+# Web
+founder-web/node_modules/
+founder-web/.next/
+founder-web/out/
+founder-web/dist/
+founder-web/*.log
+
+# Mobile
+notes app/.dart_tool/
+notes app/.flutter-plugins
+notes app/.flutter-plugins-dependencies
+notes app/.packages
+notes app/build/
+notes app/ios/Pods/
+notes app/ios/.symlinks/
+notes app/android/.gradle/
+notes app/android/app/debug/
+notes app/android/app/profile/
+notes app/android/app/release/
+notes app/macos/Pods/
+notes app/macos/Flutter/ephemeral/
+notes app/windows/Flutter/ephemeral/
+notes app/linux/Flutter/ephemeral/
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
