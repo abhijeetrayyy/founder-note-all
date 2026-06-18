@@ -60,7 +60,7 @@ class _NotesScreenState extends State<NotesScreen> {
               title: 'No notes yet',
               subtitle: 'Capture thoughts, ideas, and meeting notes.',
               actionLabel: 'Quick add',
-              onAction: () => showQuickAdd(context, prefill: 'Note: '),
+              onAction: () => showQuickAdd(context, initialType: QuickAddType.note),
             ))
           else ...[
             SliverToBoxAdapter(child: SizedBox(
@@ -110,7 +110,7 @@ class _NotesScreenState extends State<NotesScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => showQuickAdd(context, prefill: 'Note: '),
+        onPressed: () => showQuickAdd(context, initialType: QuickAddType.note),
         icon: const Icon(Icons.add_rounded, size: 20),
         label: const Text('New note'),
       ),

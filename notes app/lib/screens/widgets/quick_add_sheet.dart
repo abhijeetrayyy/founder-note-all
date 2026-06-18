@@ -14,10 +14,14 @@ import 'keyboard_safe.dart';
 /// `null` means: follow the parser's decision.
 enum _TypeOverride { note, task, mit }
 
+/// Public type hint for the initial state of the sheet.
+enum QuickAddType { auto, task, note, mit }
+
 class QuickAddSheet extends StatefulWidget {
   final String? prefill;
   final bool defaultToMIT;
-  const QuickAddSheet({super.key, this.prefill, this.defaultToMIT = false});
+  final QuickAddType initialType;
+  const QuickAddSheet({super.key, this.prefill, this.defaultToMIT = false, this.initialType = QuickAddType.auto});
 
   @override
   State<QuickAddSheet> createState() => _QuickAddSheetState();
@@ -45,7 +49,13 @@ class _QuickAddSheetState extends State<QuickAddSheet> {
   void initState() {
     super.initState();
     if (widget.prefill != null) _ctrl.text = widget.prefill!;
-    if (widget.defaultToMIT) _override = _TypeOverride.mit;
+    if (widget.defaultToMIT || widget.initialType == QuickAddType.mit) {
+      _override = _TypeOverride.mit;
+    } else if (widget.initialType == QuickAddType.task) {
+      _override = _TypeOverride.task;
+    } else if (widget.initialType == QuickAddType.note) {
+      _override = _TypeOverride.note;
+    }
     _ctrl.addListener(_onChange);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focus.requestFocus();
@@ -561,11 +571,11 @@ class _QuickAddResult {
   _QuickAddResult({required this.type, required this.text, this.id});
 }
 
-Future<void> showQuickAdd(BuildContext context, {String? prefill, bool defaultToMIT = false}) async {
+Future<void> showQuickAdd(BuildContext context, {String? prefill, bool defaultToMIT = false, QuickAddType initialType = QuickAddType.auto}) async {
   HapticFeedback.lightImpact();
   final result = await showAppSheet<_QuickAddResult>(
     context: context,
-    builder: (_) => QuickAddSheet(prefill: prefill, defaultToMIT: defaultToMIT),
+    builder: (_) => QuickAddSheet(prefill: prefill, defaultToMIT: defaultToMIT, initialType: initialType),
   );
   if (result == null) return;
   if (!context.mounted) return;

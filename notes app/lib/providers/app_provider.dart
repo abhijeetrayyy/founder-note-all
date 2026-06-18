@@ -39,10 +39,20 @@ class AppProvider extends ChangeNotifier {
   Timer? _searchDebounce;
 
   void setSection(AppSection s) {
+    if (_section == s) return;
     _section = s;
     _sidebarIndex = AppSection.values.indexOf(s);
     notifyListeners();
   }
+
+  void goToDashboard() => setSection(AppSection.dashboard);
+  void goToInbox() => setSection(AppSection.inbox);
+  void goToTasks() => setSection(AppSection.tasks);
+  void goToNotes() => setSection(AppSection.notes);
+  void goToProjects() => setSection(AppSection.projects);
+  void goToPlan() => setSection(AppSection.planning);
+  void goToFocus() => setSection(AppSection.focus);
+  void goToSettings() => setSection(AppSection.settings);
 
   void setGlobalSearch(String q) {
     _searchDebounce?.cancel();

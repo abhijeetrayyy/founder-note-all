@@ -15,6 +15,9 @@ import '../models/daily_plan.dart';
 import '../theme/app_theme.dart';
 import 'planning/daily_planning_screen.dart';
 import 'focus_timer_screen.dart';
+import 'notes/note_editor_screen.dart';
+import 'projects/project_detail_screen.dart';
+import 'tasks/task_editor_screen.dart';
 import 'widgets/empty_state.dart';
 import 'widgets/quick_add_sheet.dart';
 
@@ -79,10 +82,10 @@ class DashboardScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
 
-                // Quick actions row
+                // Quick actions row — each tile opens a DISTINCT screen
                 _QuickActionRow(
-                  onAddTask: () => showQuickAdd(context),
-                  onAddNote: () => showQuickAdd(context, prefill: 'Note: '),
+                  onAddTask: () => _openTaskEditor(context),
+                  onAddNote: () => _openNoteEditor(context),
                   onPlan: () => _openPlanning(context),
                   onFocus: () => app.setSection(AppSection.focus),
                 ),
@@ -108,7 +111,7 @@ class DashboardScreen extends StatelessWidget {
 
                 const SizedBox(height: 16),
                 // Inbox preview
-                _SectionHeader(title: 'Inbox', count: inboxCount, onTap: () => app.setSection(AppSection.tasks)),
+                _SectionHeader(title: 'Inbox', count: inboxCount, onTap: () => app.setSection(AppSection.inbox)),
                 const SizedBox(height: 8),
                 if (inboxCount == 0)
                   Container(
@@ -160,7 +163,12 @@ class DashboardScreen extends StatelessWidget {
                   Wrap(spacing: 6, runSpacing: 6, children: [
                     for (final p in projects.projects.take(10))
                       GestureDetector(
-                        onTap: () => app.setSection(AppSection.projects),
+                        onTap: () {
+                          HapticFeedback.selectionClick();
+                          Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => ProjectDetailScreen(projectId: p.id), fullscreenDialog: true),
+                          );
+                        },
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           decoration: BoxDecoration(color: Color(p.color).withValues(alpha: isDark ? 0.16 : 0.10), borderRadius: BorderRadius.circular(18), border: Border.all(color: Color(p.color).withValues(alpha: 0.3))),
@@ -191,8 +199,24 @@ class DashboardScreen extends StatelessWidget {
   String _dateLine() => DateFormat('EEEE, MMM d').format(DateTime.now());
 
   Future<void> _openPlanning(BuildContext context) async {
+    HapticFeedback.lightImpact();
     final result = await Navigator.of(context, rootNavigator: true).push(MaterialPageRoute(builder: (_) => const DailyPlanningScreen(), fullscreenDialog: true));
     if (result == true && context.mounted) await context.read<DailyPlanProvider>().load();
+  }
+
+  Future<void> _openTaskEditor(BuildContext context) async {
+    HapticFeedback.lightImpact();
+    await Navigator.of(context, rootNavigator: true).push(MaterialPageRoute(builder: (_) => const TaskEditorScreen(), fullscreenDialog: true));
+  }
+
+  Future<void> _openNoteEditor(BuildContext context) async {
+    HapticFeedback.lightImpact();
+    await Navigator.of(context, rootNavigator: true).push(MaterialPageRoute(builder: (_) => const NoteEditorScreen(), fullscreenDialog: true));
+  }
+
+  Future<void> _openSection(BuildContext context, AppSection section) async {
+    HapticFeedback.selectionClick();
+    context.read<AppProvider>().setSection(section);
   }
 
   /// Group today's tasks by time-block and render a vertical timeline.
@@ -412,13 +436,13 @@ class _QuickActionRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(children: [
-      Expanded(child: _ActionTile(icon: Icons.check_circle_rounded, label: 'Task', color: AppTheme.primary, onTap: onAddTask)),
+      Expanded(child: _ActionTile(icon: Icons.add_task_rounded, label: 'Add Task', sublabel: 'Open editor', color: AppTheme.primary, onTap: onAddTask)),
       const SizedBox(width: 8),
-      Expanded(child: _ActionTile(icon: Icons.notes_rounded, label: 'Note', color: AppTheme.energyMedium, onTap: onAddNote)),
+      Expanded(child: _ActionTile(icon: Icons.edit_note_rounded, label: 'Add Note', sublabel: 'Open editor', color: AppTheme.energyMedium, onTap: onAddNote)),
       const SizedBox(width: 8),
-      Expanded(child: _ActionTile(icon: Icons.flag_rounded, label: 'Plan', color: Colors.orange, onTap: onPlan)),
+      Expanded(child: _ActionTile(icon: Icons.flag_rounded, label: 'Plan', sublabel: 'Morning ritual', color: Colors.orange, onTap: onPlan)),
       const SizedBox(width: 8),
-      Expanded(child: _ActionTile(icon: Icons.timer_rounded, label: 'Focus', color: AppTheme.energyDeep, onTap: onFocus)),
+      Expanded(child: _ActionTile(icon: Icons.bolt_rounded, label: 'Focus', sublabel: 'Timer session', color: AppTheme.energyDeep, onTap: onFocus)),
     ]);
   }
 }
@@ -426,21 +450,33 @@ class _QuickActionRow extends StatelessWidget {
 class _ActionTile extends StatelessWidget {
   final IconData icon;
   final String label;
+  final String sublabel;
   final Color color;
   final VoidCallback onTap;
-  const _ActionTile({required this.icon, required this.label, required this.color, required this.onTap});
+  const _ActionTile({required this.icon, required this.label, required this.sublabel, required this.color, required this.onTap});
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        decoration: BoxDecoration(color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(14), border: Border.all(color: color.withValues(alpha: 0.2))),
-        child: Column(children: [
-          Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: color.withValues(alpha: 0.14), borderRadius: BorderRadius.circular(10)), child: Icon(icon, color: color, size: 20)),
-          const SizedBox(height: 6),
-          Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: color)),
-        ]),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 6),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: isDark ? 0.16 : 0.10),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: color.withValues(alpha: isDark ? 0.32 : 0.25)),
+          ),
+          child: Column(children: [
+            Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: color.withValues(alpha: 0.20), borderRadius: BorderRadius.circular(10)), child: Icon(icon, color: color, size: 22)),
+            const SizedBox(height: 6),
+            Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: color, height: 1.1)),
+            const SizedBox(height: 2),
+            Text(sublabel, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 9, fontWeight: FontWeight.w600, color: color.withValues(alpha: 0.7), letterSpacing: 0.2)),
+          ]),
+        ),
       ),
     );
   }
@@ -609,25 +645,37 @@ class _NoteCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      width: 180,
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Color(note.color).withValues(alpha: isDark ? 0.14 : 0.08),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Color(note.color).withValues(alpha: 0.3)),
+        onTap: () {
+          HapticFeedback.selectionClick();
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => NoteEditorScreen(noteId: note.id), fullscreenDialog: true),
+          );
+        },
+        child: Container(
+          width: 180,
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: Color(note.color).withValues(alpha: isDark ? 0.14 : 0.08),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: Color(note.color).withValues(alpha: 0.3)),
+          ),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Row(children: [
+              Container(width: 8, height: 8, decoration: BoxDecoration(color: Color(note.color), shape: BoxShape.circle)),
+              const SizedBox(width: 6),
+              Expanded(child: Text(note.title.isEmpty ? 'Untitled' : note.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800))),
+            ]),
+            const Spacer(),
+            if (note.content.isNotEmpty) Text(note.content, maxLines: 3, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 12, color: isDark ? AppTheme.darkTextMuted : AppTheme.lightTextMuted, height: 1.4)),
+            const SizedBox(height: 6),
+            Text(DateFormat('MMM d').format(note.updatedAt), style: TextStyle(fontSize: 10, color: isDark ? AppTheme.darkTextMuted : AppTheme.lightTextMuted, fontWeight: FontWeight.w600)),
+          ]),
+        ),
       ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(children: [
-          Container(width: 8, height: 8, decoration: BoxDecoration(color: Color(note.color), shape: BoxShape.circle)),
-          const SizedBox(width: 6),
-          Expanded(child: Text(note.title.isEmpty ? 'Untitled' : note.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800))),
-        ]),
-        const Spacer(),
-        if (note.content.isNotEmpty) Text(note.content, maxLines: 3, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 12, color: isDark ? AppTheme.darkTextMuted : AppTheme.lightTextMuted, height: 1.4)),
-        const SizedBox(height: 6),
-        Text(DateFormat('MMM d').format(note.updatedAt), style: TextStyle(fontSize: 10, color: isDark ? AppTheme.darkTextMuted : AppTheme.lightTextMuted, fontWeight: FontWeight.w600)),
-      ]),
     );
   }
 }

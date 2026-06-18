@@ -25,6 +25,37 @@ export async function getProjects(): Promise<Project[]> {
   return (data ?? []) as Project[];
 }
 
+export async function getProject(id: string): Promise<Project | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("projects").select("*").eq("id", id).single();
+  if (error && error.code !== "PGRST116") throw error;
+  return data as Project | null;
+}
+
+export async function getProjectTasks(projectId: string): Promise<Task[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("tasks")
+    .select("*")
+    .eq("project_id", projectId)
+    .order("completed", { ascending: true })
+    .order("priority", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as Task[];
+}
+
+export async function getProjectNotes(projectId: string): Promise<Note[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("notes")
+    .select("*")
+    .eq("project_id", projectId)
+    .eq("is_archived", false)
+    .order("updated_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as Note[];
+}
+
 export async function getTags(): Promise<Tag[]> {
   const supabase = await createClient();
   const { data, error } = await supabase.from("tags").select("*").order("name");
@@ -79,6 +110,13 @@ export async function getNotes(): Promise<Note[]> {
     .order("updated_at", { ascending: false });
   if (error) throw error;
   return (data ?? []) as Note[];
+}
+
+export async function getNote(id: string): Promise<Note | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("notes").select("*").eq("id", id).single();
+  if (error && error.code !== "PGRST116") throw error;
+  return data as Note | null;
 }
 
 export async function getGoals(): Promise<Goal[]> {

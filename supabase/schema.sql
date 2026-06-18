@@ -600,6 +600,19 @@ $$;
 
 grant execute on function public.add_mit(date, uuid) to authenticated;
 
+-- ---------------------------------------------------------------------------
+-- 19. DEFAULT GRANTS (Supabase roles)
+-- ---------------------------------------------------------------------------
+-- Ensure anon and authenticated can use the public schema and its objects.
+-- This matters when the public schema is recreated (e.g. via drop schema public cascade).
+grant usage on schema public to anon, authenticated, service_role;
+grant all on all tables in schema public to anon, authenticated, service_role;
+grant all on all sequences in schema public to anon, authenticated, service_role;
+grant all on all functions in schema public to anon, authenticated, service_role;
+alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
+alter default privileges in schema public grant all on sequences to anon, authenticated, service_role;
+alter default privileges in schema public grant all on functions to anon, authenticated, service_role;
+
 -- ============================================================================
 -- END OF SCHEMA
 -- ============================================================================

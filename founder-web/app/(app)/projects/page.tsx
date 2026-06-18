@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getProjects } from "@/lib/data";
 import { Card, SectionLabel } from "@/components/ui/card";
 import { CreateProjectButton } from "@/components/create-project-button";
@@ -20,8 +21,9 @@ export default async function ProjectsPage() {
         {projects.length ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {projects.map((project) => (
-              <div
+              <Link
                 key={project.id}
+                href={`/projects/${project.id}`}
                 className="p-4 rounded-2xl border bg-surface dark:bg-dark-surface border-border dark:border-dark-border hover:shadow-card transition"
               >
                 <div className="flex items-center gap-3">
@@ -36,7 +38,7 @@ export default async function ProjectsPage() {
                     {project.description ? <p className="text-sm text-text-muted dark:text-dark-text-muted line-clamp-1">{project.description}</p> : null}
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         ) : (

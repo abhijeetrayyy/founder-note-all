@@ -1,9 +1,7 @@
 import Link from "next/link";
-import { getProfile, getTasksDueToday, getHabits, getHabitLogsForDate, getEnergyLog, getNotes, getGoals, getTodaySummary } from "@/lib/data";
+import { getProfile, getTasksDueToday, getHabits, getHabitLogsForDate, getEnergyLog, getNotes, getGoals, getTodaySummary, getDailyPlan } from "@/lib/data";
 import { todayKey, greeting } from "@/lib/utils";
 import { Card, SectionLabel } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { TaskItem } from "@/components/task-item";
 import { HabitRow } from "@/components/habit-row";
 import { EnergyPicker, EnergyBadge } from "@/components/energy-picker";
@@ -11,7 +9,7 @@ import { NoteCard } from "@/components/note-card";
 import { GoalCard } from "@/components/goal-card";
 
 export default async function TodayPage() {
-  const [profile, tasks, habits, habitLogs, energy, notes, goals, summary] = await Promise.all([
+  const [profile, tasks, habits, habitLogs, energy, notes, goals, summary, plan] = await Promise.all([
     getProfile(),
     getTasksDueToday(),
     getHabits(),
@@ -20,11 +18,13 @@ export default async function TodayPage() {
     getNotes(),
     getGoals(),
     getTodaySummary(),
+    getDailyPlan(),
   ]);
 
   const greetingText = greeting(profile?.display_name || "Founder");
-  const mits = tasks.filter((t) => t.priority === 2);
-  const rest = tasks.filter((t) => t.priority !== 2);
+  const mitIds = plan?.mit_task_ids ?? [];
+  const mits = tasks.filter((t) => mitIds.includes(t.id));
+  const rest = tasks.filter((t) => !mitIds.includes(t.id));
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 space-y-8">
@@ -44,19 +44,34 @@ export default async function TodayPage() {
         <SummaryCard label="Habits" value={summary.habits_done_today} href="/habits" />
       </div>
 
+      {plan?.intention_text ? (
+        <Card className="p-5 border-primary/30 bg-primary/5">
+          <SectionLabel className="mb-2">TODAY&apos;S INTENTION</SectionLabel>
+          <p className="text-lg font-bold leading-snug">{plan.intention_text}</p>
+          {plan.blocker_notes ? (
+            <p className="mt-2 text-sm text-text-muted dark:text-dark-text-muted">Blockers: {plan.blocker_notes}</p>
+          ) : null}
+        </Card>
+      ) : null}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <Card className="p-5 space-y-4">
             <div className="flex items-center justify-between">
               <SectionLabel>MOST IMPORTANT TASKS</SectionLabel>
               <Link href="/plan" className="text-xs font-bold text-primary hover:underline">
-                Plan day
+                {mits.length ? "Edit plan" : "Plan day"}
               </Link>
             </div>
             {mits.length ? (
               <div className="space-y-3">
-                {mits.map((task) => (
-                  <TaskItem key={task.id} task={task} />
+                {mits.map((task, i) => (
+                  <div key={task.id} className="flex items-start gap-3">
+                    <span className="w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold shrink-0 mt-1">{i + 1}</span>
+                    <div className="flex-1 min-w-0">
+                      <TaskItem task={task} />
+                    </div>
+                  </div>
                 ))}
               </div>
             ) : (
@@ -115,7 +130,7 @@ export default async function TodayPage() {
         </div>
       </div>
 
-      {notes.length > 0 && (
+      {notes.length > 0 ? (
         <section>
           <div className="flex items-center justify-between mb-4">
             <SectionLabel>RECENT NOTES</SectionLabel>
@@ -129,7 +144,7 @@ export default async function TodayPage() {
             ))}
           </div>
         </section>
-      )}
+      ) : null}
     </div>
   );
 }

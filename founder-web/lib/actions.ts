@@ -161,6 +161,22 @@ export async function toggleTask(id: string, completed: boolean) {
   return { success: true };
 }
 
+export async function updateTask(id: string, updates: { priority?: number; is_inbox?: boolean; title?: string; description?: string; due_date?: string | null; project_id?: string | null; energy_level?: number; estimated_minutes?: number | null; first_step?: string; implementation_intention?: string; recurrence?: number }) {
+  const supabase = await createClient();
+  const cleanUpdates: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(updates)) {
+    if (v !== undefined) cleanUpdates[k] = v;
+  }
+  if (Object.keys(cleanUpdates).length === 0) return { success: true };
+  const { error } = await supabase.from("tasks").update(cleanUpdates).eq("id", id);
+  if (error) return { error: error.message };
+  revalidatePath("/tasks");
+  revalidatePath("/today");
+  revalidatePath("/inbox");
+  revalidatePath("/plan");
+  return { success: true };
+}
+
 export async function deleteTask(id: string) {
   const supabase = await createClient();
   const { error } = await supabase.from("tasks").delete().eq("id", id);
@@ -228,6 +244,33 @@ export async function createNote(formData: FormData) {
   revalidatePath("/notes");
   revalidatePath("/today");
   return { success: true, id: (data as Note | null)?.id };
+}
+
+export async function pinNote(id: string, pinned: boolean) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("notes").update({ is_pinned: pinned }).eq("id", id);
+  if (error) return { error: error.message };
+  revalidatePath("/notes");
+  revalidatePath("/today");
+  return { success: true };
+}
+
+export async function archiveNote(id: string, archived: boolean) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("notes").update({ is_archived: archived }).eq("id", id);
+  if (error) return { error: error.message };
+  revalidatePath("/notes");
+  revalidatePath("/today");
+  return { success: true };
+}
+
+export async function deleteNote(id: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("notes").delete().eq("id", id);
+  if (error) return { error: error.message };
+  revalidatePath("/notes");
+  revalidatePath("/today");
+  return { success: true };
 }
 
 export async function createProject(formData: FormData) {
@@ -362,6 +405,109 @@ export async function saveDailyPlan(formData: FormData) {
     energy_level: Number(formData.get("energy_level") ?? null) || null,
     mit_task_ids: [],
     morning_done: false,
+  } as unknown as DailyPlan);
+  if (error) return { error: error.message };
+  revalidatePath("/plan");
+  revalidatePath("/today");
+  return { success: true };
+}
+
+export async function updatePlanAction(formData: FormData) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  const date = todayKey();
+  const mitRaw = String(formData.get("mit_task_ids") ?? "").trim();
+  const mitIds = mitRaw ? mitRaw.split(",").filter(Boolean) : [];
+  const intention = String(formData.get("intention_text") ?? "");
+  const blockers = String(formData.get("blocker_notes") ?? "");
+  const reflection = String(formData.get("reflection_text") ?? "");
+
+  const { data: existing } = await supabase.from("daily_plans").select("*").eq("id", date).single();
+  const morningDone = Boolean(existing?.morning_done) || mitIds.length > 0 || intention.length > 0;
+
+  const { error } = await supabase.from("daily_plans").upsert({
+    id: date,
+    user_id: user.id,
+    intention_text: intention,
+    blocker_notes: blockers,
+    reflection_text: reflection,
+    energy_level: existing?.energy_level ?? null,
+    mit_task_ids: mitIds,
+    morning_done: morningDone,
+    created_at: existing?.created_at ?? new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  } as unknown as DailyPlan);
+  if (error) return { error: error.message };
+
+  // For each MIT id, ensure the task's priority is bumped to high and is_inbox=false
+  if (mitIds.length > 0) {
+    await supabase
+      .from("tasks")
+      .update({ priority: 2, is_inbox: false })
+      .in("id", mitIds);
+  }
+
+  revalidatePath("/plan");
+  revalidatePath("/today");
+  revalidatePath("/inbox");
+  return { success: true };
+}
+
+export async function addMITAction(taskId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  const date = todayKey();
+  const { data: existing } = await supabase.from("daily_plans").select("*").eq("id", date).single();
+  const currentMits: string[] = existing?.mit_task_ids ?? [];
+  if (currentMits.includes(taskId)) return { success: true };
+  if (currentMits.length >= 3) return { error: "Already 3 MITs" };
+  const next = [...currentMits, taskId];
+
+  const { error } = await supabase.from("daily_plans").upsert({
+    id: date,
+    user_id: user.id,
+    intention_text: existing?.intention_text ?? "",
+    blocker_notes: existing?.blocker_notes ?? "",
+    reflection_text: existing?.reflection_text ?? "",
+    energy_level: existing?.energy_level ?? null,
+    mit_task_ids: next,
+    morning_done: true,
+    created_at: existing?.created_at ?? new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  } as unknown as DailyPlan);
+  if (error) return { error: error.message };
+
+  await supabase.from("tasks").update({ priority: 2, is_inbox: false }).eq("id", taskId);
+  revalidatePath("/plan");
+  revalidatePath("/today");
+  return { success: true };
+}
+
+export async function removeMITAction(taskId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  const date = todayKey();
+  const { data: existing } = await supabase.from("daily_plans").select("*").eq("id", date).single();
+  const currentMits: string[] = existing?.mit_task_ids ?? [];
+  const next = currentMits.filter((id) => id !== taskId);
+
+  const { error } = await supabase.from("daily_plans").upsert({
+    id: date,
+    user_id: user.id,
+    intention_text: existing?.intention_text ?? "",
+    blocker_notes: existing?.blocker_notes ?? "",
+    reflection_text: existing?.reflection_text ?? "",
+    energy_level: existing?.energy_level ?? null,
+    mit_task_ids: next,
+    morning_done: existing?.morning_done ?? false,
+    created_at: existing?.created_at ?? new Date().toISOString(),
+    updated_at: new Date().toISOString(),
   } as unknown as DailyPlan);
   if (error) return { error: error.message };
   revalidatePath("/plan");

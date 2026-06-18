@@ -81,24 +81,16 @@ class _AppShellState extends State<AppShell> {
   }
 
   Widget _mobile(AppProvider app) {
-    final fab = _shouldShowFab(app.section)
-        ? FloatingActionButton.extended(
-            onPressed: _showQuickAdd,
-            icon: const Icon(Icons.add_rounded, size: 22),
-            label: const Text('Capture'),
-          )
-        : null;
     return Scaffold(
       key: _scaffoldKey,
       drawer: const Drawer(child: _MoreMenu()),
       body: SafeArea(top: false, child: _buildContent(app)),
-      floatingActionButton: fab,
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       bottomNavigationBar: _BottomNav(section: app.section, onChange: (s) => app.setSection(s), onCapture: _showQuickAdd, onMore: () => _scaffoldKey.currentState?.openDrawer()),
     );
   }
 
-  bool _shouldShowFab(AppSection s) => s != AppSection.planning && s != AppSection.focus && s != AppSection.review;
+  @Deprecated('Use bottom nav Capture button instead')
+  bool _shouldShowFab(AppSection s) => false;
 
   Widget _buildContent(AppProvider app) {
     switch (app.section) {
@@ -139,6 +131,13 @@ class _BottomNav extends StatelessWidget {
     final plan = context.watch<DailyPlanProvider>();
     final tasks = context.watch<TasksProvider>();
     final inboxCount = tasks.tasks.where((t) => !t.completed && t.isInbox).length;
+    // "More" is active when on a section that lives in the drawer (not the bottom nav)
+    final moreSections = {
+      AppSection.tasks, AppSection.notes, AppSection.projects, AppSection.calendar,
+      AppSection.journal, AppSection.habits, AppSection.review, AppSection.focus,
+      AppSection.goals, AppSection.settings,
+    };
+    final moreActive = moreSections.contains(section);
     return Container(
       decoration: BoxDecoration(color: Theme.of(context).cardColor, border: Border(top: BorderSide(color: Theme.of(context).dividerColor))),
       child: SafeArea(
@@ -171,7 +170,7 @@ class _BottomNav extends StatelessWidget {
               ),
             ),
             // More (drawer)
-            Expanded(child: _Item(icon: Icons.menu_rounded, label: 'More', active: false, onTap: onMore)),
+            Expanded(child: _Item(icon: Icons.menu_rounded, label: 'More', active: moreActive, onTap: onMore)),
           ]),
         ),
       ),
@@ -310,29 +309,43 @@ class _Group extends StatelessWidget {
   const _Group({required this.title, required this.items});
   @override
   Widget build(BuildContext context) {
+    final currentSection = context.watch<AppProvider>().section;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Padding(padding: const EdgeInsets.fromLTRB(12, 8, 12, 8), child: Text(title, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Theme.of(context).brightness == Brightness.dark ? AppTheme.darkTextMuted : AppTheme.lightTextMuted, letterSpacing: 1.4))),
-        for (final it in items) Material(
-          color: Colors.transparent,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(12),
-            onTap: () { context.read<AppProvider>().setSection(it.section); Navigator.pop(context); },
-            child: Container(
-              margin: const EdgeInsets.only(bottom: 2),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-              decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
-              child: Row(children: [
-                Icon(it.icon, size: 18, color: Theme.of(context).brightness == Brightness.dark ? AppTheme.darkText : AppTheme.lightText),
-                const SizedBox(width: 12),
-                Expanded(child: Text(it.label, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Theme.of(context).brightness == Brightness.dark ? AppTheme.darkText : AppTheme.lightText))),
-                if (it.badge != null) Container(padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2), decoration: BoxDecoration(color: AppTheme.primary.withValues(alpha: 0.14), borderRadius: BorderRadius.circular(8)), child: Text(it.badge!, style: const TextStyle(fontSize: 11, color: AppTheme.primary, fontWeight: FontWeight.w700))),
-                const SizedBox(width: 4),
-                Icon(Icons.chevron_right_rounded, size: 18, color: Theme.of(context).brightness == Brightness.dark ? AppTheme.darkTextMuted : AppTheme.lightTextMuted),
-              ]),
-            ),
-          ),
+        Padding(padding: const EdgeInsets.fromLTRB(12, 8, 12, 8), child: Text(title, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: isDark ? AppTheme.darkTextMuted : AppTheme.lightTextMuted, letterSpacing: 1.4))),
+        for (final it in items) Builder(
+          builder: (ctx) {
+            final isActive = currentSection == it.section;
+            return Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(12),
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  ctx.read<AppProvider>().setSection(it.section);
+                  Navigator.pop(ctx);
+                },
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 2),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: isActive ? AppTheme.primary.withValues(alpha: isDark ? 0.18 : 0.10) : Colors.transparent,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(children: [
+                    Icon(it.icon, size: 18, color: isActive ? AppTheme.primary : (isDark ? AppTheme.darkText : AppTheme.lightText)),
+                    const SizedBox(width: 12),
+                    Expanded(child: Text(it.label, style: TextStyle(fontSize: 14, fontWeight: isActive ? FontWeight.w700 : FontWeight.w500, color: isActive ? AppTheme.primary : (isDark ? AppTheme.darkText : AppTheme.lightText)))),
+                    if (it.badge != null) Container(padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2), decoration: BoxDecoration(color: AppTheme.primary.withValues(alpha: 0.14), borderRadius: BorderRadius.circular(8)), child: Text(it.badge!, style: const TextStyle(fontSize: 11, color: AppTheme.primary, fontWeight: FontWeight.w700))),
+                    const SizedBox(width: 4),
+                    Icon(Icons.chevron_right_rounded, size: 18, color: isDark ? AppTheme.darkTextMuted : AppTheme.lightTextMuted),
+                  ]),
+                ),
+              ),
+            );
+          },
         ),
       ]),
     );
