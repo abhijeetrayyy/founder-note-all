@@ -6,43 +6,31 @@ import { DailyPlanForm } from "@/components/daily-plan-form";
 
 export default async function PlanPage() {
   const [plan, dueTasks, allTasks, profile] = await Promise.all([
-    getDailyPlan(),
-    getTasksDueToday(),
-    getTasks({ completed: false }),
-    getProfile(),
+    getDailyPlan(), getTasksDueToday(), getTasks({ completed: false }), getProfile(),
   ]);
   const mitIds = plan?.mit_task_ids ?? [];
   const dueNotMit = dueTasks.filter((t) => !mitIds.includes(t.id));
 
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-8">
-      <header>
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-10">
+      <header className="space-y-1">
         <h1 className="text-2xl font-bold text-foreground tracking-tight font-display">Plan your day</h1>
-        <p className="text-sm text-foreground-muted mt-1">A short ritual beats a long list. Set your intention, pick what matters, go.</p>
+        <p className="text-sm text-foreground-muted">A short ritual beats a long list. Set your intention, pick what matters, go.</p>
       </header>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        <Card variant="ambient" className="p-5 space-y-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <Card variant="focused" className="p-5 space-y-4">
           <p className="text-2xs uppercase tracking-[0.15em] text-foreground-muted font-bold">Energy level</p>
           <EnergyPicker value={plan?.energy_level ?? profile?.energy_default} />
           <p className="text-xs text-foreground-subtle">Match your work to how you feel — not the other way around.</p>
         </Card>
 
         <Card variant="ambient" className="p-5 space-y-4">
-          <p className="text-2xs uppercase tracking-[0.15em] text-foreground-muted font-bold">State</p>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-foreground-muted">Intention</span>
-              <span className="text-foreground font-semibold">{plan?.intention_text ? "Set" : "—"}</span>
-            </div>
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-foreground-muted">MITs</span>
-              <span className="text-foreground font-semibold">{mitIds.length}/3</span>
-            </div>
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-foreground-muted">Reflection</span>
-              <span className="text-foreground font-semibold">{plan?.reflection_text ? "Done" : "—"}</span>
-            </div>
+          <p className="text-2xs uppercase tracking-[0.15em] text-foreground-muted font-bold">Today&apos;s state</p>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between text-sm"><span className="text-foreground-muted">Intention</span><span className="text-foreground font-semibold">{plan?.intention_text ? "✓" : "—"}</span></div>
+            <div className="flex items-center justify-between text-sm"><span className="text-foreground-muted">MITs</span><span className="text-foreground font-semibold">{mitIds.length}/3</span></div>
+            <div className="flex items-center justify-between text-sm"><span className="text-foreground-muted">Reflection</span><span className="text-foreground font-semibold">{plan?.reflection_text ? "✓" : "—"}</span></div>
           </div>
         </Card>
       </div>
@@ -54,11 +42,9 @@ export default async function PlanPage() {
 
       {dueNotMit.length > 0 && (
         <Card variant="ambient" className="p-5 space-y-4">
-          <p className="text-2xs uppercase tracking-[0.15em] text-foreground-muted font-bold mb-1">Also due today</p>
+          <p className="text-2xs uppercase tracking-[0.15em] text-foreground-muted font-bold">Also due today</p>
           <div className="space-y-2">
-            {dueNotMit.map((task) => (
-              <TaskItem key={task.id} task={task} />
-            ))}
+            {dueNotMit.map((task) => (<TaskItem key={task.id} task={task} />))}
           </div>
         </Card>
       )}
