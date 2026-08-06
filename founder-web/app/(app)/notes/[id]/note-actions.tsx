@@ -33,7 +33,7 @@ export function NoteActions({ noteId, isPinned, isArchived }: { noteId: string; 
   async function onDelete() {
     if (!confirm("Delete this note? This cannot be undone.")) return;
     setPending(true);
-    const result = await deleteNoteAction(noteId);
+    const result = await deleteNote(noteId);
     setPending(false);
     if (result.error) toast.show(result.error, "error");
     else {
@@ -48,7 +48,7 @@ export function NoteActions({ noteId, isPinned, isArchived }: { noteId: string; 
       <button
         onClick={onPin}
         disabled={pending}
-        className="h-9 px-3 rounded-xl hover:bg-surface-alt dark:hover:bg-dark-surface-alt text-sm font-bold focus-ring disabled:opacity-50"
+        className="h-9 px-3.5 rounded-xl text-foreground-muted hover:text-foreground hover:bg-base-raised transition-colors text-sm font-bold focus-ring disabled:opacity-50"
         aria-label={isPinned ? "Unpin" : "Pin"}
       >
         {isPinned ? "Unpin" : "Pin"}
@@ -56,21 +56,17 @@ export function NoteActions({ noteId, isPinned, isArchived }: { noteId: string; 
       <button
         onClick={onArchive}
         disabled={pending}
-        className="h-9 px-3 rounded-xl hover:bg-surface-alt dark:hover:bg-dark-surface-alt text-sm font-bold focus-ring disabled:opacity-50"
+        className="h-9 px-3.5 rounded-xl text-foreground-muted hover:text-foreground hover:bg-base-raised transition-colors text-sm font-bold focus-ring disabled:opacity-50"
       >
         {isArchived ? "Restore" : "Archive"}
       </button>
       <button
         onClick={onDelete}
         disabled={pending}
-        className="h-9 px-3 rounded-xl hover:bg-danger/10 text-danger text-sm font-bold focus-ring disabled:opacity-50"
+        className="h-9 px-3.5 rounded-xl hover:bg-state-overdue-surface text-state-overdue text-sm font-bold focus-ring disabled:opacity-50 transition-colors"
       >
         Delete
       </button>
     </div>
   );
-}
-
-async function deleteNoteAction(id: string) {
-  return deleteNote(id);
 }

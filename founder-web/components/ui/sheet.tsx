@@ -13,48 +13,70 @@ interface SheetProps {
 }
 
 export function Sheet({ open, onClose, title, children, className, size = "md" }: SheetProps) {
+  const titleId = React.useId();
+  const panelRef = React.useRef<HTMLDivElement>(null);
+  const previousFocusRef = React.useRef<HTMLElement | null>(null);
+
   React.useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = prev;
-    };
+    previousFocusRef.current = document.activeElement as HTMLElement | null;
+    return () => { document.body.style.overflow = prev; previousFocusRef.current?.focus(); };
   }, [open]);
 
   React.useEffect(() => {
-    if (!open) return;
+    if (!open || !panelRef.current) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") { onClose(); return; }
+      if (e.key === "Tab" && panelRef.current) {
+        const focusable = panelRef.current.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusable.length === 0) return;
+        const first = focusable[0], last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
+  React.useEffect(() => {
+    if (!open || !panelRef.current) return;
+    const timer = setTimeout(() => {
+      const focusable = panelRef.current?.querySelector<HTMLElement>(
+        'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled])'
+      );
+      focusable?.focus();
+    }, 50);
+    return () => clearTimeout(timer);
+  }, [open]);
+
   if (!open) return null;
 
-  const sizes = {
-    sm: "sm:max-w-sm",
-    md: "sm:max-w-md",
-    lg: "sm:max-w-lg",
-    full: "sm:max-w-3xl",
-  };
+  const sizes: Record<string, string> = { sm: "sm:max-w-sm", md: "sm:max-w-md", lg: "sm:max-w-lg", full: "sm:max-w-3xl" };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm animate-fade-in" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/30 backdrop-blur-sm animate-fade-in" onClick={onClose}>
       <div
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={title ? titleId : undefined}
         onClick={(e) => e.stopPropagation()}
         className={cn(
-          "w-full bg-surface dark:bg-dark-surface rounded-t-sheet sm:rounded-sheet border border-border dark:border-dark-border shadow-2xl max-h-[92vh] flex flex-col animate-slide-up",
+          "w-full glass-focused rounded-t-sheet sm:rounded-sheet shadow-focused max-h-[92vh] flex flex-col animate-slide-up",
           sizes[size],
           className,
         )}
       >
         {title && (
-          <div className="flex items-center justify-between px-5 py-4 border-b border-border dark:border-dark-border">
-            <h2 className="text-lg font-bold">{title}</h2>
-            <button onClick={onClose} className="w-9 h-9 rounded-full hover:bg-surface-alt dark:hover:bg-dark-surface-alt flex items-center justify-center focus-ring" aria-label="Close">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+          <div className="flex items-center justify-between px-5 py-4 border-b border-base-border">
+            <h2 id={titleId} className="text-lg font-bold text-foreground">{title}</h2>
+            <button onClick={onClose} className="w-9 h-9 rounded-xl hover:bg-base-raised flex items-center justify-center focus-ring transition-colors" aria-label="Close">
+              <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" className="text-foreground-muted"><path d="M18 6 6 18M6 6l12 12" /></svg>
             </button>
           </div>
         )}

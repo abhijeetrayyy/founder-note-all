@@ -50,7 +50,7 @@ export function TaskActions({ taskId, completed }: { taskId: string; completed: 
       <button
         onClick={onToggle}
         disabled={pending}
-        className="h-9 px-3 rounded-xl bg-primary text-white text-sm font-bold hover:bg-primary-deep transition focus-ring disabled:opacity-50"
+        className="h-9 px-3.5 rounded-xl bg-gradient-to-br from-accent-600 to-accent-700 text-white text-sm font-bold hover:shadow-glow-strong transition-all focus-ring disabled:opacity-50"
       >
         {completed ? "Reopen" : "Complete"}
       </button>
@@ -58,7 +58,7 @@ export function TaskActions({ taskId, completed }: { taskId: string; completed: 
         <button
           onClick={onMakeMIT}
           disabled={pending}
-          className="h-9 px-3 rounded-xl hover:bg-surface-alt dark:hover:bg-dark-surface-alt text-sm font-bold focus-ring disabled:opacity-50"
+          className="h-9 px-3.5 rounded-xl text-foreground-muted hover:text-foreground hover:bg-base-raised transition-colors text-sm font-bold focus-ring disabled:opacity-50"
         >
           Mark MIT
         </button>
@@ -66,7 +66,7 @@ export function TaskActions({ taskId, completed }: { taskId: string; completed: 
       <button
         onClick={onDelete}
         disabled={pending}
-        className="h-9 px-3 rounded-xl hover:bg-danger/10 text-danger text-sm font-bold focus-ring disabled:opacity-50"
+        className="h-9 px-3.5 rounded-xl hover:bg-state-overdue-surface text-state-overdue text-sm font-bold focus-ring disabled:opacity-50 transition-colors"
       >
         Delete
       </button>

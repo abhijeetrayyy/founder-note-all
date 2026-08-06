@@ -3,24 +3,26 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
+type BadgeVariant = "default" | "tonal" | "danger" | "warning" | "success";
+
 export function Badge({
   children,
-  className,
   variant = "default",
+  className,
 }: {
   children: React.ReactNode;
+  variant?: BadgeVariant;
   className?: string;
-  variant?: "default" | "success" | "warning" | "danger" | "tonal";
 }) {
-  const variants = {
-    default: "bg-surface-alt dark:bg-dark-surface-alt text-text dark:text-dark-text",
-    success: "bg-success/10 text-success",
-    warning: "bg-warning/10 text-warning",
-    danger: "bg-danger/10 text-danger",
-    tonal: "bg-primary/10 text-primary",
+  const variants: Record<BadgeVariant, string> = {
+    default: "bg-base-raised text-foreground-muted border-base-border",
+    tonal: "bg-accent-muted text-accent border-accent-muted-strong",
+    danger: "bg-state-overdue-surface text-state-overdue border-state-overdue/10",
+    warning: "bg-state-attention-surface text-state-attention border-state-attention/10",
+    success: "bg-state-done-surface text-state-done border-state-done/10",
   };
   return (
-    <span className={cn("inline-flex items-center rounded-full px-2.5 h-6 text-xs font-bold", variants[variant], className)}>
+    <span className={cn("inline-flex items-center text-[11px] font-semibold px-2.5 h-6 rounded-full border tracking-wide", variants[variant], className)}>
       {children}
     </span>
   );

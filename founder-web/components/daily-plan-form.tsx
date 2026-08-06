@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
+import { format } from "date-fns";
 import { useToast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { Textarea, Input } from "@/components/ui/input";
@@ -45,10 +46,7 @@ export function DailyPlanForm({ plan, allTasks }: { plan: DailyPlan | null; allT
     const result = await updatePlanAction(form);
     setPending(false);
     if (result.error) toast.show(result.error, "error");
-    else {
-      toast.show("Daily plan saved", "success");
-      router.refresh();
-    }
+    else { toast.show("Plan saved", "success"); router.refresh(); }
   }
 
   async function toggleMit(taskId: string) {
@@ -60,10 +58,7 @@ export function DailyPlanForm({ plan, allTasks }: { plan: DailyPlan | null; allT
       if (result.error) toast.show(result.error, "error");
       else router.refresh();
     } else {
-      if (mitIds.length >= 3) {
-        toast.show("You can only pick 3 MITs. Remove one first.", "error");
-        return;
-      }
+      if (mitIds.length >= 3) { toast.show("Max 3 MITs. Remove one first.", "error"); return; }
       setMitIds([...mitIds, taskId]);
       setPending(true);
       const result = await addMITAction(taskId);
@@ -76,98 +71,60 @@ export function DailyPlanForm({ plan, allTasks }: { plan: DailyPlan | null; allT
   return (
     <form onSubmit={savePlan} className="space-y-5">
       <div>
-        <label className="mb-1.5 block text-xs font-bold text-text-muted dark:text-dark-text-muted">Today&apos;s intention</label>
-        <Input
-          value={intention}
-          onChange={(e) => setIntention(e.target.value)}
-          placeholder="Today I will focus on…"
-        />
+        <label htmlFor="plan-intention" className="text-2xs uppercase tracking-[0.15em] text-foreground-muted font-bold mb-1.5 block">Intention</label>
+        <Input id="plan-intention" value={intention} onChange={(e) => setIntention(e.target.value)} placeholder="Today I will focus on…" />
       </div>
 
       <div>
-        <label className="mb-1.5 block text-xs font-bold text-text-muted dark:text-dark-text-muted">Likely blockers</label>
-        <Textarea
-          value={blockers}
-          onChange={(e) => setBlockers(e.target.value)}
-          placeholder="What could get in the way?"
-          rows={3}
-        />
+        <label htmlFor="plan-blockers" className="text-2xs uppercase tracking-[0.15em] text-foreground-muted font-bold mb-1.5 block">Blockers</label>
+        <Textarea id="plan-blockers" value={blockers} onChange={(e) => setBlockers(e.target.value)} placeholder="What could get in the way?" rows={2} />
       </div>
 
       <div>
         <div className="flex items-center justify-between mb-2">
-          <label className="text-xs font-bold text-text-muted dark:text-dark-text-muted">YOUR MITs (max 3)</label>
-          <span className="text-xs font-extrabold text-primary">{mitIds.length}/3</span>
+          <span className="text-2xs uppercase tracking-[0.15em] text-foreground-muted font-bold">MITs</span>
+          <span aria-live="polite" className="text-2xs text-accent font-bold">{mitIds.length}/3</span>
         </div>
 
-        {/* Selected MITs */}
         {selectedMits.length > 0 ? (
           <div className="space-y-2 mb-3">
             {selectedMits.map((t, i) => (
-              <div key={t.id} className="flex items-center gap-3 p-3 rounded-2xl border border-primary/30 bg-primary/5">
-                <span className="w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold shrink-0">
-                  {i + 1}
-                </span>
+              <div key={t.id} className="flex items-center gap-3 p-3 rounded-xl bg-accent-muted border border-accent-muted-strong">
+                <span className="w-6 h-6 rounded-lg bg-gradient-to-br from-accent-600 to-accent-700 text-white flex items-center justify-center text-xs font-bold shrink-0">{i + 1}</span>
                 <div className="flex-1 min-w-0">
-                  <p className="font-bold text-sm truncate">{t.title}</p>
-                  {t.estimated_minutes ? (
-                    <p className="text-xs text-text-muted dark:text-dark-text-muted">{t.estimated_minutes} min</p>
-                  ) : null}
+                  <p className="font-semibold text-sm text-foreground truncate">{t.title}</p>
+                  {t.estimated_minutes ? <p className="text-xs text-foreground-subtle">{t.estimated_minutes} min</p> : null}
                 </div>
-                <button
-                  type="button"
-                  onClick={() => toggleMit(t.id)}
-                  disabled={pending}
-                  className="text-xs font-bold text-danger hover:underline focus-ring"
-                >
-                  Remove
-                </button>
+                <button type="button" onClick={() => toggleMit(t.id)} disabled={pending} className="text-xs font-semibold text-state-overdue hover:underline focus-ring">Remove</button>
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-sm text-text-muted dark:text-dark-text-muted italic mb-3">No MITs picked yet. Choose 1-3 below.</p>
+          <p className="text-sm text-foreground-muted italic mb-3">Pick 1–3 priorities for today.</p>
         )}
 
-        {/* Picker */}
-        {mitIds.length < 3 && availableTasks.length > 0 ? (
-          <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
-            {availableTasks
-              .filter((t) => !mitIds.includes(t.id))
-              .slice(0, 12)
-              .map((t) => (
-                <button
-                  key={t.id}
-                  type="button"
-                  onClick={() => toggleMit(t.id)}
-                  disabled={pending}
-                  className="w-full flex items-center gap-3 p-3 rounded-2xl border bg-surface dark:bg-dark-surface border-border dark:border-dark-border hover:border-primary/40 hover:bg-primary/5 transition text-left focus-ring"
-                >
-                  <span className="w-6 h-6 rounded-full border-2 border-border dark:border-dark-border shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm truncate">{t.title}</p>
-                    <p className="text-xs text-text-muted dark:text-dark-text-muted">
-                      {t.estimated_minutes ? `${t.estimated_minutes} min` : "No estimate"}
-                      {t.due_date ? ` · ${t.due_date}` : ""}
-                    </p>
-                  </div>
-                </button>
-              ))}
+        {mitIds.length < 3 && availableTasks.length > 0 && (
+          <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1">
+            {availableTasks.filter((t) => !mitIds.includes(t.id)).slice(0, 12).map((t) => (
+              <button key={t.id} type="button" onClick={() => toggleMit(t.id)} disabled={pending} aria-pressed={mitIds.includes(t.id)}
+                className="w-full flex items-center gap-3 p-3 rounded-xl bg-base-raised hover:bg-base-overlay border border-transparent hover:border-accent/20 transition-colors text-left focus-ring">
+                <span className="w-5 h-5 rounded-full border-2 border-base-border shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-sm text-foreground truncate">{t.title}</p>
+                  <p className="text-xs text-foreground-subtle">{t.estimated_minutes ? `${t.estimated_minutes} min` : "—"}{t.due_date ? ` · ${format(new Date(t.due_date), "MMM d")}` : ""}</p>
+                </div>
+              </button>
+            ))}
           </div>
-        ) : null}
+        )}
       </div>
 
       <div>
-        <label className="mb-1.5 block text-xs font-bold text-text-muted dark:text-dark-text-muted">End-of-day reflection (optional)</label>
-        <Textarea
-          value={reflection}
-          onChange={(e) => setReflection(e.target.value)}
-          placeholder="What did you ship? What's tomorrow look like?"
-          rows={3}
-        />
+        <label className="text-2xs uppercase tracking-[0.15em] text-foreground-muted font-bold mb-1.5 block">Reflection</label>
+        <Textarea value={reflection} onChange={(e) => setReflection(e.target.value)} placeholder="What did you ship? What's ahead?" rows={3} />
       </div>
 
-      <Button type="submit" className="w-full h-12" disabled={pending}>
+      <Button type="submit" className="w-full" disabled={pending}>
         {pending ? "Saving…" : "Save plan"}
       </Button>
     </form>

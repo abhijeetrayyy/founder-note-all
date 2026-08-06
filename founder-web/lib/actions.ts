@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { parseSmartInput } from "@/lib/smart-input";
 import { todayKey } from "@/lib/utils";
-import type { EnergyLevelValue, PriorityValue, RecurrenceValue, Task, Note, Project, Goal, Habit, HabitLog, DailyPlan, JournalEntry, EnergyLog, UserProfile } from "@/lib/supabase/types";
+import type { EnergyLevelValue, PriorityValue, RecurrenceValue, Task, Note, Project, Goal, Habit, JournalEntry } from "@/lib/supabase/types";
 
 export async function signUp(formData: FormData) {
   const supabase = await createClient();
@@ -17,16 +17,20 @@ export async function signUp(formData: FormData) {
   if (error) return { error: error.message };
 
   if (data.user) {
-    await supabase.from("users_profile").insert({
+    const { error: profileErr } = await supabase.from("users_profile").insert([{
       id: data.user.id,
       display_name: name || email.split("@")[0],
       energy_default: 1,
       onboarding_completed: false,
       preferences: {},
-    } as UserProfile);
+    }]);
+    if (profileErr) {
+      await supabase.auth.signOut();
+      return { error: "Account created but profile setup failed. Please try signing up again." };
+    }
   }
 
-  redirect("/today");
+  redirect("/onboarding");
 }
 
 export async function signIn(formData: FormData) {
@@ -82,7 +86,10 @@ export async function quickCapture(formData: FormData) {
     return { success: true, type: "note", id: (note as Note | null)?.id };
   }
 
-  const dueDate = parsed.date ? todayKey(parsed.date) : todayKey();
+  const isMIT = forced === "mit" || parsed.isMIT;
+  // Undated, un-prioritized captures go to the Inbox for later triage instead of
+  // silently defaulting to "due today" — that's what was making /inbox permanently empty.
+  const dueDate = parsed.date ? todayKey(parsed.date) : isMIT ? todayKey() : null;
   const { data: task, error } = await supabase
     .from("tasks")
     .insert({
@@ -101,14 +108,14 @@ export async function quickCapture(formData: FormData) {
       actual_minutes: null,
       first_step: "",
       implementation_intention: "",
-      is_inbox: false,
+      is_inbox: !isMIT,
     } as Task)
     .select("*")
     .single();
   if (error) return { error: error.message };
   if (tagIds.length) await linkTaskTags((task as Task | null)?.id ?? "", tagIds);
 
-  if (forced === "mit" || parsed.isMIT) {
+  if (isMIT) {
     await supabase.rpc("add_mit", { p_date: todayKey(), p_task_id: (task as Task | null)?.id });
   }
 
@@ -121,8 +128,8 @@ export async function quickCapture(formData: FormData) {
 async function resolveProjectHint(userId: string, hint: string | null): Promise<string | null> {
   if (!hint) return null;
   const supabase = await createClient();
-  const { data } = await supabase.from("projects").select("id").eq("user_id", userId).ilike("name", hint).single();
-  return (data as Project | null)?.id ?? null;
+  const { data } = await supabase.from("projects").select("id").eq("user_id", userId).ilike("name", hint).limit(1).maybeSingle();
+  return data?.id ?? null;
 }
 
 async function resolveTags(userId: string, names: string[]): Promise<string[]> {
@@ -356,12 +363,25 @@ export async function toggleHabit(habitId: string, date: string = todayKey()) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
 
-  const { data: existing } = await supabase.from("habit_logs").select("*").eq("habit_id", habitId).eq("log_date", date).single();
+  // Atomic toggle: if row exists, delete it; if not, insert it
+  const { data: existing } = await supabase
+    .from("habit_logs")
+    .select("id")
+    .eq("habit_id", habitId)
+    .eq("log_date", date)
+    .maybeSingle();
+
   if (existing) {
-    const { error } = await supabase.from("habit_logs").delete().eq("id", (existing as HabitLog).id);
+    const { error } = await supabase.from("habit_logs").delete().eq("id", existing.id);
     if (error) return { error: error.message };
   } else {
-    const { error } = await supabase.from("habit_logs").insert({ user_id: user.id, habit_id: habitId, log_date: date, count: 1, done: true } as HabitLog);
+    const { error } = await supabase.from("habit_logs").insert({
+      user_id: user.id,
+      habit_id: habitId,
+      log_date: date,
+      count: 1,
+      done: true,
+    });
     if (error) return { error: error.message };
   }
   revalidatePath("/habits");
@@ -396,6 +416,7 @@ export async function saveDailyPlan(formData: FormData) {
   if (!user) return { error: "Not authenticated" };
 
   const date = String(formData.get("date") ?? todayKey());
+  const { data: existing } = await supabase.from("daily_plans").select("mit_task_ids").eq("id", date).single();
   const { error } = await supabase.from("daily_plans").upsert({
     id: date,
     user_id: user.id,
@@ -403,9 +424,9 @@ export async function saveDailyPlan(formData: FormData) {
     blocker_notes: String(formData.get("blocker_notes") ?? ""),
     reflection_text: String(formData.get("reflection_text") ?? ""),
     energy_level: Number(formData.get("energy_level") ?? null) || null,
-    mit_task_ids: [],
+    mit_task_ids: existing?.mit_task_ids ?? [],
     morning_done: false,
-  } as unknown as DailyPlan);
+  });
   if (error) return { error: error.message };
   revalidatePath("/plan");
   revalidatePath("/today");
@@ -438,7 +459,7 @@ export async function updatePlanAction(formData: FormData) {
     morning_done: morningDone,
     created_at: existing?.created_at ?? new Date().toISOString(),
     updated_at: new Date().toISOString(),
-  } as unknown as DailyPlan);
+  });
   if (error) return { error: error.message };
 
   // For each MIT id, ensure the task's priority is bumped to high and is_inbox=false
@@ -478,7 +499,7 @@ export async function addMITAction(taskId: string) {
     morning_done: true,
     created_at: existing?.created_at ?? new Date().toISOString(),
     updated_at: new Date().toISOString(),
-  } as unknown as DailyPlan);
+  });
   if (error) return { error: error.message };
 
   await supabase.from("tasks").update({ priority: 2, is_inbox: false }).eq("id", taskId);
@@ -508,7 +529,7 @@ export async function removeMITAction(taskId: string) {
     morning_done: existing?.morning_done ?? false,
     created_at: existing?.created_at ?? new Date().toISOString(),
     updated_at: new Date().toISOString(),
-  } as unknown as DailyPlan);
+  });
   if (error) return { error: error.message };
   revalidatePath("/plan");
   revalidatePath("/today");
@@ -527,7 +548,7 @@ export async function saveEnergyLevel(level: number, note: string = "") {
     log_date: date,
     level,
     note,
-  } as EnergyLog);
+  });
   if (error) return { error: error.message };
   revalidatePath("/today");
   revalidatePath("/plan");
@@ -545,9 +566,175 @@ export async function updateProfile(formData: FormData) {
       display_name: String(formData.get("display_name") ?? ""),
       energy_default: Number(formData.get("energy_default") ?? 1),
       onboarding_completed: true,
-    } as Partial<UserProfile>)
+    })
     .eq("id", user.id);
   if (error) return { error: error.message };
   revalidatePath("/settings");
   return { success: true };
+}
+
+export async function saveFocusSession(formData: FormData) {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { error: "Not authenticated" };
+
+    const taskId = String(formData.get("task_id") ?? "") || null;
+    const { error } = await supabase.from("focus_sessions").insert({
+      user_id: user.id,
+      task_id: taskId,
+      mode: String(formData.get("mode") ?? "pomodoro"),
+      duration_minutes: Number(formData.get("duration_minutes") ?? 0),
+      completed: String(formData.get("completed") ?? "true") === "true",
+      ended_at: new Date().toISOString(),
+    });
+    if (error) return { error: "Table not yet created — run the migration" };
+    revalidatePath("/focus");
+    return { success: true };
+  } catch {
+    return { error: "Focus sessions require the migration to be applied" };
+  }
+}
+
+export async function saveWeeklyReview(formData: FormData) {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { error: "Not authenticated" };
+
+    const weekStart = String(formData.get("week_start") ?? "");
+    const { error } = await supabase.from("weekly_reviews").upsert({
+      user_id: user.id,
+      week_start: weekStart,
+      accomplishments: String(formData.get("accomplishments") ?? ""),
+      challenges: String(formData.get("challenges") ?? ""),
+      next_priorities: String(formData.get("next_priorities") ?? ""),
+      habits_adjustment: String(formData.get("habits_adjustment") ?? ""),
+      updated_at: new Date().toISOString(),
+    });
+    if (error) return { error: error.message };
+    revalidatePath("/review");
+    return { success: true };
+  } catch {
+    return { error: "Weekly reviews require the migration to be applied" };
+  }
+}
+
+export async function updateJournalEntry(formData: FormData) {
+  const supabase = await createClient();
+  const id = String(formData.get("id") ?? "");
+  const { error } = await supabase.from("journal_entries").update({
+    content: String(formData.get("content") ?? ""),
+    mood: Number(formData.get("mood") ?? 1),
+    updated_at: new Date().toISOString(),
+  }).eq("id", id);
+  if (error) return { error: error.message };
+  revalidatePath("/journal");
+  return { success: true };
+}
+
+export async function deleteJournalEntry(id: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("journal_entries").delete().eq("id", id);
+  if (error) return { error: error.message };
+  revalidatePath("/journal");
+  return { success: true };
+}
+
+export async function toggleGoalMilestone(id: string, completed: boolean) {
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase.from("goal_milestones").update({
+      is_completed: completed,
+      completed_at: completed ? new Date().toISOString() : null,
+    }).eq("id", id);
+    if (error) return { error: error.message };
+    revalidatePath("/goals");
+    return { success: true };
+  } catch {
+    return { error: "Goal milestones require the migration to be applied" };
+  }
+}
+
+export async function createGoalMilestone(formData: FormData) {
+  try {
+    const supabase = await createClient();
+    const goalId = String(formData.get("goal_id") ?? "");
+    const title = String(formData.get("title") ?? "").trim();
+    if (!title) return { error: "Milestone title is required" };
+    const { error } = await supabase.from("goal_milestones").insert({
+      goal_id: goalId,
+      title,
+      sort_order: 0,
+    });
+    if (error) return { error: error.message };
+    revalidatePath("/goals");
+    return { success: true };
+  } catch {
+    return { error: "Goal milestones require the migration to be applied" };
+  }
+}
+
+export async function deleteGoal(id: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("goals").delete().eq("id", id);
+  if (error) return { error: error.message };
+  revalidatePath("/goals");
+  return { success: true };
+}
+
+export async function updateHabit(formData: FormData) {
+  const supabase = await createClient();
+  const id = String(formData.get("id") ?? "");
+  const { error } = await supabase.from("habits").update({
+    name: String(formData.get("name") ?? ""),
+    description: String(formData.get("description") ?? ""),
+    target_per_day: Number(formData.get("target_per_day") ?? 1),
+  }).eq("id", id);
+  if (error) return { error: error.message };
+  revalidatePath("/habits");
+  return { success: true };
+}
+
+export async function deleteHabit(id: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("habits").delete().eq("id", id);
+  if (error) return { error: error.message };
+  revalidatePath("/habits");
+  return { success: true };
+}
+
+export async function exportUserData() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  const [tasks, notes, projects, habits, goals, journal] = await Promise.all([
+    supabase.from("tasks").select("*"),
+    supabase.from("notes").select("*"),
+    supabase.from("projects").select("*"),
+    supabase.from("habits").select("*"),
+    supabase.from("goals").select("*"),
+    supabase.from("journal_entries").select("*"),
+  ]);
+
+  return {
+    tasks: tasks.data ?? [],
+    notes: notes.data ?? [],
+    projects: projects.data ?? [],
+    habits: habits.data ?? [],
+    goals: goals.data ?? [],
+    journal: journal.data ?? [],
+    exportedAt: new Date().toISOString(),
+  };
+}
+
+export async function deleteAccount() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+  await supabase.from("users_profile").delete().eq("id", user.id);
+  // Note: full auth user deletion requires a service_role client.
+  // The user should manually delete their account via Supabase dashboard.
+  redirect("/login");
 }

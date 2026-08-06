@@ -2,87 +2,136 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --font-sans: "Inter", "SF Pro Display", "Segoe UI", system-ui, sans-serif;
-}
+* { box-sizing: border-box; }
 
 html {
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
-}
-
-body {
-  font-family: var(--font-sans);
+  text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+body {
+  font-family: var(--font-sans), "Inter", system-ui, sans-serif;
+  background: #FAFAFC;
+  color: #1A1A2E;
+  min-height: 100dvh;
+  line-height: 1.7;
+  letter-spacing: -0.01em;
+  position: relative;
+}
+
+/* Ambient light mesh so glass surfaces have something to refract instead of flat white. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(38rem 28rem at 8% -6%, rgba(124, 58, 237, 0.10), transparent 60%),
+    radial-gradient(34rem 26rem at 100% 8%, rgba(20, 184, 166, 0.08), transparent 60%),
+    radial-gradient(30rem 24rem at 12% 100%, rgba(245, 158, 11, 0.06), transparent 60%);
+}
+
+::selection { background: rgba(124,58,237,0.12); color: #1A1A2E; }
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.10); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.18); }
+
 @layer base {
-  * {
-    @apply border-border;
-  }
-
-  body {
-    @apply bg-bg dark:bg-dark-bg text-text dark:text-dark-text;
-  }
-
-  /* Scrollbar (desktop) */
-  ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-  }
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 4px;
-  }
-  .dark ::-webkit-scrollbar-thumb {
-    background: #2a2a3a;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
-  }
+  * { @apply border-base-border; }
+  body { @apply bg-base text-foreground; }
 }
 
 @layer components {
-  .card {
-    @apply rounded-card bg-surface dark:bg-dark-surface border border-border dark:border-dark-border shadow-card;
+  .glass-ambient {
+    background: rgba(255,255,255,0.55);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(0,0,0,0.05);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
   }
-  .card-hover {
-    @apply hover:shadow-card-hover transition-shadow;
+  .glass-active {
+    background: rgba(255,255,255,0.72);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    border: 1px solid rgba(124,58,237,0.10);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.05);
   }
-  .pill {
-    @apply inline-flex items-center gap-1.5 rounded-pill border border-border dark:border-dark-border px-3 h-9 text-sm font-semibold transition-colors;
+  .glass-focused {
+    background: rgba(255,255,255,0.88);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    border: 1px solid rgba(124,58,237,0.18);
+    box-shadow: 0 8px 40px rgba(124,58,237,0.08), 0 2px 8px rgba(0,0,0,0.06);
   }
-  .pill-active {
-    @apply bg-primary text-white border-primary;
-  }
-  .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-2xl font-semibold text-sm transition-all active:scale-[0.98];
-  }
-  .btn-primary {
-    @apply btn bg-primary text-white hover:bg-primary-deep px-5 h-11 shadow-primary;
-  }
-  .btn-ghost {
-    @apply btn text-text dark:text-dark-text hover:bg-surface-alt dark:hover:bg-dark-surface-alt px-4 h-11;
-  }
-  .input {
-    @apply w-full rounded-xl bg-surface-alt dark:bg-dark-surface-alt border-0 px-4 h-12 text-[15px] outline-none focus:ring-2 focus:ring-primary/40 transition;
-  }
-  .label-section {
-    @apply text-[10px] font-extrabold tracking-[1.4px] text-text-muted dark:text-dark-text-muted;
+  .glass-surface {
+    background: rgba(255,255,255,0.64);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(0,0,0,0.05);
   }
   .focus-ring {
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-bg dark:focus-visible:ring-offset-dark-bg;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-base;
   }
+  .ambient-glow { animation: breathe 4s ease-in-out infinite; }
 }
 
 @layer utilities {
   .scrollbar-hide::-webkit-scrollbar { display: none; }
   .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-
   .safe-bottom { padding-bottom: max(env(safe-area-inset-bottom), 1rem); }
   .safe-top { padding-top: max(env(safe-area-inset-top), 0.5rem); }
+  .shimmer-bg {
+    background: linear-gradient(90deg, rgba(0,0,0,0.04) 25%, rgba(0,0,0,0.08) 50%, rgba(0,0,0,0.04) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 2s linear infinite;
+  }
+  .text-gradient {
+    background: linear-gradient(135deg, #7C3AED 0%, #8B5CF6 50%, #10B981 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .number-mono { font-feature-settings: "tnum"; font-variant-numeric: tabular-nums; }
+}
+
+/* ── Satisfaction glow (task completion) ── */
+@keyframes satisfaction-glow {
+  0%   { box-shadow: inset 0 0 0 0 rgba(16, 185, 129, 0), 0 0 0 0 rgba(16, 185, 129, 0); }
+  30%  { box-shadow: inset 0 0 0 2px rgba(16, 185, 129, 0.3), 0 0 20px rgba(16, 185, 129, 0.15); }
+  100% { box-shadow: inset 0 0 0 0 rgba(16, 185, 129, 0), 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+.animate-satisfaction {
+  animation: satisfaction-glow 1s ease-out forwards;
+}
+
+/* ── Day Won gradient transition ── */
+.day-won-bg::before {
+  background:
+    radial-gradient(50rem 36rem at 50% -10%, rgba(245, 158, 11, 0.12), transparent 60%),
+    radial-gradient(40rem 30rem at 80% 90%, rgba(16, 185, 129, 0.08), transparent 60%),
+    radial-gradient(30rem 24rem at 20% 100%, rgba(124, 58, 237, 0.06), transparent 60%) !important;
+  transition: background 4s ease;
+}
+
+/* ── Evening mode (adaptive) ── */
+html.evening body {
+  transition: background 3s ease;
+}
+html.evening body::before {
+  background:
+    radial-gradient(38rem 28rem at 8% -6%, rgba(245, 158, 11, 0.08), transparent 60%),
+    radial-gradient(34rem 26rem at 100% 8%, rgba(245, 158, 11, 0.06), transparent 60%),
+    radial-gradient(30rem 24rem at 12% 100%, rgba(245, 158, 11, 0.04), transparent 60%) !important;
+  transition: background 3s ease;
+}
+html.night body::before {
+  background:
+    radial-gradient(30rem 24rem at 50% 0%, rgba(124, 58, 237, 0.04), transparent 60%) !important;
+  transition: background 3s ease;
 }

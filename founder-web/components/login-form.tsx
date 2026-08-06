@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { signIn } from "@/lib/actions";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 
 export function LoginForm() {
   const search = useSearchParams();
@@ -13,9 +14,7 @@ export function LoginForm() {
   const [pending, setPending] = React.useState(false);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setPending(true);
-    setError("");
+    e.preventDefault(); setPending(true); setError("");
     const form = new FormData(e.currentTarget);
     const result = await signIn(form);
     setPending(false);
@@ -23,28 +22,27 @@ export function LoginForm() {
   }
 
   return (
-    <div className="w-full max-w-sm">
-      <div className="flex items-center justify-center gap-2 font-extrabold text-2xl text-primary mb-8">
-        <span className="w-9 h-9 rounded-lg bg-primary text-white flex items-center justify-center text-base">F</span>
-        FounderOS
+    <div className="w-full max-w-md animate-slide-up">
+      <div className="flex items-center justify-center gap-2 mb-8">
+        <span className="w-9 h-9 rounded-xl bg-gradient-to-br from-accent-600 to-accent-700 text-white flex items-center justify-center text-sm font-extrabold font-display">F</span>
+        <span className="font-bold text-xl tracking-tight text-foreground font-display">Founder<span className="text-gradient">OS</span></span>
       </div>
-
-      <h1 className="text-2xl font-extrabold text-center">Welcome back</h1>
-      <p className="mt-2 text-sm text-text-muted dark:text-dark-text-muted text-center">Log in to continue executing.</p>
-
-      <form onSubmit={onSubmit} className="mt-8 space-y-4">
-        <Input name="email" type="email" placeholder="Email" required autoFocus />
-        <Input name="password" type="password" placeholder="Password" required />
-        {error && <p className="text-sm text-danger font-semibold">{error}</p>}
-        <Button type="submit" className="w-full h-12 text-base" disabled={pending}>
-          {pending ? "Logging in…" : "Log in"}
-        </Button>
-      </form>
-
-      <p className="mt-6 text-sm text-center text-text-muted dark:text-dark-text-muted">
-        Don&apos;t have an account?{" "}
-        <Link href={`/signup${search?.get("next") ? `?next=${encodeURIComponent(search.get("next")!)}` : ""}`} className="text-primary font-bold hover:underline">
-          Sign up
+      <Card variant="focused" className="p-8">
+        <h1 className="text-2xl font-bold text-center text-foreground font-display">Welcome back</h1>
+        <p className="mt-2 text-sm text-foreground-muted text-center">Pick up where you left off.</p>
+        <form onSubmit={onSubmit} className="mt-8 space-y-4">
+          <Input name="email" type="email" placeholder="Email" required autoFocus />
+          <Input name="password" type="password" placeholder="Password" required />
+          {error && <p role="alert" className="text-sm text-state-overdue font-semibold">{error}</p>}
+          <Button type="submit" className="w-full h-12 text-base" disabled={pending}>
+            {pending ? "Signing in…" : "Sign in"}
+          </Button>
+        </form>
+      </Card>
+      <p className="mt-6 text-sm text-center text-foreground-muted">
+        New here?{" "}
+        <Link href={`/signup${search?.get("next") ? `?next=${encodeURIComponent(search.get("next")!)}` : ""}`} className="text-accent-600 font-semibold hover:underline">
+          Create an account
         </Link>
       </p>
     </div>

@@ -1,6 +1,5 @@
 import { getDailyPlan, getTasksDueToday, getTasks, getProfile } from "@/lib/data";
-import { todayKey } from "@/lib/utils";
-import { Card, SectionLabel } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { TaskItem } from "@/components/task-item";
 import { EnergyPicker } from "@/components/energy-picker";
 import { DailyPlanForm } from "@/components/daily-plan-form";
@@ -16,32 +15,53 @@ export default async function PlanPage() {
   const dueNotMit = dueTasks.filter((t) => !mitIds.includes(t.id));
 
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-8">
       <header>
-        <h1 className="text-2xl sm:text-3xl font-extrabold">Daily Planning</h1>
-        <p className="text-text-muted dark:text-dark-text-muted mt-1">Set your intention and pick today&apos;s MITs.</p>
+        <h1 className="text-2xl font-bold text-foreground tracking-tight font-display">Plan your day</h1>
+        <p className="text-sm text-foreground-muted mt-1">A short ritual beats a long list. Set your intention, pick what matters, go.</p>
       </header>
 
-      <Card className="p-5 space-y-4">
-        <SectionLabel>ENERGY</SectionLabel>
-        <EnergyPicker value={plan?.energy_level ?? profile?.energy_default} />
-      </Card>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <Card variant="ambient" className="p-5 space-y-4">
+          <p className="text-2xs uppercase tracking-[0.15em] text-foreground-muted font-bold">Energy level</p>
+          <EnergyPicker value={plan?.energy_level ?? profile?.energy_default} />
+          <p className="text-xs text-foreground-subtle">Match your work to how you feel — not the other way around.</p>
+        </Card>
 
-      <Card className="p-5 space-y-4">
-        <SectionLabel>TODAY&apos;S PLAN</SectionLabel>
+        <Card variant="ambient" className="p-5 space-y-4">
+          <p className="text-2xs uppercase tracking-[0.15em] text-foreground-muted font-bold">State</p>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-foreground-muted">Intention</span>
+              <span className="text-foreground font-semibold">{plan?.intention_text ? "Set" : "—"}</span>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-foreground-muted">MITs</span>
+              <span className="text-foreground font-semibold">{mitIds.length}/3</span>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-foreground-muted">Reflection</span>
+              <span className="text-foreground font-semibold">{plan?.reflection_text ? "Done" : "—"}</span>
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      <Card variant="ambient" className="p-5 space-y-4">
+        <p className="text-2xs uppercase tracking-[0.15em] text-foreground-muted font-bold">Today&apos;s plan</p>
         <DailyPlanForm plan={plan} allTasks={allTasks} />
       </Card>
 
-      {dueNotMit.length > 0 ? (
-        <Card className="p-5 space-y-4">
-          <SectionLabel>OTHER TASKS DUE TODAY</SectionLabel>
-          <div className="space-y-3">
+      {dueNotMit.length > 0 && (
+        <Card variant="ambient" className="p-5 space-y-4">
+          <p className="text-2xs uppercase tracking-[0.15em] text-foreground-muted font-bold mb-1">Also due today</p>
+          <div className="space-y-2">
             {dueNotMit.map((task) => (
               <TaskItem key={task.id} task={task} />
             ))}
           </div>
         </Card>
-      ) : null}
+      )}
     </div>
   );
 }
