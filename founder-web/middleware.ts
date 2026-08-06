@@ -5,8 +5,7 @@ export async function middleware(request: NextRequest) {
   const isAuthRoute = path.startsWith("/login") || path.startsWith("/signup") || path.startsWith("/auth");
   const isPublicRoute = path === "/" || isAuthRoute || path === "/onboarding";
 
-  // Check for auth cookie presence (lightweight, no Supabase import needed)
-  const hasSession = request.cookies.has("sb-iybljwukjcvonjmwoamk-auth-token");
+  const hasSession = request.cookies.getAll().some(c => c.name.startsWith("sb-") && c.name.includes("-auth-token"));
 
   if (!hasSession && !isPublicRoute) {
     const url = request.nextUrl.clone();
