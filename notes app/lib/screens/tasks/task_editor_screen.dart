@@ -10,6 +10,7 @@ import '../../providers/tag_provider.dart';
 import '../../theme/app_theme.dart';
 import '../widgets/tag_picker.dart';
 import '../widgets/keyboard_safe.dart';
+import 'task_breakdown_sheet.dart';
 
 class TaskEditorScreen extends StatefulWidget {
   final String? taskId;
@@ -292,6 +293,23 @@ class _TaskEditorScreenState extends State<TaskEditorScreen> {
             ),
           ),
 
+          const SizedBox(height: 12),
+          // "Feeling stuck?" button — opens guided breakdown sheet
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () => _showBreakdownSheet(),
+              icon: const Icon(Icons.psychology_rounded, size: 18),
+              label: Text(_firstStep.text.isNotEmpty || _intention.text.isNotEmpty ? 'Update breakdown' : 'Feeling stuck?'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppTheme.primary,
+                side: const BorderSide(color: AppTheme.primary, width: 1.2),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+              ),
+            ),
+          ),
+
           const SizedBox(height: 20),
           const _SectionTitle('PROJECT'),
           Wrap(spacing: 6, runSpacing: 6, children: [
@@ -386,6 +404,24 @@ class _TaskEditorScreenState extends State<TaskEditorScreen> {
             ]),
           ],
         ],
+      ),
+    );
+  }
+
+  void _showBreakdownSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Theme.of(context).cardColor,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(AppTheme.sheetRadius))),
+      builder: (_) => TaskBreakdownSheet(
+        firstStep: _firstStep.text,
+        implementationIntention: _intention.text,
+        currentEnergy: _energy,
+        onFirstStepSaved: (v) => _firstStep.text = v,
+        onIntentionSaved: (v) => _intention.text = v,
+        onMatchEnergy: () => setState(() => _energy = 0),
       ),
     );
   }

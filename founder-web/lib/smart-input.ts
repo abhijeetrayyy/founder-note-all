@@ -81,9 +81,10 @@ function parseDate(text: string): Date | null {
     const re = new RegExp(`\\b(next|this)?\\s*${days[i]}\\b`, "i");
     const m = re.exec(lower);
     if (m) {
-      const isNext = m[1] === "next";
-      let target = i - ((today.getDay() + 6) % 7) + 1;
-      if (target <= 0 || isNext) target = (i - ((today.getDay() + 6) % 7) + 1) + (isNext ? 7 : 7);
+      const isNext = m[1]?.toLowerCase() === "next";
+      let target = i - ((today.getDay() + 6) % 7);
+      if (target < 0) target += 7;
+      if (isNext) target += 7;
       return new Date(today.getTime() + target * 86400000);
     }
   }
@@ -132,9 +133,11 @@ function parseTime(text: string): { hour: number; minute: number; label: string 
 
 function parsePriority(text: string): 0 | 1 | 2 | null {
   const lower = text.toLowerCase();
-  if (/\b(urgent|asap|critical|important|!!!)\b/.test(lower)) return 2;
-  if (/\b(high priority|!)\b/.test(lower)) return 2;
-  if (/\b(low priority)\b/.test(lower)) return 0;
+  if (/\b(urgent|asap|critical|important)\b/.test(lower)) return 2;
+  if (/(^|\s)!!!(\s|$)/.test(text)) return 2;
+  if (/(^|\s)!!(\s|$)/.test(text)) return 2;
+  if (/\bhigh priority\b/.test(lower)) return 2;
+  if (/\blow priority\b/.test(lower)) return 0;
   return null;
 }
 
@@ -162,8 +165,10 @@ function parseMIT(text: string): boolean {
 }
 
 function parseProject(text: string): string | null {
-  const m = /\b(?:in|for|@)([A-Z][\w-]+|\w[\w-]+)\b/.exec(text);
-  return m?.[1] ?? null;
+  // @ProjectName — multi-word until next keyword or end
+  const atMatch = /@([A-Za-z][\w\s-]*?)(?:\s*(?:#|!|due|by|at|every|daily|weekly|monthly|tomorrow|today|next|in\s+\d)|\s*$)/.exec(text);
+  if (atMatch) return atMatch[1].trim();
+  return null;
 }
 
 function parseTags(text: string): string[] {

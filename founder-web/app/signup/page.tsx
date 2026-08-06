@@ -5,6 +5,7 @@ import Link from "next/link";
 import { signUp } from "@/lib/actions";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 
 export default function SignupPage() {
   const [error, setError] = React.useState("");
@@ -22,28 +23,30 @@ export default function SignupPage() {
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center px-6 py-12">
-      <div className="w-full max-w-sm">
-        <div className="flex items-center justify-center gap-2 font-extrabold text-2xl text-primary mb-8">
-          <span className="w-9 h-9 rounded-lg bg-primary text-white flex items-center justify-center text-base">F</span>
-          FounderOS
+      <div className="w-full max-w-md animate-slide-up">
+        <div className="flex items-center justify-center gap-2 mb-8">
+          <span className="w-9 h-9 rounded-xl bg-gradient-to-br from-accent-600 to-accent-700 text-white flex items-center justify-center text-sm font-extrabold font-display">F</span>
+          <span className="font-bold text-xl tracking-tight text-foreground font-display">Founder<span className="text-gradient">OS</span></span>
         </div>
 
-        <h1 className="text-2xl font-extrabold text-center">Create your account</h1>
-        <p className="mt-2 text-sm text-text-muted dark:text-dark-text-muted text-center">Start executing with clarity today.</p>
+        <Card variant="focused" className="p-8">
+          <h1 className="text-2xl font-bold text-center text-foreground font-display">Create your account</h1>
+          <p className="mt-2 text-sm text-foreground-muted text-center">One task at a time, starting today.</p>
 
-        <form onSubmit={onSubmit} className="mt-8 space-y-4">
-          <Input name="name" placeholder="Your name" required autoFocus />
-          <Input name="email" type="email" placeholder="Email" required />
-          <Input name="password" type="password" placeholder="Password" minLength={6} required />
-          {error && <p className="text-sm text-danger font-semibold">{error}</p>}
-          <Button type="submit" className="w-full h-12 text-base" disabled={pending}>
-            {pending ? "Creating account…" : "Sign up"}
-          </Button>
-        </form>
+          <form onSubmit={onSubmit} className="mt-8 space-y-4">
+            <Input name="name" placeholder="Your name" required autoFocus />
+            <Input name="email" type="email" placeholder="Email" required />
+            <Input name="password" type="password" placeholder="Password" minLength={6} required />
+            {error && <p role="alert" className="text-sm text-state-overdue font-semibold">{error}</p>}
+            <Button type="submit" className="w-full h-12 text-base" disabled={pending}>
+              {pending ? "Creating account…" : "Sign up"}
+            </Button>
+          </form>
+        </Card>
 
-        <p className="mt-6 text-sm text-center text-text-muted dark:text-dark-text-muted">
+        <p className="mt-6 text-sm text-center text-foreground-muted">
           Already have an account?{" "}
-          <Link href="/login" className="text-primary font-bold hover:underline">
+          <Link href="/login" className="text-accent-600 font-semibold hover:underline">
             Log in
           </Link>
         </p>

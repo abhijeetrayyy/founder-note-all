@@ -25,14 +25,16 @@ class GoalsProvider extends ChangeNotifier {
     return g;
   }
 
-  Future<void> update(String id, {String? title, String? description, int? color, int? iconIndex, bool? archived}) async {
+  Future<void> update(String id, {String? title, String? description, int? color, int? iconIndex, bool? archived, int? progress}) async {
     final i = _goals.indexWhere((g) => g.id == id);
     if (i == -1) return;
-    final u = _goals[i].copyWith(title: title, description: description, color: color, iconIndex: iconIndex, archived: archived);
+    final u = _goals[i].copyWith(title: title, description: description, color: color, iconIndex: iconIndex, archived: archived, progress: progress);
     await _db.updateGoal(u);
     _goals[i] = u;
     notifyListeners();
   }
+
+  Future<void> updateProgress(String id, int progress) => update(id, progress: progress.clamp(0, 100));
 
   Future<void> remove(String id) async {
     await _db.deleteGoal(id);

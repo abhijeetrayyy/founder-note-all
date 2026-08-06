@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../../providers/tasks_provider.dart';
 import '../../providers/notes_provider.dart';
+import '../../providers/goals_provider.dart';
+import '../../providers/journal_provider.dart';
 import '../../theme/app_theme.dart';
 
 class WeeklyReviewScreen extends StatefulWidget {
@@ -20,19 +22,75 @@ class _WeeklyReviewScreenState extends State<WeeklyReviewScreen> {
   Widget build(BuildContext context) {
     final tasks = context.watch<TasksProvider>();
     final notes = context.watch<NotesProvider>();
+    final goals = context.watch<GoalsProvider>();
+    final journal = context.watch<JournalProvider>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final weekAgo = DateTime.now().subtract(const Duration(days: 7));
     final completedThisWeek = tasks.tasks.where((t) => t.completed && t.updatedAt.isAfter(weekAgo)).toList();
     final pending = tasks.active;
     final recentNotes = notes.notes.where((n) => n.updatedAt.isAfter(weekAgo)).toList();
+    final recentJournal = journal.entries.where((e) => e.createdAt.isAfter(weekAgo)).toList();
+    final activeGoals = goals.goals.where((g) => !g.archived).toList();
 
     final steps = [
+      _ReviewStep(title: 'This week\'s summary', child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(color: isDark ? AppTheme.darkSurfaceAlt : AppTheme.lightSurfaceAlt, borderRadius: BorderRadius.circular(16)),
+          child: Column(children: [
+            Row(children: [
+              _StatCard(label: 'Completed', value: '${completedThisWeek.length}', color: AppTheme.success),
+              const SizedBox(width: 10),
+              _StatCard(label: 'Still open', value: '${pending.length}', color: AppTheme.warning),
+            ]),
+            const SizedBox(height: 10),
+            Row(children: [
+              _StatCard(label: 'Notes', value: '${recentNotes.length}', color: AppTheme.primary),
+              const SizedBox(width: 10),
+              _StatCard(label: 'Journal', value: '${recentJournal.length}', color: AppTheme.energyAdmin),
+            ]),
+          ]),
+        ),
+        if (activeGoals.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          Text('Goal progress', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: isDark ? AppTheme.darkText : AppTheme.lightText)),
+          const SizedBox(height: 8),
+          ...activeGoals.map((g) => Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(children: [
+              Expanded(child: Text(g.title, style: const TextStyle(fontSize: 13))),
+              Text('${g.progress}%', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Color(g.color))),
+              const SizedBox(width: 8),
+              SizedBox(
+                width: 60,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(value: g.progress / 100, color: Color(g.color), backgroundColor: Color(g.color).withValues(alpha: 0.12)),
+                ),
+              ),
+            ]),
+          )),
+        ],
+        if (recentJournal.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          Text('Recent journal', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: isDark ? AppTheme.darkText : AppTheme.lightText)),
+          const SizedBox(height: 8),
+          ...recentJournal.take(3).map((e) => Padding(
+            padding: const EdgeInsets.only(bottom: 6),
+            child: Row(children: [
+              Text(_moodEmoji(e.mood), style: const TextStyle(fontSize: 16)),
+              const SizedBox(width: 8),
+              Expanded(child: Text(e.content, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 12, color: isDark ? AppTheme.darkTextMuted : AppTheme.lightTextMuted))),
+            ]),
+          )),
+        ],
+      ])),
       _ReviewStep(title: 'What got done', child: Column(children: [
-        Text('${completedThisWeek.length} tasks completed this week', style: TextStyle(fontSize: 16, color: Colors.green)),
+        Text('${completedThisWeek.length} tasks completed this week', style: const TextStyle(fontSize: 16, color: AppTheme.success)),
         const SizedBox(height: 12),
-        if (completedThisWeek.isNotEmpty) ...completedThisWeek.map((t) => ListTile(dense: true, leading: const Icon(Icons.check_circle, color: Colors.green, size: 18), title: Text(t.title))),
-        if (completedThisWeek.isEmpty) Text('No tasks completed this week. Time to focus!', style: TextStyle(color: Colors.grey.shade500)),
+        if (completedThisWeek.isNotEmpty) ...completedThisWeek.map((t) => ListTile(dense: true, leading: const Icon(Icons.check_circle, color: AppTheme.success, size: 18), title: Text(t.title))),
+        if (completedThisWeek.isEmpty) Text('No tasks completed this week. Time to focus!', style: TextStyle(color: isDark ? AppTheme.darkTextMuted : AppTheme.lightTextMuted)),
       ])),
       _ReviewStep(title: 'What\'s pending', child: Column(children: [
         Text('${pending.length} active tasks', style: TextStyle(fontSize: 16, color: Colors.orange)),
@@ -81,4 +139,35 @@ class _WeeklyReviewScreenState extends State<WeeklyReviewScreen> {
 class _ReviewStep {
   final String title; final Widget child;
   const _ReviewStep({required this.title, required this.child});
+}
+
+String _moodEmoji(int mood) {
+  const emojis = ['😊', '😐', '🤔', '😤', '😴'];
+  return emojis[mood.clamp(0, emojis.length - 1)];
+}
+
+class _StatCard extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color color;
+  const _StatCard({required this.label, required this.value, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: isDark ? 0.12 : 0.06),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Column(children: [
+          Text(value, style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: color, letterSpacing: -0.5)),
+          const SizedBox(height: 2),
+          Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: isDark ? AppTheme.darkTextMuted : AppTheme.lightTextMuted, letterSpacing: 0.3)),
+        ]),
+      ),
+    );
+  }
 }

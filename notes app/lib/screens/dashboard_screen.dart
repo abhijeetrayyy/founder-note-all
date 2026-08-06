@@ -51,7 +51,7 @@ class DashboardScreen extends StatelessWidget {
               snap: true,
               backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               automaticallyImplyLeading: false,
-              expandedHeight: 0,
+              expandedHeight: 84,
               flexibleSpace: SafeArea(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(20, 12, 12, 8),

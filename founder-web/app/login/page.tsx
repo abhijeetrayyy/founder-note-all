@@ -13,14 +13,16 @@ export default function LoginPage() {
 
 function LoginSkeleton() {
   return (
-    <div className="w-full max-w-sm animate-pulse">
-      <div className="h-8 bg-surface-alt dark:bg-dark-surface-alt rounded-lg mb-8 mx-auto w-40" />
-      <div className="h-6 bg-surface-alt dark:bg-dark-surface-alt rounded-lg mb-2" />
-      <div className="h-4 bg-surface-alt dark:bg-dark-surface-alt rounded-lg mb-8 w-3/4 mx-auto" />
-      <div className="space-y-4">
-        <div className="h-12 bg-surface-alt dark:bg-dark-surface-alt rounded-xl" />
-        <div className="h-12 bg-surface-alt dark:bg-dark-surface-alt rounded-xl" />
-        <div className="h-12 bg-surface-alt dark:bg-dark-surface-alt rounded-xl" />
+    <div className="w-full max-w-md animate-pulse">
+      <div className="h-9 w-40 bg-base-raised rounded-lg mb-8 mx-auto" />
+      <div className="rounded-card glass-focused p-8 space-y-4">
+        <div className="h-6 bg-base-raised rounded-lg mx-auto w-40" />
+        <div className="h-4 bg-base-raised rounded-lg mx-auto w-52" />
+        <div className="pt-4 space-y-3">
+          <div className="h-12 bg-base-raised rounded-xl" />
+          <div className="h-12 bg-base-raised rounded-xl" />
+          <div className="h-12 bg-base-raised rounded-xl" />
+        </div>
       </div>
     </div>
   );

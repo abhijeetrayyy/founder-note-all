@@ -1,14 +1,60 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:uuid/uuid.dart';
 import '../../providers/goals_provider.dart';
+import '../../models/goal_milestone.dart';
+import '../../services/database_service.dart';
 import '../../theme/app_theme.dart';
 import '../widgets/empty_state.dart';
 
-class GoalsScreen extends StatelessWidget {
+class GoalsScreen extends StatefulWidget {
   const GoalsScreen({super.key});
 
   static const _colors = [0xFF5B4FE9, 0xFF22C55E, 0xFFF59E0B, 0xFFEF4444, 0xFF3B82F6, 0xFFEC4899, 0xFF14B8A6, 0xFF8B5CF6];
   static const _icons = [Icons.flag_rounded, Icons.rocket_launch_rounded, Icons.diamond_rounded, Icons.bolt_rounded, Icons.star_rounded, Icons.local_fire_department_rounded, Icons.trending_up_rounded, Icons.emoji_events_rounded, Icons.psychology_rounded, Icons.favorite_rounded, Icons.lightbulb_rounded, Icons.public_rounded];
+
+  @override State<GoalsScreen> createState() => _GoalsScreenState();
+}
+
+class _GoalsScreenState extends State<GoalsScreen> {
+  String? _expandedGoalId;
+  Map<String, List<GoalMilestone>> _milestonesCache = {};
+  final _milestoneCtrl = TextEditingController();
+
+  static const _colors = [0xFF5B4FE9, 0xFF22C55E, 0xFFF59E0B, 0xFFEF4444, 0xFF3B82F6, 0xFFEC4899, 0xFF14B8A6, 0xFF8B5CF6];
+  static const _icons = [Icons.flag_rounded, Icons.rocket_launch_rounded, Icons.diamond_rounded, Icons.bolt_rounded, Icons.star_rounded, Icons.local_fire_department_rounded, Icons.trending_up_rounded, Icons.emoji_events_rounded, Icons.psychology_rounded, Icons.favorite_rounded, Icons.lightbulb_rounded, Icons.public_rounded];
+
+  @override
+  void dispose() {
+    _milestoneCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadMilestones(String goalId) async {
+    final ms = await DatabaseService.instance.getMilestonesForGoal(goalId);
+    if (!mounted) return;
+    setState(() => _milestonesCache[goalId] = ms);
+  }
+
+  Future<void> _toggleMilestone(GoalMilestone m) async {
+    await DatabaseService.instance.toggleMilestone(m.id, !m.isCompleted);
+    await _loadMilestones(m.goalId);
+  }
+
+  Future<void> _addMilestone(String goalId) async {
+    final text = _milestoneCtrl.text.trim();
+    if (text.isEmpty) return;
+    final m = GoalMilestone(id: const Uuid().v4(), goalId: goalId, title: text);
+    await DatabaseService.instance.insertMilestone(m);
+    _milestoneCtrl.clear();
+    await _loadMilestones(goalId);
+  }
+
+  Future<void> _deleteMilestone(GoalMilestone m) async {
+    await DatabaseService.instance.deleteMilestone(m.id);
+    await _loadMilestones(m.goalId);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +88,14 @@ class GoalsScreen extends StatelessWidget {
                       color: Colors.transparent,
                       child: InkWell(
                         borderRadius: BorderRadius.circular(16),
-                        onTap: () => _showGoalSheet(context, g.id),
+                        onTap: () {
+                          if (_expandedGoalId == g.id) {
+                            setState(() => _expandedGoalId = null);
+                          } else {
+                            setState(() => _expandedGoalId = g.id);
+                            _loadMilestones(g.id);
+                          }
+                        },
                         child: Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
@@ -50,20 +103,89 @@ class GoalsScreen extends StatelessWidget {
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(color: Color(g.color).withValues(alpha: 0.3)),
                           ),
-                          child: Row(children: [
-                            Container(
-                              width: 44, height: 44,
-                              decoration: BoxDecoration(color: Color(g.color).withValues(alpha: 0.15), borderRadius: BorderRadius.circular(12)),
-                              child: Icon(_icons[g.iconIndex % _icons.length], color: Color(g.color)),
+                          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                            Row(children: [
+                              Container(
+                                width: 44, height: 44,
+                                decoration: BoxDecoration(color: Color(g.color).withValues(alpha: 0.15), borderRadius: BorderRadius.circular(12)),
+                                child: Icon(_icons[g.iconIndex % _icons.length], color: Color(g.color)),
+                              ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                  Text(g.title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                                  if (g.description.isNotEmpty) ...[const SizedBox(height: 4), Text(g.description, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 13, color: isDark ? AppTheme.darkTextMuted : AppTheme.lightTextMuted, height: 1.4))],
+                                ]),
+                              ),
+                              Text('${g.progress}%', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: Color(g.color))),
+                              const SizedBox(width: 4),
+                              Icon(Icons.keyboard_arrow_down_rounded, size: 20, color: isDark ? AppTheme.darkTextMuted : AppTheme.lightTextMuted),
+                            ]),
+                            const SizedBox(height: 10),
+                            SliderTheme(
+                              data: SliderTheme.of(context).copyWith(
+                                trackHeight: 5,
+                                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
+                                overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
+                                activeTrackColor: Color(g.color),
+                                inactiveTrackColor: Color(g.color).withValues(alpha: 0.15),
+                                thumbColor: Color(g.color),
+                              ),
+                              child: Slider(
+                                value: g.progress.toDouble(),
+                                min: 0, max: 100, divisions: 20,
+                                onChanged: (v) => context.read<GoalsProvider>().updateProgress(g.id, v.round()),
+                              ),
                             ),
-                            const SizedBox(width: 14),
-                            Expanded(
-                              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                Text(g.title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
-                                if (g.description.isNotEmpty) ...[const SizedBox(height: 4), Text(g.description, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 13, color: isDark ? AppTheme.darkTextMuted : AppTheme.lightTextMuted, height: 1.4))],
+                            // ── Milestones (expandable) ──
+                            if (_expandedGoalId == g.id) ...[
+                              const Divider(height: 24),
+                              Text('MILESTONES', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1.4, color: isDark ? AppTheme.darkTextMuted : AppTheme.lightTextMuted)),
+                              const SizedBox(height: 8),
+                              ...(_milestonesCache[g.id] ?? []).map((m) => Container(
+                                margin: const EdgeInsets.only(bottom: 4),
+                                child: Row(children: [
+                                  GestureDetector(
+                                    onTap: () => _toggleMilestone(m),
+                                    child: Icon(m.isCompleted ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded, size: 20, color: m.isCompleted ? AppTheme.success : Colors.grey),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(child: Text(m.title, style: TextStyle(fontSize: 14, decoration: m.isCompleted ? TextDecoration.lineThrough : null, color: m.isCompleted ? (isDark ? AppTheme.darkTextMuted : AppTheme.lightTextMuted) : (isDark ? AppTheme.darkText : AppTheme.lightText)))),
+                                  GestureDetector(
+                                    onTap: () => _deleteMilestone(m),
+                                    child: Icon(Icons.close_rounded, size: 16, color: isDark ? AppTheme.darkTextMuted : AppTheme.lightTextMuted),
+                                  ),
+                                ]),
+                              )),
+                              const SizedBox(height: 8),
+                              Row(children: [
+                                Expanded(
+                                  child: TextField(
+                                    controller: _milestoneCtrl,
+                                    textInputAction: TextInputAction.done,
+                                    style: const TextStyle(fontSize: 13),
+                                    decoration: InputDecoration(
+                                      hintText: 'Add milestone...',
+                                      isDense: true,
+                                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                      filled: true,
+                                      fillColor: isDark ? AppTheme.darkSurfaceAlt : AppTheme.lightSurfaceAlt,
+                                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+                                    ),
+                                    onSubmitted: (_) => _addMilestone(g.id),
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                GestureDetector(
+                                  onTap: () => _addMilestone(g.id),
+                                  child: Container(
+                                    width: 36, height: 36,
+                                    decoration: BoxDecoration(color: AppTheme.primary, borderRadius: BorderRadius.circular(10)),
+                                    child: const Icon(Icons.add_rounded, color: Colors.white, size: 20),
+                                  ),
+                                ),
                               ]),
-                            ),
-                            Icon(Icons.chevron_right_rounded, color: isDark ? AppTheme.darkTextMuted : AppTheme.lightTextMuted),
+                            ],
                           ]),
                         ),
                       ),

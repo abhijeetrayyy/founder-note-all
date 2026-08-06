@@ -10,6 +10,7 @@ import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Sheet } from "@/components/ui/sheet";
 import type { Project } from "@/lib/supabase/types";
+import { NOTE_CATEGORIES } from "@/lib/constants";
 
 export function CreateNoteButton({ projects }: { projects: Project[] }) {
   const [open, setOpen] = React.useState(false);
@@ -46,10 +47,9 @@ function CreateNoteSheet({ open, onClose, projects }: { open: boolean; onClose: 
       <form onSubmit={onSubmit} className="space-y-4">
         <Input name="title" placeholder="Note title" required autoFocus />
         <Select name="category" label="Category">
-          <option value="General">General</option>
-          <option value="Idea">Idea</option>
-          <option value="Meeting">Meeting</option>
-          <option value="Research">Research</option>
+          {NOTE_CATEGORIES.map((cat) => (
+            <option key={cat} value={cat}>{cat}</option>
+          ))}
         </Select>
         <Select name="project_id" label="Project">
           <option value="">No project</option>

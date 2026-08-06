@@ -8,14 +8,12 @@ import { Textarea } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Sheet } from "@/components/ui/sheet";
+import { MOODS } from "@/lib/constants";
 
-const moods = [
-  { value: 0, label: "Productive 😊" },
-  { value: 1, label: "Neutral 😐" },
-  { value: 2, label: "Thoughtful 🤔" },
-  { value: 3, label: "Stressed 😤" },
-  { value: 4, label: "Tired 😴" },
-];
+const moods = MOODS.map((m) => ({
+  value: m.value,
+  label: `${m.label} ${m.emoji}`,
+}));
 
 export function CreateJournalButton() {
   const [open, setOpen] = React.useState(false);

@@ -5,9 +5,13 @@ import '../providers/app_provider.dart';
 import '../providers/daily_plan_provider.dart';
 import '../providers/tasks_provider.dart';
 import '../providers/notes_provider.dart';
+import '../providers/projects_provider.dart';
+import '../providers/journal_provider.dart';
 import '../providers/habit_provider.dart';
 import '../providers/goals_provider.dart';
+import '../providers/tag_provider.dart';
 import '../providers/auth_provider.dart';
+import '../services/supabase_sync_service.dart';
 import '../theme/app_theme.dart';
 import 'widgets/sidebar.dart';
 import 'widgets/command_palette.dart';
@@ -37,6 +41,35 @@ class AppShell extends StatefulWidget {
 
 class _AppShellState extends State<AppShell> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
+  bool _pulledForSession = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _maybePullOnLogin());
+  }
+
+  /// Runs once per app session, the first time we observe an authenticated
+  /// user (cold start already signed in, or right after a fresh sign-in).
+  /// Pulls cloud data into SQLite, then reloads every provider that reads
+  /// from those 7 tables so the pulled data actually shows up in the UI.
+  Future<void> _maybePullOnLogin() async {
+    final auth = context.read<AuthProvider>();
+    if (_pulledForSession || !auth.isAuthenticated) return;
+    _pulledForSession = true;
+    await SupabaseSyncService.instance.pullAll();
+    if (!mounted) return;
+    await Future.wait([
+      context.read<TasksProvider>().load(),
+      context.read<NotesProvider>().load(),
+      context.read<ProjectsProvider>().load(),
+      context.read<GoalsProvider>().load(),
+      context.read<HabitProvider>().load(),
+      context.read<JournalProvider>().load(),
+      context.read<DailyPlanProvider>().load(),
+      context.read<TagProvider>().load(),
+    ]);
+  }
 
   void _showCommandPalette() {
     showDialog(context: context, builder: (_) => const CommandPalette(), barrierColor: Colors.black.withValues(alpha: 0.4));
@@ -56,6 +89,7 @@ class _AppShellState extends State<AppShell> {
     final auth = context.watch<AuthProvider>();
     if (auth.loading) return const Scaffold(body: Center(child: CircularProgressIndicator()));
     if (!auth.isAuthenticated) return const LoginScreen();
+    if (!_pulledForSession) _maybePullOnLogin();
     if (!app.onboarded) return const OnboardingScreen();
     final isWide = MediaQuery.of(context).size.width > 800;
 

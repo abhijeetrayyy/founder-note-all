@@ -7,6 +7,7 @@ class Goal {
   final DateTime createdAt;
   final DateTime updatedAt;
   final bool archived;
+  final int progress; // 0-100
 
   Goal({
     required this.id,
@@ -17,10 +18,11 @@ class Goal {
     DateTime? createdAt,
     DateTime? updatedAt,
     this.archived = false,
+    this.progress = 0,
   })  : createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now();
 
-  Goal copyWith({String? title, String? description, int? color, int? iconIndex, DateTime? updatedAt, bool? archived}) => Goal(
+  Goal copyWith({String? title, String? description, int? color, int? iconIndex, DateTime? updatedAt, bool? archived, int? progress}) => Goal(
     id: id,
     title: title ?? this.title,
     description: description ?? this.description,
@@ -29,6 +31,7 @@ class Goal {
     createdAt: createdAt,
     updatedAt: updatedAt ?? DateTime.now(),
     archived: archived ?? this.archived,
+    progress: progress ?? this.progress,
   );
 
   Map<String, dynamic> toMap() => {
@@ -40,6 +43,7 @@ class Goal {
     'createdAt': createdAt.toIso8601String(),
     'updatedAt': updatedAt.toIso8601String(),
     'archived': archived ? 1 : 0,
+    'progress': progress,
   };
 
   factory Goal.fromMap(Map<String, dynamic> map) => Goal(
@@ -51,5 +55,6 @@ class Goal {
     createdAt: DateTime.parse(map['createdAt'] as String),
     updatedAt: DateTime.parse(map['updatedAt'] as String),
     archived: (map['archived'] as int?) == 1,
+    progress: ((map['progress'] as int?) ?? 0).clamp(0, 100),
   );
 }

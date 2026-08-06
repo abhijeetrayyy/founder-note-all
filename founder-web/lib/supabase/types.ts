@@ -164,85 +164,71 @@ export type Database = {
         Row: UserProfileRow;
         Insert: Omit<UserProfileRow, "created_at" | "updated_at"> & Partial<Pick<UserProfileRow, "created_at" | "updated_at">>;
         Update: Partial<UserProfileRow>;
-        Relationships: [];
       };
       projects: {
         Row: ProjectRow;
         Insert: Omit<ProjectRow, "id" | "created_at" | "updated_at"> & Partial<Pick<ProjectRow, "id" | "created_at" | "updated_at">>;
         Update: Partial<ProjectRow>;
-        Relationships: [];
       };
       tags: {
         Row: TagRow;
         Insert: Omit<TagRow, "id" | "created_at"> & Partial<Pick<TagRow, "id" | "created_at">>;
         Update: Partial<TagRow>;
-        Relationships: [];
       };
       notes: {
         Row: NoteRow;
         Insert: Omit<NoteRow, "id" | "created_at" | "updated_at"> & Partial<Pick<NoteRow, "id" | "created_at" | "updated_at">>;
         Update: Partial<NoteRow>;
-        Relationships: [];
       };
       note_tags: {
         Row: NoteTagRow;
         Insert: NoteTagRow;
         Update: Partial<NoteTagRow>;
-        Relationships: [];
       };
       tasks: {
         Row: TaskRow;
         Insert: Omit<TaskRow, "id" | "created_at" | "updated_at"> & Partial<Pick<TaskRow, "id" | "created_at" | "updated_at">>;
         Update: Partial<TaskRow>;
-        Relationships: [];
       };
       task_tags: {
         Row: TaskTagRow;
         Insert: TaskTagRow;
         Update: Partial<TaskTagRow>;
-        Relationships: [];
       };
       reminders: {
         Row: ReminderRow;
         Insert: Omit<ReminderRow, "id" | "created_at"> & Partial<Pick<ReminderRow, "id" | "created_at">>;
         Update: Partial<ReminderRow>;
-        Relationships: [];
       };
       journal_entries: {
         Row: JournalEntryRow;
         Insert: Omit<JournalEntryRow, "id" | "created_at" | "updated_at"> & Partial<Pick<JournalEntryRow, "id" | "created_at" | "updated_at">>;
         Update: Partial<JournalEntryRow>;
-        Relationships: [];
       };
       habits: {
         Row: HabitRow;
         Insert: Omit<HabitRow, "id" | "created_at" | "updated_at"> & Partial<Pick<HabitRow, "id" | "created_at" | "updated_at">>;
         Update: Partial<HabitRow>;
-        Relationships: [];
       };
       habit_logs: {
         Row: HabitLogRow;
         Insert: Omit<HabitLogRow, "id" | "created_at"> & Partial<Pick<HabitLogRow, "id" | "created_at">>;
         Update: Partial<HabitLogRow>;
-        Relationships: [];
       };
       daily_plans: {
         Row: DailyPlanRow;
         Insert: Omit<DailyPlanRow, "created_at" | "updated_at"> & Partial<Pick<DailyPlanRow, "created_at" | "updated_at">>;
         Update: Partial<DailyPlanRow>;
-        Relationships: [];
       };
       goals: {
         Row: GoalRow;
         Insert: Omit<GoalRow, "id" | "created_at" | "updated_at"> & Partial<Pick<GoalRow, "id" | "created_at" | "updated_at">>;
         Update: Partial<GoalRow>;
-        Relationships: [];
       };
       energy_logs: {
         Row: EnergyLogRow;
         Insert: Omit<EnergyLogRow, "id" | "created_at"> & Partial<Pick<EnergyLogRow, "id" | "created_at">>;
         Update: Partial<EnergyLogRow>;
-        Relationships: [];
       };
     };
     Views: {
@@ -283,6 +269,41 @@ export type DailyPlan = DailyPlanRow;
 export type Goal = GoalRow;
 export type EnergyLog = EnergyLogRow;
 export type UserProfile = UserProfileRow;
+
+export interface FocusSession {
+  id: string;
+  user_id: string;
+  task_id: string | null;
+  mode: string;
+  started_at: string;
+  ended_at: string | null;
+  duration_minutes: number | null;
+  completed: boolean;
+  pause_duration_seconds: number;
+  created_at: string;
+}
+
+export interface WeeklyReview {
+  id: string;
+  user_id: string;
+  week_start: string;
+  accomplishments: string;
+  challenges: string;
+  next_priorities: string;
+  habits_adjustment: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface GoalMilestone {
+  id: string;
+  goal_id: string;
+  title: string;
+  is_completed: boolean;
+  completed_at: string | null;
+  sort_order: number;
+  created_at: string;
+}
 
 // App-level enums (matching the Flutter app)
 export const EnergyLevel = { admin: 0, medium: 1, deep: 2 } as const;
