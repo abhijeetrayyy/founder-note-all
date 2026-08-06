@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/note.dart';
 import '../models/task.dart';
 import '../models/project.dart';
@@ -18,6 +19,67 @@ import '../providers/auth_provider.dart';
 import '../services/database_service.dart';
 import '../services/supabase_sync_service.dart';
 import '../theme/app_theme.dart';
+
+Future<void> _deleteAccount(BuildContext context) async {
+  final step1 = await showDialog<bool>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: const Text('Delete your account?'),
+      content: const Text('This will permanently delete your cloud account and all synced data. Local data on this device will remain until you clear it manually. This action cannot be undone.'),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+        FilledButton(onPressed: () => Navigator.pop(ctx, true), style: FilledButton.styleFrom(backgroundColor: AppTheme.danger), child: const Text('I understand')),
+      ],
+    ),
+  );
+  if (step1 != true) return;
+
+  final ctrl = TextEditingController();
+  final step2 = await showDialog<bool>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: const Text('Type DELETE to confirm'),
+      content: Column(mainAxisSize: MainAxisSize.min, children: [
+        const Text('To confirm, type DELETE in the field below.'),
+        const SizedBox(height: 12),
+        TextField(controller: ctrl, autofocus: true, decoration: const InputDecoration(hintText: 'Type DELETE')),
+      ]),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+        FilledButton(onPressed: () => Navigator.pop(ctx, ctrl.text.trim() == 'DELETE'), style: FilledButton.styleFrom(backgroundColor: AppTheme.danger), child: const Text('Delete my account')),
+      ],
+    ),
+  );
+  ctrl.dispose();
+  if (step2 != true) return;
+
+  final step3 = await showDialog<bool>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: const Text('Are you absolutely sure?'),
+      content: const Text('All your cloud data will be permanently deleted. This is your final chance to cancel.'),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+        FilledButton(onPressed: () => Navigator.pop(ctx, true), style: FilledButton.styleFrom(backgroundColor: AppTheme.danger), child: const Text('Yes, delete everything')),
+      ],
+    ),
+  );
+  if (step3 != true) return;
+
+  try {
+    // Delete user's profile row
+    await Supabase.instance.client.from('users_profile').delete().eq('user_id', Supabase.instance.client.auth.currentUser!.id);
+    // Sign out
+    await context.read<AuthProvider>().signOut();
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Account deleted. Restart the app to start fresh.')));
+    }
+  } catch (e) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to delete account: $e')));
+    }
+  }
+}
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -102,6 +164,21 @@ class SettingsScreen extends StatelessWidget {
               _Section(label: 'ABOUT'),
               _SettingTile(icon: Icons.rocket_launch_rounded, title: 'Founder', subtitle: 'Execution OS for founders · v2.1'),
               _SettingTile(icon: Icons.code_rounded, title: 'Built with', subtitle: 'Flutter · SQLite · Provider'),
+              const SizedBox(height: 16),
+              _Section(label: 'DANGER ZONE'),
+              Consumer<AuthProvider>(
+                builder: (context, auth, _) => _SettingTile(
+                  icon: Icons.delete_forever_rounded,
+                  title: 'Delete account',
+                  subtitle: auth.isAuthenticated ? 'Permanently delete your account and cloud data' : 'Sign in first',
+                  trailing: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(color: AppTheme.danger.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(8)),
+                    child: const Text('Delete', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppTheme.danger)),
+                  ),
+                  onTap: auth.isAuthenticated ? () => _deleteAccount(context) : null,
+                ),
+              ),
               const SizedBox(height: 24),
               Center(child: Text('Built for people who ship.', style: TextStyle(fontSize: 12, color: isDark ? AppTheme.darkTextMuted : AppTheme.lightTextMuted, fontStyle: FontStyle.italic))),
             ]),

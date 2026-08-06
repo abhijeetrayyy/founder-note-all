@@ -2,43 +2,49 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class AppTheme {
-  // ── Brand ────────────────────────────────────────────────────────────────
-  static const primary = Color(0xFF5B4FE9);
-  static const primaryDeep = Color(0xFF3A2FD9);
-  static const accent = Color(0xFFFF6B6B);
+  // ── Brand (from web tailwind.config.ts) ────────────────────────────
+  static const primary = Color(0xFF7C3AED);
+  static const primaryGlow = Color(0xFF8B5CF6);
+  static const primaryDeep = Color(0xFF6B21A8);
 
-  // ── Light ───────────────────────────────────────────────────────────────
-  static const lightBg = Color(0xFFF6F7FB);
+  // ── Light (from web base colors) ───────────────────────────────────
+  static const lightBg = Color(0xFFFAFAFC);
   static const lightSurface = Color(0xFFFFFFFF);
-  static const lightSurfaceAlt = Color(0xFFEEF0F7);
-  static const lightText = Color(0xFF0F0F1A);
-  static const lightTextMuted = Color(0xFF6B6B7B);
-  static const lightBorder = Color(0xFFE3E5EE);
+  static const lightSurfaceAlt = Color(0xFFF4F4F8);
+  static const lightText = Color(0xFF1A1A2E);
+  static const lightTextMuted = Color(0x801A1A2E);    // 50% opacity
+  static const lightTextSubtle = Color(0x4D1A1A2E);   // 30% opacity
+  static const lightBorder = Color(0x0F000000);        // rgba(0,0,0,0.06)
   static const lightSidebar = Color(0xFFFFFFFF);
 
-  // ── Dark ────────────────────────────────────────────────────────────────
-  static const darkBg = Color(0xFF0A0A14);
-  static const darkSurface = Color(0xFF15151F);
-  static const darkSurfaceAlt = Color(0xFF1F1F2C);
+  // ── Dark (from web dark mode) ──────────────────────────────────────
+  static const darkBg = Color(0xFF0A0A0F);
+  static const darkSurface = Color(0xFF1A1A24);
+  static const darkSurfaceAlt = Color(0xFF24243A);
   static const darkText = Color(0xFFF5F5FA);
   static const darkTextMuted = Color(0xFF9595A8);
   static const darkBorder = Color(0xFF2A2A3A);
   static const darkSidebar = Color(0xFF0F0F18);
 
-  // ── Energy palette ─────────────────────────────────────────────────────
-  static const energyAdmin = Color(0xFF14B8A6);
-  static const energyMedium = Color(0xFF3B82F6);
-  static const energyDeep = Color(0xFF7C3AED);
+  // ── Energy palette (matching web ENERGY_CONFIG) ────────────────────
+  static const energyAdmin = Color(0xFF10B981);  // teal
+  static const energyMedium = Color(0xFF3B82F6);  // blue
+  static const energyDeep = Color(0xFF8B5CF6);    // deep purple
 
-  static const success = Color(0xFF22C55E);
+  // ── State colors (from web) ────────────────────────────────────────
+  static const success = Color(0xFF10B981);
   static const warning = Color(0xFFF59E0B);
   static const danger = Color(0xFFEF4444);
+  static const successSurface = Color(0x1410B981);
+  static const attentionSurface = Color(0x14F59E0B);
+  static const dangerSurface = Color(0x14EF4444);
 
-  static const cardRadius = 16.0;
-  static const pillRadius = 12.0;
-  static const sheetRadius = 24.0;
+  // ── Shape tokens (from web) ────────────────────────────────────────
+  static const cardRadius = 24.0;
+  static const pillRadius = 9999.0;
+  static const sheetRadius = 32.0;
 
-  // ── Spacing scale ──────────────────────────────────────────────────────
+  // ── Spacing scale ──────────────────────────────────────────────────
   static const s1 = 4.0;
   static const s2 = 8.0;
   static const s3 = 12.0;
@@ -114,7 +120,7 @@ class AppTheme {
       dialogTheme: DialogThemeData(
         backgroundColor: surface,
         surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,

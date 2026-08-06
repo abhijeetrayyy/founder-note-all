@@ -9,6 +9,9 @@ import '../models/tag.dart';
 import '../models/habit.dart';
 import '../models/daily_plan.dart';
 import '../models/goal.dart';
+import '../models/goal_milestone.dart';
+import '../models/focus_session.dart';
+import '../models/energy_log.dart';
 
 class DatabaseService {
   static Database? _database;
@@ -26,7 +29,7 @@ class DatabaseService {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, 'notes_app.db');
 
-    return await openDatabase(path, version: 8, onCreate: _onCreate, onUpgrade: _onUpgrade);
+    return await openDatabase(path, version: 11, onCreate: _onCreate, onUpgrade: _onUpgrade);
   }
 
   Future<void> _onCreate(Database db, int version) async {
@@ -112,9 +115,42 @@ class DatabaseService {
         iconIndex INTEGER NOT NULL DEFAULT 0,
         createdAt TEXT NOT NULL,
         updatedAt TEXT NOT NULL,
-        archived INTEGER NOT NULL DEFAULT 0
+        archived INTEGER NOT NULL DEFAULT 0,
+        progress INTEGER NOT NULL DEFAULT 0
       )
     ''');
+
+    await db.execute('''
+      CREATE TABLE goal_milestones (
+        id TEXT PRIMARY KEY,
+        goal_id TEXT NOT NULL,
+        title TEXT NOT NULL,
+        is_completed INTEGER NOT NULL DEFAULT 0,
+        completed_at TEXT
+      )
+    ''');
+    await db.execute('CREATE INDEX idx_gm_goal ON goal_milestones(goal_id)');
+
+    await db.execute('''
+      CREATE TABLE focus_sessions (
+        id TEXT PRIMARY KEY,
+        mode TEXT NOT NULL,
+        duration_minutes INTEGER NOT NULL,
+        completed INTEGER NOT NULL DEFAULT 1,
+        created_at TEXT NOT NULL
+      )
+    ''');
+    await db.execute('CREATE INDEX idx_fs_date ON focus_sessions(created_at DESC)');
+
+    await db.execute('''
+      CREATE TABLE energy_logs (
+        id TEXT PRIMARY KEY,
+        level INTEGER NOT NULL DEFAULT 1,
+        note TEXT,
+        created_at TEXT NOT NULL
+      )
+    ''');
+    await db.execute('CREATE INDEX idx_el_date ON energy_logs(created_at DESC)');
   }
 
   void _createFtsTriggers(Database db, String table, String fts) {
@@ -211,6 +247,42 @@ class DatabaseService {
           archived INTEGER NOT NULL DEFAULT 0
         )
       ''');
+    }
+    if (oldVersion < 9) {
+      try { await db.execute('ALTER TABLE goals ADD COLUMN progress INTEGER NOT NULL DEFAULT 0'); } catch (_) {}
+    }
+    if (oldVersion < 10) {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS goal_milestones (
+          id TEXT PRIMARY KEY,
+          goal_id TEXT NOT NULL,
+          title TEXT NOT NULL,
+          is_completed INTEGER NOT NULL DEFAULT 0,
+          completed_at TEXT
+        )
+      ''');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_gm_goal ON goal_milestones(goal_id)');
+    }
+    if (oldVersion < 11) {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS focus_sessions (
+          id TEXT PRIMARY KEY,
+          mode TEXT NOT NULL,
+          duration_minutes INTEGER NOT NULL,
+          completed INTEGER NOT NULL DEFAULT 1,
+          created_at TEXT NOT NULL
+        )
+      ''');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_fs_date ON focus_sessions(created_at DESC)');
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS energy_logs (
+          id TEXT PRIMARY KEY,
+          level INTEGER NOT NULL DEFAULT 1,
+          note TEXT,
+          created_at TEXT NOT NULL
+        )
+      ''');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_el_date ON energy_logs(created_at DESC)');
     }
   }
 
@@ -622,5 +694,69 @@ class DatabaseService {
   Future<void> deleteGoal(String id) async {
     final db = await database;
     await db.delete('goals', where: 'id = ?', whereArgs: [id]);
+    await db.delete('goal_milestones', where: 'goal_id = ?', whereArgs: [id]);
+  }
+
+  // ── Goal Milestones ──
+  Future<List<GoalMilestone>> getMilestonesForGoal(String goalId) async {
+    final db = await database;
+    final maps = await db.query('goal_milestones', where: 'goal_id = ?', whereArgs: [goalId], orderBy: 'title ASC');
+    return maps.map((m) => GoalMilestone.fromMap(m)).toList();
+  }
+
+  Future<void> insertMilestone(GoalMilestone m) async {
+    final db = await database;
+    await db.insert('goal_milestones', m.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  Future<void> toggleMilestone(String id, bool completed) async {
+    final db = await database;
+    await db.update('goal_milestones', {
+      'is_completed': completed ? 1 : 0,
+      'completed_at': completed ? DateTime.now().toIso8601String() : null,
+    }, where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<void> deleteMilestone(String id) async {
+    final db = await database;
+    await db.delete('goal_milestones', where: 'id = ?', whereArgs: [id]);
+  }
+
+  // ── Focus Sessions ──
+  Future<void> insertFocusSession(FocusSession s) async {
+    final db = await database;
+    await db.insert('focus_sessions', s.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  Future<int> getTodayFocusCount() async {
+    final db = await database;
+    final today = DateTime.now().toIso8601String().substring(0, 10);
+    final r = await db.rawQuery('SELECT COUNT(*) as c FROM focus_sessions WHERE created_at LIKE ? AND completed = 1', ['$today%']);
+    return Sqflite.firstIntValue(r) ?? 0;
+  }
+
+  Future<List<FocusSession>> getRecentFocusSessions({int limit = 20}) async {
+    final db = await database;
+    final maps = await db.query('focus_sessions', orderBy: 'created_at DESC', limit: limit);
+    return maps.map((m) => FocusSession.fromMap(m)).toList();
+  }
+
+  // ── Energy Logs ──
+  Future<void> insertEnergyLog(EnergyLog e) async {
+    final db = await database;
+    await db.insert('energy_logs', e.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  Future<EnergyLog?> getTodayEnergyLog() async {
+    final db = await database;
+    final today = DateTime.now().toIso8601String().substring(0, 10);
+    final maps = await db.query('energy_logs', where: 'created_at LIKE ?', whereArgs: ['$today%'], limit: 1);
+    return maps.isEmpty ? null : EnergyLog.fromMap(maps.first);
+  }
+
+  Future<List<EnergyLog>> getRecentEnergyLogs({int limit = 7}) async {
+    final db = await database;
+    final maps = await db.query('energy_logs', orderBy: 'created_at DESC', limit: limit);
+    return maps.map((m) => EnergyLog.fromMap(m)).toList();
   }
 }

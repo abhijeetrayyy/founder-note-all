@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:uuid/uuid.dart';
+import '../models/focus_session.dart';
+import '../services/database_service.dart';
 import '../theme/app_theme.dart';
 
 class FocusTimerScreen extends StatefulWidget {
@@ -62,6 +65,7 @@ class _FocusTimerScreenState extends State<FocusTimerScreen> {
       _completed++;
       _seconds = _minutes * 60;
     });
+    _logSession(completed: true);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Row(children: const [
@@ -73,6 +77,17 @@ class _FocusTimerScreenState extends State<FocusTimerScreen> {
         behavior: SnackBarBehavior.floating,
       ));
     }
+  }
+
+  Future<void> _logSession({bool completed = true}) async {
+    final modeKeys = ['pomodoro', 'deep_work', 'quick_sprint'];
+    final session = FocusSession(
+      id: const Uuid().v4(),
+      mode: modeKeys[_modeIndex],
+      durationMinutes: _modes[_modeIndex].$2,
+      completed: completed,
+    );
+    await DatabaseService.instance.insertFocusSession(session);
   }
 
   void _reset() {
