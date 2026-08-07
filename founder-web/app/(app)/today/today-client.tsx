@@ -106,7 +106,7 @@ export function TodayClient({
           </div>
           <h3 className="text-lg font-bold text-foreground mb-2">What deserves your attention today?</h3>
           <p className="text-sm text-foreground-muted mb-4 max-w-md mx-auto">Pick 1–3 things that matter most. Everything else can wait.</p>
-          <span className="inline-block h-11 px-5 rounded-xl bg-accent-muted text-accent font-semibold text-sm hover:bg-accent-muted-strong transition-colors">Plan your day →</span>
+          <span className="inline-flex items-center justify-center h-11 px-5 rounded-xl bg-accent-muted text-accent font-semibold text-sm hover:bg-accent-muted-strong transition-colors active:scale-[0.97]">Plan your day →</span>
         </Link>
       )}
 
