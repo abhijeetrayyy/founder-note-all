@@ -62,10 +62,10 @@ export default function HomePage() {
           too big, and shows you the momentum you&apos;re already building.
         </p>
         <div className="mt-9 flex flex-col sm:flex-row gap-3 justify-center">
-          <Link href="/signup" className="h-12 px-7 rounded-xl text-[15px] font-bold text-white bg-gradient-to-br from-accent-600 to-accent-700 shadow-md hover:shadow-glow-strong hover:-translate-y-px transition-all flex items-center justify-center focus-ring">
+          <Link href="/signup" className="h-12 px-7 rounded-xl text-base font-bold text-white bg-gradient-to-br from-accent-600 to-accent-700 shadow-md hover:shadow-glow-strong hover:-translate-y-px transition-all flex items-center justify-center focus-ring">
             Start for free
           </Link>
-          <Link href="/login" className="h-12 px-7 rounded-xl text-[15px] font-semibold text-foreground border border-base-border hover:bg-base-raised transition-colors flex items-center justify-center focus-ring">
+          <Link href="/login" className="h-12 px-7 rounded-xl text-base font-semibold text-foreground border border-base-border hover:bg-base-raised transition-colors flex items-center justify-center focus-ring">
             I already have an account
           </Link>
         </div>
@@ -77,7 +77,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {PAINS.map((p) => (
               <Card key={p.title} variant="ambient" className="p-6 text-left">
-                <h3 className="font-bold text-[15px] text-foreground leading-snug">{p.title}</h3>
+                <h3 className="font-bold text-base text-foreground leading-snug">{p.title}</h3>
                 <p className="mt-2.5 text-sm text-foreground-muted leading-relaxed">{p.body}</p>
                 <p className="mt-4 pt-4 border-t border-base-border text-sm font-semibold text-accent leading-relaxed">{p.fix}</p>
               </Card>
@@ -91,7 +91,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {FEATURES.map((f) => (
               <Card key={f.title} variant="ambient" interactive className="p-5">
-                <h3 className="font-bold text-[15px] text-foreground">{f.title}</h3>
+                <h3 className="font-bold text-base text-foreground">{f.title}</h3>
                 <p className="mt-2 text-sm text-foreground-muted leading-relaxed">{f.desc}</p>
               </Card>
             ))}
@@ -103,7 +103,7 @@ export default function HomePage() {
         <Card variant="focused" className="max-w-3xl mx-auto p-10 text-center">
           <h2 className="text-2xl sm:text-3xl font-bold text-foreground font-display">Pick one thing. Start today.</h2>
           <p className="mt-3 text-foreground-muted">No credit card, no setup ritual — just tell us what&apos;s on your mind.</p>
-          <Link href="/signup" className="mt-7 inline-flex h-12 px-7 rounded-xl text-[15px] font-bold text-white bg-gradient-to-br from-accent-600 to-accent-700 shadow-md hover:shadow-glow-strong hover:-translate-y-px transition-all items-center justify-center focus-ring">
+          <Link href="/signup" className="mt-7 inline-flex h-12 px-7 rounded-xl text-base font-bold text-white bg-gradient-to-br from-accent-600 to-accent-700 shadow-md hover:shadow-glow-strong hover:-translate-y-px transition-all items-center justify-center focus-ring">
             Start for free
           </Link>
         </Card>

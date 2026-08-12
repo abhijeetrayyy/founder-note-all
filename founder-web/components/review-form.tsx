@@ -49,7 +49,7 @@ export function ReviewForm({ weekStart, existing }: { weekStart: string; existin
         <div key={p.key} className="space-y-2">
           <div className="flex gap-3 items-start">
             <span className="w-6 h-6 rounded-full bg-accent-muted text-accent flex items-center justify-center text-xs font-bold shrink-0 mt-1">{i + 1}</span>
-            <label className="text-[15px] font-semibold text-foreground">{p.label}</label>
+            <label className="text-base font-semibold text-foreground">{p.label}</label>
           </div>
           <Textarea
             value={values[p.key]}

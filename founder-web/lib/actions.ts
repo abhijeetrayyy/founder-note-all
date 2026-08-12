@@ -289,6 +289,35 @@ export async function answerLoop(
   return { success: true };
 }
 
+/** The fields a triage answer touches — enough to put a loop back as it was. */
+export type LoopSnapshot = {
+  due_date: string | null;
+  is_inbox: boolean;
+  answered_at: string | null;
+  released_at: string | null;
+  not_this_week: boolean;
+  owed_to: string;
+  owed_direction: number;
+};
+
+/**
+ * Undo a triage answer by restoring the loop's prior state.
+ *
+ * Triage is the fastest-moving surface in the app — four buttons, keyboard
+ * shortcuts, one row after another — which makes it the easiest place to
+ * mis-tap and, until now, the only one with no way back.
+ */
+export async function restoreLoopState(id: string, prev: LoopSnapshot) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("tasks")
+    .update({ ...prev, updated_at: new Date().toISOString() })
+    .eq("id", id);
+  if (error) return { error: error.message };
+  revalidateLoops();
+  return { success: true };
+}
+
 /** Attach a person to a loop, or clear one by passing an empty name. */
 export async function setOwed(id: string, name: string, direction: 0 | 1) {
   const supabase = await createClient();
@@ -349,6 +378,48 @@ export async function parkLoop(id: string, nextMove: string) {
   if (error) return { error: error.message };
   revalidateLoops();
   revalidatePath("/shutdown");
+  return { success: true };
+}
+
+/**
+ * Put a parked loop back exactly as it was.
+ *
+ * `previous` is the first step the loop carried before parking — usually empty.
+ * Restoring it rather than clearing blindly means undo returns the loop to its
+ * actual prior state, not to a guess at one.
+ */
+export async function unparkLoop(id: string, previous: string = "") {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("tasks")
+    .update({ first_step: previous, updated_at: new Date().toISOString() })
+    .eq("id", id);
+  if (error) return { error: error.message };
+  revalidateLoops();
+  revalidatePath("/shutdown");
+  return { success: true };
+}
+
+/** Take a loop back off tomorrow's plan. The other half of choosing one. */
+export async function clearTomorrowOneThing(taskId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  const tomorrow = todayKey(new Date(Date.now() + 86400000));
+  const { data: existing } = await supabase.from("daily_plans").select("*").eq("id", tomorrow).single();
+  if (existing) {
+    const next = (existing.mit_task_ids ?? []).filter((id: string) => id !== taskId);
+    await supabase.from("daily_plans")
+      .update({ mit_task_ids: next, updated_at: new Date().toISOString() })
+      .eq("id", tomorrow);
+  }
+  // The due date goes back to unset rather than to today — it was not due today
+  // before it was chosen, and guessing would quietly reshape the founder's day.
+  await supabase.from("tasks").update({ due_date: null }).eq("id", taskId);
+
+  revalidatePath("/today");
+  revalidatePath("/plan");
   return { success: true };
 }
 

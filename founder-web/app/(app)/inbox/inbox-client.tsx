@@ -46,7 +46,7 @@ export function InboxClient({ tasks }: { tasks: Task[] }) {
           />
         ))}
       </div>
-      <p className="mt-4 font-mono text-[10.5px] text-[#A69E90]">
+      <p className="mt-4 font-mono text-2xs text-[#A69E90]">
         ↑↓ move · 1 do · 2 tomorrow · 3 hand off · 4 let go
       </p>
     </>

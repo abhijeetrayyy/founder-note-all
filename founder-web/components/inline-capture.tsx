@@ -61,7 +61,7 @@ export function InlineCapture() {
           onBlur={() => setTimeout(() => setShowPreview(false), 200)}
           onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submit(); } }}
           placeholder="What's on your mind? Type naturally — we'll figure out the details."
-          className="w-full h-14 rounded-2xl bg-base-raised border-0 px-5 text-[16px] font-medium text-foreground placeholder:text-foreground-subtle outline-none focus:ring-2 focus:ring-accent/30 transition-all"
+          className="w-full h-14 rounded-2xl bg-base-raised border-0 px-5 text-lg font-medium text-foreground placeholder:text-foreground-subtle outline-none focus:ring-2 focus:ring-accent/30 transition-all"
         />
         <button
           onClick={submit}

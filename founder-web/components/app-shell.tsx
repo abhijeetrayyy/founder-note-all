@@ -18,36 +18,49 @@ import type { UserProfile } from "@/lib/supabase/types";
  * approximated.
  */
 
-type NavItem = { href: string; label: string; icon: React.FC<IconProps>; badge?: string };
+type NavItem = { href: string; label: string; icon: React.FC<IconProps>; badge?: string; hint: string };
 type NavGroupDef = { label: string; items: NavItem[] };
 
+/**
+ * Nav labels say what the thing is, not what it is called internally.
+ *
+ * "Pulse" and "Rituals" were house words — a founder reading them cannot tell
+ * what happens if they click. Every item now carries a plain hint, surfaced as
+ * a tooltip and repeated as the purpose line at the top of the page, so nothing
+ * in the app is a mystery box.
+ */
 const NAV: NavGroupDef[] = [
-  { label: "Commit", items: [
-    { href: "/today", label: "Today", icon: SunIcon },
-    { href: "/plan", label: "Morning plan", icon: SunriseIcon, badge: "60s" },
+  { label: "Every day", items: [
+    { href: "/today", label: "Today", icon: SunIcon, hint: "Your one thing, and what else is on today" },
+    { href: "/plan", label: "Plan the day", icon: SunriseIcon, badge: "60s", hint: "Pick three things that matter, in under a minute" },
+    { href: "/inbox", label: "Triage", icon: InboxIcon, hint: "Answer each captured thought: do, schedule, hand off, or drop" },
   ]},
-  { label: "Clarify", items: [
-    { href: "/inbox", label: "Triage", icon: InboxIcon },
-    { href: "/loops", label: "All loops", icon: CheckSquareIcon },
-    { href: "/unblock", label: "Unblock", icon: UserPlusIcon },
-    { href: "/projects", label: "Projects", icon: FolderIcon },
-    { href: "/notes", label: "Notes", icon: FileTextIcon },
+  { label: "Your work", items: [
+    { href: "/loops", label: "All loops", icon: CheckSquareIcon, hint: "Everything open, filtered by what needs an answer" },
+    { href: "/unblock", label: "Waiting on people", icon: UserPlusIcon, hint: "Loops sitting with someone else, with the nudge already drafted" },
+    { href: "/projects", label: "Projects", icon: FolderIcon, hint: "Which outcomes have stopped moving, and on whom" },
+    { href: "/notes", label: "Notes", icon: FileTextIcon, hint: "Thinking that is not a task yet" },
+    { href: "/goals", label: "90-day goals", icon: CompassIcon, hint: "The two or three things everything else answers to" },
   ]},
-  { label: "Execute & close", items: [
-    { href: "/focus", label: "Focus", icon: TimerIcon },
-    { href: "/shutdown", label: "Shutdown", icon: MoonIcon, badge: "7pm" },
-    { href: "/journal", label: "Reflect", icon: NotebookIcon },
+  { label: "Doing & stopping", items: [
+    { href: "/focus", label: "Focus session", icon: TimerIcon, hint: "One task, one timer, and a place to park distractions" },
+    { href: "/shutdown", label: "End the day", icon: MoonIcon, badge: "7pm", hint: "See what shipped, park what is open, then stop" },
+    { href: "/habits", label: "Habits", icon: FlameIcon, hint: "Small daily rituals, tracked as evidence not pressure" },
+    { href: "/journal", label: "Journal", icon: NotebookIcon, hint: "Mood and freeform writing, tied to the day" },
   ]},
-  { label: "Review", items: [
-    { href: "/review", label: "Weekly review", icon: CalendarCheckIcon, badge: "fri" },
-    { href: "/stats", label: "Pulse", icon: ActivityIcon },
-    { href: "/goals", label: "90-day goals", icon: CompassIcon },
-    { href: "/habits", label: "Rituals", icon: FlameIcon },
+  { label: "Looking back", items: [
+    { href: "/review", label: "Weekly review", icon: CalendarCheckIcon, badge: "fri", hint: "Friday: the evidence, then one thing to change" },
+    { href: "/stats", label: "Patterns", icon: ActivityIcon, hint: "What your logged sessions reveal about your real shape" },
   ]},
   { label: "System", items: [
-    { href: "/settings", label: "Settings", icon: SettingsIcon },
+    { href: "/settings", label: "Settings", icon: SettingsIcon, hint: "Tune your capacity and ritual times" },
   ]},
 ];
+
+/** The same hints, keyed by route, for the purpose line on each page. */
+export const ROUTE_HINTS: Record<string, string> = Object.fromEntries(
+  NAV.flatMap((g) => g.items.map((i) => [i.href, i.hint])),
+);
 
 /**
  * Screen titles, derived from the nav so the two can never drift.
@@ -86,14 +99,19 @@ export function AppShell({ children, profile, pressure, energy = 1, onQuickAdd }
     .find((k) => pathname === k || pathname.startsWith(`${k}/`));
   const title = key ? titles[key] : "";
   const meta = key ? METAS[key] ?? "" : "";
+  const hint = key ? ROUTE_HINTS[key] ?? "" : "";
 
   return (
     <div className="flex min-h-screen bg-[#F6F3EC] text-[#171512]">
       <aside className="hidden lg:flex w-[252px] flex-none border-r border-[#E6DFD2] bg-[#FBF8F2] h-screen sticky top-0 flex-col">
-        <div className="h-[60px] flex items-center gap-2.5 px-[18px]">
-          <span className="w-7 h-7 rounded-[9px] bg-[#5B4FE9] text-white flex items-center justify-center font-display text-[18px] leading-none">F</span>
-          <span className="font-semibold text-[16px] tracking-[-0.01em]">FounderOS</span>
-        </div>
+        {/* The wordmark is the mark. A lone "F" in a coloured tile is a
+            placeholder pretending to be a logo — it says nothing the word next
+            to it does not already say. */}
+        <Link href="/today" className="h-[60px] flex items-center px-[18px] focus-ring">
+          <span className="font-display text-2xl tracking-[-0.015em] text-[#171512]">
+            Founder<span className="italic text-[#5B4FE9]">OS</span>
+          </span>
+        </Link>
 
         <div className="px-3.5 pb-3">
           <CaptureButton onClick={onQuickAdd} />
@@ -121,8 +139,10 @@ export function AppShell({ children, profile, pressure, energy = 1, onQuickAdd }
             <button onClick={() => setMenuOpen(true)} className="lg:hidden -ml-1 mr-1 text-[#6B6459] focus-ring rounded" aria-label="Menu">
               <MenuIcon className="w-5 h-5" />
             </button>
-            <h1 className="font-display text-[22px] leading-none truncate">{title}</h1>
-            {meta && <span className="hidden sm:block font-mono text-[11px] text-[#9A9285] truncate">{meta}</span>}
+            <h1 className="font-display text-2xl leading-none truncate">{title}</h1>
+            {/* What this screen is for, in one line, always visible. */}
+            {hint && <span className="hidden md:block text-xs text-[#8A8378] truncate">{hint}</span>}
+            {meta && <span className="hidden sm:block font-mono text-2xs text-[#9A9285] truncate">{meta}</span>}
           </div>
           <EnergyChip energy={energy} />
         </header>
@@ -157,11 +177,11 @@ export function AppShell({ children, profile, pressure, energy = 1, onQuickAdd }
 function CaptureButton({ onClick }: { onClick: () => void }) {
   return (
     <button onClick={onClick}
-      className="w-full h-[42px] rounded-xl bg-[#5B4FE9] hover:bg-[#4A3EDA] text-white text-[14px] font-semibold flex items-center justify-center gap-2 transition-colors focus-ring"
+      className="w-full h-[42px] rounded-xl bg-[#5B4FE9] hover:bg-[#4A3EDA] text-white text-base font-semibold flex items-center justify-center gap-2 transition-colors focus-ring"
       style={{ boxShadow: "0 8px 18px -10px rgba(91,79,233,0.9)" }}>
       <PlusIcon className="w-[17px] h-[17px]" />
       Capture
-      <span className="font-mono text-[10px] opacity-60 ml-0.5">⌘K</span>
+      <span className="font-mono text-2xs opacity-60 ml-0.5">⌘K</span>
     </button>
   );
 }
@@ -180,14 +200,14 @@ function PressureCard({ pressure }: { pressure: Pressure }) {
   return (
     <div className="mx-3.5 mb-3.5 p-3.5 rounded-[13px] bg-[#F1EDE3] border border-[#E6DFD2]">
       <div className="flex items-baseline justify-between gap-2.5">
-        <p className="font-mono text-[9.5px] tracking-[0.14em] uppercase text-[#A69E90]">Needs an answer</p>
-        {owed > 0 && <p className="font-mono text-[10.5px] text-[#D9552F]">{owed} owed</p>}
+        <p className="font-mono text-2xs tracking-[0.14em] uppercase text-[#A69E90]">Needs an answer</p>
+        {owed > 0 && <p className="font-mono text-2xs text-[#D9552F]">{owed} owed</p>}
       </div>
-      <p className="mt-1.5 font-mono text-[26px] leading-none tracking-[-0.02em] text-[#171512]">{needsAnswer}</p>
+      <p className="mt-1.5 font-mono text-3xl leading-none tracking-[-0.02em] text-[#171512]">{needsAnswer}</p>
       <div className="h-[5px] rounded-full bg-[#E1DACB] mt-[11px] overflow-hidden">
         <div className="h-[5px] rounded-full bg-[#5B4FE9] transition-all duration-500" style={{ width: `${pct}%` }} />
       </div>
-      <p className="mt-[9px] text-[11.5px] leading-[1.45] text-[#8A8378]">
+      <p className="mt-[9px] text-2xs leading-[1.45] text-[#8A8378]">
         {needsAnswer === 0
           ? "Nothing is waiting on you."
           : `${pressure.rotting_count} rotting · ${pressure.aging_count} aging · ${pressure.unclear_count} with no next move`}
@@ -199,18 +219,19 @@ function PressureCard({ pressure }: { pressure: Pressure }) {
 function NavGroup({ group, pathname, onClick }: { group: NavGroupDef; pathname: string; onClick?: () => void }) {
   return (
     <div className="flex flex-col gap-0.5">
-      <p className="mb-[5px] px-2.5 font-mono text-[9.5px] tracking-[0.16em] uppercase text-[#A69E90]">{group.label}</p>
+      <p className="mb-[5px] px-2.5 font-mono text-2xs tracking-[0.16em] uppercase text-[#A69E90]">{group.label}</p>
       {group.items.map((it) => {
         const active = pathname === it.href || pathname.startsWith(`${it.href}/`);
         return (
           <Link key={it.href} href={it.href} onClick={onClick} aria-current={active ? "page" : undefined}
+            title={it.hint}
             className={cn(
-              "w-full flex items-center gap-[11px] px-2.5 py-[9px] rounded-[10px] text-[13.5px] transition-colors focus-ring",
+              "w-full flex items-center gap-[11px] px-2.5 py-[9px] rounded-[10px] text-sm transition-colors focus-ring",
               active ? "bg-[#EFECFE] text-[#4A3EDA] font-semibold" : "text-[#6B6459] font-medium hover:bg-[#F1EDE3]",
             )}>
             <it.icon className="w-[17px] h-[17px] flex-none" />
             <span className="truncate">{it.label}</span>
-            {it.badge && <span className="ml-auto font-mono text-[10.5px] text-[#A69E90]">{it.badge}</span>}
+            {it.badge && <span className="ml-auto font-mono text-2xs text-[#A69E90]">{it.badge}</span>}
           </Link>
         );
       })}
@@ -233,10 +254,10 @@ function UserBadge({ profile }: { profile: UserProfile | null }) {
   const initials = name.split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase()).join("") || "F";
   return (
     <>
-      <span className="w-8 h-8 rounded-full bg-[#DCD8FC] text-[#4A3EDA] flex items-center justify-center text-[13px] font-semibold flex-none">{initials}</span>
+      <span className="w-8 h-8 rounded-full bg-[#DCD8FC] text-[#4A3EDA] flex items-center justify-center text-sm font-semibold flex-none">{initials}</span>
       <div className="flex-1 min-w-0">
-        <p className="text-[13px] font-semibold truncate">{name}</p>
-        <p className="mt-px text-[11px] text-[#8A8378]">Free plan</p>
+        <p className="text-sm font-semibold truncate">{name}</p>
+        <p className="mt-px text-2xs text-[#8A8378]">Free plan</p>
       </div>
     </>
   );
@@ -252,7 +273,7 @@ function EnergyChip({ energy }: { energy: number }) {
   ];
   const e = map[energy] ?? map[1];
   return (
-    <div className="hidden sm:flex items-center gap-[7px] h-[34px] px-3 rounded-[10px] text-[12.5px] font-medium flex-none"
+    <div className="hidden sm:flex items-center gap-[7px] h-[34px] px-3 rounded-[10px] text-xs font-medium flex-none"
       style={{ background: e.bg, color: e.fg }}>
       <BatteryIcon className="w-[15px] h-[15px]" />
       {e.label}

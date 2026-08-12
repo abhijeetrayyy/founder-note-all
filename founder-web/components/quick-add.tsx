@@ -33,13 +33,13 @@ export function QuickAdd({ open, onClose }: { open: boolean; onClose: () => void
         <div className="relative">
           <input ref={inputRef} value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) submit(); }}
             placeholder={mode === "note" ? "Jot down a thought…" : "What's on your mind?"}
-            className="w-full h-14 rounded-2xl bg-base-raised border-0 px-4 text-[17px] font-medium text-foreground placeholder:text-foreground-subtle outline-none focus:ring-2 focus:ring-accent/30 transition" />
+            className="w-full h-14 rounded-2xl bg-base-raised border-0 px-4 text-lg font-medium text-foreground placeholder:text-foreground-subtle outline-none focus:ring-2 focus:ring-accent/30 transition" />
         </div>
         <div className="flex items-center justify-between text-xs">
           <span className="text-foreground-muted font-medium">{hint}</span>
           <span className="text-foreground-subtle hidden sm:inline">↵ Enter · Esc close</span>
         </div>
-        <button type="submit" disabled={!text.trim() || busy} className="w-full h-12 rounded-2xl text-white font-bold text-[15px] bg-gradient-to-br from-accent-600 to-accent-700 hover:shadow-lg transition disabled:opacity-50 focus-ring">
+        <button type="submit" disabled={!text.trim() || busy} className="w-full h-12 rounded-2xl text-white font-bold text-base bg-gradient-to-br from-accent-600 to-accent-700 hover:shadow-lg transition disabled:opacity-50 focus-ring">
           {busy ? "Capturing…" : mode === "note" ? "Save thought" : mode === "mit" ? "Save as priority" : "Capture"}
         </button>
       </form>

@@ -92,11 +92,11 @@ export function JournalClient({ entry }: { entry: JournalEntry }) {
         <textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          className="w-full rounded-xl bg-base-raised border-0 px-4 py-3 text-[15px] text-foreground outline-none focus:ring-2 focus:ring-accent/40 resize-y"
+          className="w-full rounded-xl bg-base-raised border-0 px-4 py-3 text-base text-foreground outline-none focus:ring-2 focus:ring-accent/40 resize-y"
           rows={4}
         />
       ) : (
-        <p className="text-[15px] leading-relaxed whitespace-pre-wrap text-foreground">{entry.content}</p>
+        <p className="text-base leading-relaxed whitespace-pre-wrap text-foreground">{entry.content}</p>
       )}
     </div>
   );

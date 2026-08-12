@@ -52,7 +52,7 @@ export function HabitClient({ habit, log, streak }: { habit: Habit; log?: HabitL
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <h3 className={cn("font-bold text-[15px] text-foreground", done && "line-through text-foreground-muted")}>{habit.name}</h3>
+            <h3 className={cn("font-bold text-base text-foreground", done && "line-through text-foreground-muted")}>{habit.name}</h3>
             {streak > 2 && <span className="text-xs font-extrabold text-state-attention">🔥 {streak}d</span>}
           </div>
           {habit.description ? <p className="text-sm text-foreground-muted line-clamp-1">{habit.description}</p> : null}

@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { answerLoop, setNotThisWeek } from "@/lib/actions";
+import { answerLoop, setNotThisWeek, restoreLoopState, type LoopSnapshot } from "@/lib/actions";
 import { useToast } from "@/components/ui/toast";
 import { todayKey, cn } from "@/lib/utils";
 import type { Task } from "@/lib/supabase/types";
@@ -31,26 +31,47 @@ export function InboxTriageItem({ task, focused, onFocus }: {
   const [handoff, setHandoff] = React.useState(false);
   const [who, setWho] = React.useState("");
 
-  const act = React.useCallback(async (action: string, run: () => Promise<{ error?: string }>) => {
+  // Captured before anything changes, so undo restores the real prior state
+  // rather than a guess at one.
+  const snapshot = React.useRef<LoopSnapshot>({
+    due_date: task.due_date,
+    is_inbox: task.is_inbox,
+    answered_at: task.answered_at,
+    released_at: task.released_at,
+    not_this_week: task.not_this_week,
+    owed_to: task.owed_to,
+    owed_direction: task.owed_direction,
+  });
+
+  const act = React.useCallback(async (action: string, run: () => Promise<{ error?: string }>, said: string) => {
     setPending(action);
     const r = await run();
     if (r.error) { toast.show(r.error, "error"); setPending(null); return; }
     setGone(true);
+    toast.show(said, "info", {
+      label: "Undo",
+      onClick: async () => {
+        await restoreLoopState(task.id, snapshot.current);
+        setGone(false);
+        setPending(null);
+        router.refresh();
+      },
+    });
     setTimeout(() => router.refresh(), 320);
-  }, [router, toast]);
+  }, [router, toast, task.id]);
 
   const doToday = React.useCallback(
-    () => act("today", () => answerLoop(task.id, "do", { dueDate: todayKey() })), [act, task.id]);
+    () => act("today", () => answerLoop(task.id, "do", { dueDate: todayKey() }), "Moved to today"), [act, task.id]);
   const doTomorrow = React.useCallback(
-    () => act("tomorrow", () => answerLoop(task.id, "schedule", { dueDate: todayKey(new Date(Date.now() + 86400000)) })), [act, task.id]);
+    () => act("tomorrow", () => answerLoop(task.id, "schedule", { dueDate: todayKey(new Date(Date.now() + 86400000)) }), "Scheduled for tomorrow"), [act, task.id]);
   const doPark = React.useCallback(
-    () => act("park", () => setNotThisWeek(task.id, true)), [act, task.id]);
+    () => act("park", () => setNotThisWeek(task.id, true), "Parked — not this week"), [act, task.id]);
   const doDrop = React.useCallback(
-    () => act("drop", () => answerLoop(task.id, "drop")), [act, task.id]);
+    () => act("drop", () => answerLoop(task.id, "drop"), "Let go. Restorable for 30 days."), [act, task.id]);
 
   async function doHandoff() {
     if (!who.trim()) return;
-    await act("handoff", () => answerLoop(task.id, "handoff", { owedTo: who }));
+    await act("handoff", () => answerLoop(task.id, "handoff", { owedTo: who }), `Handed to ${who.trim()}`);
   }
 
   // 1 do · 2 schedule · 3 hand off · 4 drop, on the focused row only.
@@ -78,11 +99,11 @@ export function InboxTriageItem({ task, focused, onFocus }: {
       )}
     >
       <Link href={`/tasks/${task.id}`} className="block mb-3 group">
-        <p className="text-[14.5px] font-semibold leading-snug group-hover:text-[#5B4FE9] transition-colors">
+        <p className="text-base font-semibold leading-snug group-hover:text-[#5B4FE9] transition-colors">
           {task.title}
         </p>
         {task.description && (
-          <p className="mt-1 text-[12.5px] text-[#8A8378] line-clamp-2">{task.description}</p>
+          <p className="mt-1 text-xs text-[#8A8378] line-clamp-2">{task.description}</p>
         )}
       </Link>
 
@@ -94,7 +115,7 @@ export function InboxTriageItem({ task, focused, onFocus }: {
             onChange={(e) => setWho(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") doHandoff(); if (e.key === "Escape") setHandoff(false); }}
             placeholder="Who is picking this up?"
-            className="flex-1 min-w-[12rem] h-8 px-3 rounded-full border border-[#E0D9CB] bg-[#FBF8F2] text-[12.5px] focus-ring"
+            className="flex-1 min-w-[12rem] h-8 px-3 rounded-full border border-[#E0D9CB] bg-[#FBF8F2] text-xs focus-ring"
           />
           <Btn label="Hand off" onClick={doHandoff} busy={pending === "handoff"} tone="accent" />
           <Btn label="Cancel" onClick={() => setHandoff(false)} busy={false} />
@@ -120,14 +141,14 @@ function Btn({ label, onClick, busy, tone, k }: {
       onClick={onClick}
       disabled={busy}
       className={cn(
-        "h-8 px-3 rounded-full text-[12.5px] font-semibold inline-flex items-center gap-1.5 transition-colors focus-ring disabled:opacity-50",
+        "h-8 px-3 rounded-full text-xs font-semibold inline-flex items-center gap-1.5 transition-colors focus-ring disabled:opacity-50",
         tone === "accent" && "bg-[#5B4FE9] text-white hover:bg-[#4A3EDA]",
         tone === "danger" && "text-[#D9552F] hover:bg-[#FBF0EA]",
         !tone && "bg-[#F1EDE3] text-[#6B6459] hover:bg-[#E7E0D2]",
       )}
     >
       {label}
-      {k && <kbd className={cn("font-mono text-[9.5px] opacity-55", tone === "accent" && "text-white")}>{k}</kbd>}
+      {k && <kbd className={cn("font-mono text-2xs opacity-55", tone === "accent" && "text-white")}>{k}</kbd>}
     </button>
   );
 }

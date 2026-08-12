@@ -12,22 +12,27 @@ import type { Goal, GoalMilestone } from "@/lib/supabase/types";
 export function GoalClient({ goal, milestones }: { goal: Goal; milestones: GoalMilestone[] }) {
   const router = useRouter();
   const toast = useToast();
-  const [progress, setProgress] = React.useState(goal.progress);
   const [newMilestone, setNewMilestone] = React.useState("");
   const [expanded, setExpanded] = React.useState(false);
   const [pending, setPending] = React.useState(false);
 
+  // Derived, never dragged. Falls back to the stored value only for goals that
+  // have no milestones yet, so old data still reads sensibly.
+  const doneCount = milestones.filter((m) => m.is_completed).length;
+  const progress = milestones.length
+    ? Math.round((doneCount / milestones.length) * 100)
+    : goal.progress;
+
+  // Keep the stored column in step so Review and other surfaces agree.
+  React.useEffect(() => {
+    if (milestones.length && progress !== goal.progress) {
+      void updateGoalProgress(goal.id, progress);
+    }
+  }, [progress, goal.progress, goal.id, milestones.length]);
+
   const today = todayKey();
   const isOverdue = goal.target_date ? goal.target_date < today && progress < 100 : false;
   const isDueSoon = goal.target_date ? goal.target_date > today && new Date(goal.target_date).getTime() - Date.now() < 7 * 86400000 : false;
-
-  async function onProgress(e: React.ChangeEvent<HTMLInputElement>) {
-    const v = Number(e.target.value);
-    setProgress(v);
-    const result = await updateGoalProgress(goal.id, v);
-    if (result.error) toast.show(result.error, "error");
-    else router.refresh();
-  }
 
   async function addMilestone(e: React.FormEvent) {
     e.preventDefault();
@@ -74,10 +79,10 @@ export function GoalClient({ goal, milestones }: { goal: Goal; milestones: GoalM
         <div className="mb-3 -mt-1 flex items-start gap-2.5 p-3 rounded-xl bg-state-attention-surface border border-state-attention/30">
           <span aria-hidden="true" className="mt-1.5 w-1.5 h-1.5 rounded-full bg-state-attention flex-none" />
           <div className="flex-1 min-w-0">
-            <p className="text-[13px] font-semibold text-foreground">
+            <p className="text-sm font-semibold text-foreground">
               Nothing has moved this in {idleDays} days.
             </p>
-            <p className="mt-0.5 text-[12.5px] text-foreground-muted">
+            <p className="mt-0.5 text-xs text-foreground-muted">
               Is it dead, or is it the only thing that matters? Both are fine answers — leaving it
               undecided is the one that costs you.
             </p>
@@ -91,7 +96,7 @@ export function GoalClient({ goal, milestones }: { goal: Goal; milestones: GoalM
           </Meter>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h3 className="font-bold text-[15px] text-foreground truncate">{goal.title}</h3>
+              <h3 className="font-bold text-base text-foreground truncate">{goal.title}</h3>
               {isOverdue ? <span className="text-2xs font-extrabold text-state-overdue shrink-0">OVERDUE</span> : null}
               {isDueSoon ? <span className="text-2xs font-extrabold text-state-attention shrink-0">DUE SOON</span> : null}
             </div>
@@ -106,16 +111,31 @@ export function GoalClient({ goal, milestones }: { goal: Goal; milestones: GoalM
         </div>
       </div>
 
+      {/* Progress is milestones done, not a slider you drag.
+          A slider asks the founder to invent a number and then believe it —
+          the answer is always a guess, and a guessed number that looks precise
+          is worse than no number. Ticking a milestone is a fact. */}
       <div className="mt-4">
-        <input
-          type="range"
-          min={0}
-          max={100}
-          value={progress}
-          onChange={onProgress}
-          aria-label={`Goal progress: ${progress}%`}
-          className="w-full h-2 rounded-lg bg-base-overlay accent-accent cursor-pointer"
-        />
+        {milestones.length ? (
+          <>
+            <div className="flex items-center gap-2" aria-label={`${doneCount} of ${milestones.length} milestones done`}>
+              {milestones.map((m) => (
+                <span key={m.id}
+                  className={cn("h-1.5 flex-1 rounded-full transition-colors",
+                    m.is_completed ? "bg-accent" : "bg-base-overlay")} />
+              ))}
+            </div>
+            <p className="mt-2 text-xs text-foreground-muted">
+              {doneCount} of {milestones.length} milestones · {progress}%
+              {doneCount === milestones.length && " — every milestone is done. Is the goal?"}
+            </p>
+          </>
+        ) : (
+          <p className="text-xs text-foreground-muted">
+            No milestones yet. Progress here is milestones done, so add the first checkpoint below and
+            this fills in on its own.
+          </p>
+        )}
       </div>
 
       {goal.target_date && (
