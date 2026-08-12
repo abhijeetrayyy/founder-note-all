@@ -10,7 +10,6 @@ export default async function JournalPage() {
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-6">
       <header className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight font-display">Journal</h1>
           <p className="text-sm text-foreground-muted mt-1">Reflect, capture lessons, and clear your mind.</p>
         </div>
         <CreateJournalButton />

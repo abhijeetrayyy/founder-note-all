@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { format, isToday, isPast } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { toggleTask, deleteTask } from "@/lib/actions";
+import { toggleTask, releaseLoop, restoreLoop } from "@/lib/actions";
 import { useToast } from "@/components/ui/toast";
 import { priorityLabel, energyLabel, type Task, type Project } from "@/lib/supabase/types";
 
@@ -22,7 +22,20 @@ export function TaskItem({ task, project, href }: { task: Task; project?: Projec
   const linkHref = href ?? `/tasks/${task.id}`;
 
   async function onToggle(e: React.MouseEvent) { e.preventDefault(); if (pending) return; setPending(true); const r = await toggleTask(task.id, !done); setPending(false); if (r.error) toast.show(r.error, "error"); else { setDone(!done); router.refresh(); } }
-  async function onDelete(e: React.MouseEvent) { e.preventDefault(); e.stopPropagation(); if (!confirm("Delete?")) return; const r = await deleteTask(task.id); if (r.error) toast.show(r.error, "error"); else router.refresh(); }
+  // Releases rather than deletes. Everywhere else in the app a dropped loop is
+  // recoverable for 30 days; a single irreversible path here would undo the
+  // whole premise that letting go should be cheap. No confirm() either — the
+  // undo is the confirmation, and it does not interrupt.
+  async function onDelete(e: React.MouseEvent) {
+    e.preventDefault(); e.stopPropagation();
+    const r = await releaseLoop(task.id, "dropped from list");
+    if (r.error) { toast.show(r.error, "error"); return; }
+    toast.show("Let go. Restorable for 30 days.", "info", {
+      label: "Undo",
+      onClick: async () => { await restoreLoop(task.id); router.refresh(); },
+    });
+    router.refresh();
+  }
 
   return (
     <Link href={linkHref} className={cn("group flex items-start gap-3 p-3.5 rounded-xl transition-all duration-200", done ? "bg-base-overlay/50 border border-base-border/50" : "bg-base-surface border border-base-border hover:border-accent/20 hover:bg-base-raised")}>

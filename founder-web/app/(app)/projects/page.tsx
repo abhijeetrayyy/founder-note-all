@@ -1,55 +1,96 @@
 import Link from "next/link";
-import { getProjects } from "@/lib/data";
+import { getProjectHealth } from "@/lib/data";
 import { EmptyState } from "@/components/ui/card";
 import { CreateProjectButton } from "@/components/create-project-button";
 import { PROJECT_COLORS } from "@/lib/constants";
+import { GRACE_DAYS, ROT_DAYS } from "@/lib/loops";
 
+/**
+ * Projects, ordered by how stuck they are.
+ *
+ * This page used to render a name, a coloured initial and a description — which
+ * answers "what is this project called", a question nobody has. Every signal
+ * needed to answer the real one already existed in the data: open loops, the
+ * age of the oldest unanswered one, who it is blocked on, and how long since
+ * anything moved.
+ */
 export default async function ProjectsPage() {
-  const projects = await getProjects();
+  const health = await getProjectHealth();
+  const stuck = health.filter((h) => h.oldestDays >= GRACE_DAYS || h.owedByYou > 0);
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-8">
-      <header className="flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight font-display">Projects</h1>
-          <p className="text-sm text-foreground-muted mt-1">{projects.length} active</p>
-        </div>
+    <div className="max-w-[1180px] mx-auto px-5 sm:px-7 pt-7 pb-16 space-y-5">
+      <header className="flex items-start justify-between gap-4 flex-wrap">
+        <p className="text-[14.5px] text-[#6B6459] max-w-[560px]">
+          {health.length === 0
+            ? "Outcomes, not folders."
+            : stuck.length === 0
+            ? "Nothing is stuck. Every project has moved recently."
+            : `${stuck.length} of ${health.length} ${stuck.length === 1 ? "project has" : "projects have"} stopped moving. Most stuck first.`}
+        </p>
         <CreateProjectButton />
       </header>
 
-      {projects.length ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {projects.map((project) => (
-            <Link
-              key={project.id}
-              href={`/projects/${project.id}`}
-              className="group p-5 rounded-card glass-ambient hover:glass-active transition-all duration-300"
-            >
-              <div className="flex items-center gap-4">
-                <span
-                  className="w-11 h-11 rounded-xl flex items-center justify-center text-lg font-bold text-white shrink-0 shadow-md"
-                  style={{ backgroundColor: PROJECT_COLORS[project.color % PROJECT_COLORS.length] }}
-                >
-                  {project.name[0]?.toUpperCase()}
-                </span>
-                <div className="min-w-0">
-                  <h3 className="font-bold text-[15px] text-foreground truncate">{project.name}</h3>
-                  {project.description ? (
-                    <p className="text-sm text-foreground-muted line-clamp-1 mt-0.5">{project.description}</p>
-                  ) : null}
-                </div>
-                <span className="ml-auto text-foreground-subtle opacity-0 group-hover:opacity-100 transition-opacity">→</span>
-              </div>
-            </Link>
-          ))}
+      {health.length ? (
+        <div className="flex flex-col gap-2.5">
+          {health.map((h) => <ProjectRow key={h.project.id} h={h} />)}
         </div>
       ) : (
         <EmptyState
           icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>}
           title="No projects yet"
-          subtitle="Group tasks and notes around outcomes you're driving toward."
+          subtitle="Group loops around an outcome you're driving toward."
         />
       )}
     </div>
+  );
+}
+
+function ProjectRow({ h }: { h: Awaited<ReturnType<typeof getProjectHealth>>[number] }) {
+  const { project, open, oldestDays, idleDays, blockedOn, owedByYou } = h;
+  const rotting = oldestDays >= ROT_DAYS;
+  const aging = oldestDays >= GRACE_DAYS && !rotting;
+
+  // The single sentence that says why this project is where it is in the list.
+  const verdict = owedByYou > 0
+    ? `${owedByYou} ${owedByYou === 1 ? "person is" : "people are"} waiting on you`
+    : rotting
+    ? `Oldest loop has sat ${oldestDays} days unanswered`
+    : blockedOn.length
+    ? `Sitting with ${blockedOn.slice(0, 2).join(" and ")}${blockedOn.length > 2 ? ` +${blockedOn.length - 2}` : ""}`
+    : aging
+    ? `Oldest loop is ${oldestDays} days old`
+    : open === 0
+    ? "Nothing open"
+    : idleDays !== null && idleDays >= 7
+    ? `Nothing has moved for ${idleDays} days`
+    : "Moving";
+
+  const tone = owedByYou > 0 || rotting ? "#D9552F" : aging || (idleDays ?? 0) >= 7 ? "#B07C15" : "#8A8378";
+
+  return (
+    <Link href={`/projects/${project.id}`}
+      className="group flex items-center gap-4 rounded-[18px] border border-[#E6DFD2] bg-[#FFFDF8] p-[18px] hover:border-[#C9C0B0] transition-colors focus-ring">
+      <span className="w-10 h-10 rounded-xl flex items-center justify-center text-[15px] font-semibold text-white shrink-0"
+        style={{ backgroundColor: PROJECT_COLORS[project.color % PROJECT_COLORS.length] }}>
+        {project.name[0]?.toUpperCase()}
+      </span>
+
+      <div className="flex-1 min-w-0">
+        <p className="text-[15px] font-semibold truncate">{project.name}</p>
+        <p className="mt-0.5 text-[13px] truncate" style={{ color: tone }}>{verdict}</p>
+      </div>
+
+      <div className="hidden sm:flex flex-col items-end gap-1 flex-none">
+        <span className="font-mono text-[12px] text-[#6B6459]">{open} open</span>
+        {idleDays !== null && (
+          <span className="font-mono text-[10.5px] text-[#A69E90]">
+            {idleDays === 0 ? "touched today" : `${idleDays}d since a change`}
+          </span>
+        )}
+      </div>
+
+      <span className="text-[#C4BCAC] group-hover:text-[#5B4FE9] transition-colors flex-none">→</span>
+    </Link>
   );
 }

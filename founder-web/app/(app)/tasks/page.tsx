@@ -11,7 +11,6 @@ export default async function TasksPage() {
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-8">
       <header className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight font-display">Tasks</h1>
           <p className="text-sm text-foreground-muted mt-1">{open.length} open · {done.length} done</p>
         </div>
         <CreateTaskButton projects={projects} />

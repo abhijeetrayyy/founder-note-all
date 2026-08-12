@@ -44,7 +44,6 @@ export default async function ReviewPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-6">
       <header>
-        <h1 className="text-2xl font-bold text-foreground tracking-tight font-display">Weekly review</h1>
         <p className="text-sm text-foreground-muted mt-1">Reflect on the week, then reset for the next one.</p>
       </header>
 

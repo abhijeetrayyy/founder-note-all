@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/toast";
-import { toggleTask, deleteTask, updateTask } from "@/lib/actions";
+import { toggleTask, releaseLoop, restoreLoop, updateTask } from "@/lib/actions";
 
 export function TaskActions({ taskId, completed }: { taskId: string; completed: boolean }) {
   const router = useRouter();
@@ -21,17 +21,19 @@ export function TaskActions({ taskId, completed }: { taskId: string; completed: 
     }
   }
 
+  // The second delete path. Like the one on list rows, this releases rather
+  // than destroys — "this cannot be undone" was both hostile and, now, untrue.
   async function onDelete() {
-    if (!confirm("Delete this task? This cannot be undone.")) return;
     setPending(true);
-    const result = await deleteTask(taskId);
+    const result = await releaseLoop(taskId, "dropped from detail");
     setPending(false);
-    if (result.error) toast.show(result.error, "error");
-    else {
-      toast.show("Task deleted", "success");
-      router.push("/tasks");
-      router.refresh();
-    }
+    if (result.error) { toast.show(result.error, "error"); return; }
+    toast.show("Let go. Restorable for 30 days.", "info", {
+      label: "Undo",
+      onClick: async () => { await restoreLoop(taskId); router.refresh(); },
+    });
+    router.push("/loops");
+    router.refresh();
   }
 
   async function onMakeMIT() {

@@ -49,24 +49,30 @@ const NAV: NavGroupDef[] = [
   ]},
 ];
 
-/** Screen titles and their sub-line, per the handoff's TITLES map. */
-const TITLES: Record<string, [string, string]> = {
-  "/today": ["Today", ""],
-  "/plan": ["Morning plan", "60 seconds"],
-  "/inbox": ["Triage", ""],
-  "/loops": ["Loops", ""],
-  "/unblock": ["Unblock", ""],
-  "/projects": ["Projects", ""],
-  "/notes": ["Notes", ""],
-  "/focus": ["Focus", "session"],
-  "/shutdown": ["Shutdown", "2 minutes"],
-  "/journal": ["Reflect", ""],
-  "/review": ["Weekly review", ""],
-  "/stats": ["Pulse", "last 30 days"],
-  "/goals": ["90-day goals", ""],
-  "/habits": ["Rituals", ""],
-  "/settings": ["Settings", ""],
-  "/tasks": ["Tasks", ""],
+/**
+ * Screen titles, derived from the nav so the two can never drift.
+ *
+ * They did drift: the header said "Triage" over a page whose own heading said
+ * "Inbox", and the same on four other routes — All loops/Loops, Rituals/Habits,
+ * Reflect/Journal, 90-day goals/Goals. The label you clicked was not the label
+ * you landed on. Pages no longer render their own title at all; this is the
+ * single source.
+ */
+const NAV_TITLES: Record<string, string> = Object.fromEntries(
+  NAV.flatMap((g) => g.items.map((i) => [i.href, i.label])),
+);
+
+/** Sub-lines are per-route context, not a second name. */
+const METAS: Record<string, string> = {
+  "/plan": "60 seconds",
+  "/focus": "session",
+  "/shutdown": "2 minutes",
+  "/stats": "last 30 days",
+};
+
+const EXTRA_TITLES: Record<string, string> = {
+  "/tasks": "Tasks",
+  "/replan": "Replan",
 };
 
 export function AppShell({ children, profile, pressure, energy = 1, onQuickAdd }: { children: React.ReactNode; profile: UserProfile | null; pressure?: Pressure; energy?: number; onQuickAdd: () => void }) {
@@ -74,8 +80,12 @@ export function AppShell({ children, profile, pressure, energy = 1, onQuickAdd }
   const [menuOpen, setMenuOpen] = React.useState(false);
   const p = pressure ?? EMPTY_PRESSURE;
 
-  const key = Object.keys(TITLES).find((k) => pathname === k || pathname.startsWith(`${k}/`));
-  const [title, meta] = TITLES[key ?? ""] ?? ["", ""];
+  const titles = { ...NAV_TITLES, ...EXTRA_TITLES };
+  const key = Object.keys(titles)
+    .sort((a, b) => b.length - a.length)
+    .find((k) => pathname === k || pathname.startsWith(`${k}/`));
+  const title = key ? titles[key] : "";
+  const meta = key ? METAS[key] ?? "" : "";
 
   return (
     <div className="flex min-h-screen bg-[#F6F3EC] text-[#171512]">

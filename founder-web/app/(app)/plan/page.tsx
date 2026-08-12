@@ -17,7 +17,6 @@ export default async function PlanPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-8">
       <header>
-        <h1 className="text-2xl font-bold text-foreground tracking-tight font-display">Plan your day</h1>
         <p className="text-sm text-foreground-muted mt-1">A short ritual beats a long list. Set your intention, pick what matters, go.</p>
       </header>
 

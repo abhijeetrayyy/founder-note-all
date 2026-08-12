@@ -8,7 +8,6 @@ export default async function SettingsPage() {
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 space-y-6">
       <header>
-        <h1 className="text-2xl font-bold text-foreground tracking-tight font-display">Settings</h1>
         <p className="text-sm text-foreground-muted mt-1">Manage your profile and preferences.</p>
       </header>
 

@@ -5,15 +5,22 @@ import { cn } from "@/lib/utils";
 
 export type ToastType = "success" | "error" | "info";
 
+/** An optional recovery affordance carried by the toast itself. */
+export interface ToastAction {
+  label: string;
+  onClick: () => void | Promise<void>;
+}
+
 interface Toast {
   id: string;
   message: string;
   type: ToastType;
+  action?: ToastAction;
   timer?: ReturnType<typeof setTimeout>;
 }
 
 interface ToastContextValue {
-  show: (message: string, type?: ToastType) => void;
+  show: (message: string, type?: ToastType, action?: ToastAction) => void;
 }
 
 const ToastContext = React.createContext<ToastContextValue | null>(null);
@@ -22,15 +29,24 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = React.useState<Toast[]>([]);
   const timersRef = React.useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
-  const show = React.useCallback((message: string, type: ToastType = "info") => {
+  const show = React.useCallback((message: string, type: ToastType = "info", action?: ToastAction) => {
     const id = Math.random().toString(36).slice(2);
-    setToasts((prev) => [...prev, { id, message, type }]);
+    setToasts((prev) => [...prev, { id, message, type, action }]);
+    // An undo the founder cannot reach in time is not an undo. Anything
+    // carrying an action gets long enough to actually notice and click it.
     const timer = setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
       timersRef.current.delete(id);
-    }, 3000);
+    }, action ? 8000 : 3000);
     timersRef.current.set(id, timer);
   }, []);
+
+  function dismiss(id: string) {
+    const timer = timersRef.current.get(id);
+    if (timer) clearTimeout(timer);
+    timersRef.current.delete(id);
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }
 
   function pauseTimer(id: string) {
     const timer = timersRef.current.get(id);
@@ -68,7 +84,15 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                 t.type === "info" && "bg-accent",
               )}
             />
-            {t.message}
+            <span className="flex-1">{t.message}</span>
+            {t.action && (
+              <button
+                onClick={async () => { dismiss(t.id); await t.action!.onClick(); }}
+                className="flex-none text-accent font-bold hover:underline underline-offset-2 focus-ring rounded px-1"
+              >
+                {t.action.label}
+              </button>
+            )}
           </div>
         ))}
       </div>

@@ -1,19 +1,17 @@
-import { getGoals, getGoalMilestones } from "@/lib/data";
+import { getGoals, getMilestonesForGoals } from "@/lib/data";
 import { Card, SectionLabel, EmptyState } from "@/components/ui/card";
 import { CreateGoalButton } from "@/components/create-goal-button";
 import { GoalClient } from "./goal-client";
 
 export default async function GoalsPage() {
   const goals = await getGoals();
-  const milestonesMap = new Map(
-    await Promise.all(goals.map(async (g) => [g.id, await getGoalMilestones(g.id)] as const))
-  );
+  // One query for every goal's milestones, not one query per goal.
+  const milestonesMap = await getMilestonesForGoals(goals.map((g) => g.id));
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-6">
       <header className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight font-display">Goals</h1>
           <p className="text-sm text-foreground-muted mt-1">Track what matters over the next 90 days.</p>
         </div>
         <CreateGoalButton />

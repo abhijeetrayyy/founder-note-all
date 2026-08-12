@@ -430,6 +430,86 @@ export const getReleasedLoops = cache(async (): Promise<Task[]> => {
   return data ?? [];
 });
 
+/**
+ * Energy truth: planned energy against how blocks actually felt, by weekday.
+ *
+ * This is the only place the app can learn it was wrong. Capacity is currently
+ * an asserted constant; without this it stays asserted forever.
+ *
+ * Returns null until there is enough evidence to say something honest — a
+ * pattern drawn from three sessions is a coincidence, not a shape.
+ */
+export const getEnergyTruth = cache(async (): Promise<{
+  byDay: { day: string; sessions: number; good: number; rough: number }[];
+  worstDay: string | null;
+  bestDay: string | null;
+  total: number;
+} | null> => {
+  const supabase = await createClient();
+  const since = new Date(Date.now() - 60 * 86_400_000).toISOString();
+
+  const { data, error } = await supabase
+    .from("focus_sessions")
+    .select("felt, started_at, created_at")
+    .not("felt", "is", null)
+    .gte("created_at", since)
+    .limit(500);
+  if (error || !data) return null;
+
+  const rows = data as { felt: number | null; started_at: string | null; created_at: string }[];
+  if (rows.length < 5) return null;
+
+  const names = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const buckets = names.map((day) => ({ day, sessions: 0, good: 0, rough: 0 }));
+
+  for (const r of rows) {
+    const d = new Date(r.started_at ?? r.created_at).getDay();
+    const b = buckets[d];
+    b.sessions += 1;
+    // 0 flow / 1 solid read as the block working; 2 fought it / 3 wrong task do not.
+    if (r.felt !== null && r.felt <= 1) b.good += 1; else b.rough += 1;
+  }
+
+  const rated = buckets.filter((b) => b.sessions >= 2);
+  const best = [...rated].sort((a, b) => b.good / b.sessions - a.good / a.sessions)[0];
+  const worst = [...rated].sort((a, b) => a.good / a.sessions - b.good / b.sessions)[0];
+
+  return {
+    byDay: buckets,
+    total: rows.length,
+    bestDay: best && best.good / best.sessions > 0.5 ? best.day : null,
+    worstDay: worst && worst.good / worst.sessions < 0.5 ? worst.day : null,
+  };
+});
+
+/** Loops closed in the last n days, split by whether they had been open a while. */
+export const getClosureEvidence = cache(async (days = 30) => {
+  const supabase = await createClient();
+  const since = new Date(Date.now() - days * 86_400_000).toISOString();
+  const { data, error } = await supabase
+    .from("tasks")
+    .select("created_at, completed_at")
+    .eq("completed", true)
+    .is("released_at", null)
+    .gte("completed_at", since)
+    .limit(500);
+  if (error || !data) return { closed: 0, closedOld: 0, released: 0 };
+
+  const rows = data as { created_at: string; completed_at: string | null }[];
+  const closedOld = rows.filter((t) =>
+    t.completed_at &&
+    new Date(t.completed_at).getTime() - new Date(t.created_at).getTime() >= GRACE_DAYS * 86_400_000,
+  ).length;
+
+  const { count } = await supabase
+    .from("tasks")
+    .select("*", { count: "exact", head: true })
+    .not("released_at", "is", null)
+    .gte("released_at", since);
+
+  return { closed: rows.length, closedOld, released: count ?? 0 };
+});
+
 export const getStats = cache(async () => {
   const supabase = await createClient();
   const day = todayKey();
@@ -517,6 +597,92 @@ export const getWeeklyReview = cache(async (weekStart: string): Promise<WeeklyRe
 });
 
 // ============ GOAL MILESTONES ============
+
+/**
+ * Milestones for many goals in one round trip.
+ *
+ * The goals page previously mapped getGoalMilestones over every goal, so ten
+ * goals meant eleven serialised queries behind the page render.
+ */
+export const getMilestonesForGoals = cache(async (goalIds: string[]): Promise<Map<string, GoalMilestone[]>> => {
+  const out = new Map<string, GoalMilestone[]>(goalIds.map((id) => [id, []]));
+  if (!goalIds.length) return out;
+  const supabase = await createClient();
+  try {
+    const { data, error } = await supabase
+      .from("goal_milestones")
+      .select("*")
+      .in("goal_id", goalIds)
+      .order("sort_order");
+    if (error) return out;
+    for (const m of (data ?? []) as GoalMilestone[]) {
+      out.get(m.goal_id)?.push(m);
+    }
+    return out;
+  } catch {
+    return out;
+  }
+});
+
+/**
+ * Projects, ordered by how stuck they are.
+ *
+ * A founder does not open Projects to remember what a project is called — they
+ * open it to find out which one has stopped moving and who it is sitting with.
+ * Alphabetical order answers neither question.
+ */
+export const getProjectHealth = cache(async () => {
+  const supabase = await createClient();
+  const [projects, { data: taskRows }] = await Promise.all([
+    getProjects(),
+    supabase
+      .from("tasks")
+      .select("project_id, completed, created_at, updated_at, answered_at, owed_to, owed_direction")
+      .is("released_at", null)
+      .not("project_id", "is", null)
+      .limit(1000),
+  ]);
+
+  type Row = {
+    project_id: string; completed: boolean; created_at: string; updated_at: string;
+    answered_at: string | null; owed_to: string; owed_direction: number;
+  };
+  const rows = (taskRows ?? []) as Row[];
+  const now = Date.now();
+
+  return projects.map((p) => {
+    const mine = rows.filter((t) => t.project_id === p.id);
+    const open = mine.filter((t) => !t.completed);
+
+    // Oldest unanswered loop is the honest "how stuck" signal — a scheduled
+    // task is not stuck, it is scheduled.
+    const ages = open.filter((t) => !t.answered_at)
+      .map((t) => Math.floor((now - new Date(t.created_at).getTime()) / 86_400_000));
+    const oldest = ages.length ? Math.max(...ages) : 0;
+
+    const lastTouch = mine.length
+      ? Math.floor((now - Math.max(...mine.map((t) => new Date(t.updated_at).getTime()))) / 86_400_000)
+      : null;
+
+    const blockedOn = [...new Set(
+      open.filter((t) => t.owed_to.trim() && t.owed_direction === 1).map((t) => t.owed_to.trim()),
+    )];
+    const owedByYou = open.filter((t) => t.owed_to.trim() && t.owed_direction === 0).length;
+
+    return {
+      project: p,
+      open: open.length,
+      done: mine.length - open.length,
+      oldestDays: oldest,
+      idleDays: lastTouch,
+      blockedOn,
+      owedByYou,
+      // Stuck-ness: age of the oldest unanswered loop, plus a penalty for
+      // sitting untouched, plus weight for anything a person is waiting on.
+      stuck: oldest + (lastTouch ?? 0) + owedByYou * 5,
+    };
+  }).sort((a, b) => b.stuck - a.stuck);
+});
 
 export const getGoalMilestones = cache(async (goalId: string): Promise<GoalMilestone[]> => {
   const supabase = await createClient();

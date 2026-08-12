@@ -1,89 +1,130 @@
-import { getStats } from "@/lib/data";
-import { Card, Meter } from "@/components/ui/card";
-import { EnergyChart } from "./energy-chart";
+import Link from "next/link";
+import { getPressure, getEnergyTruth, getClosureEvidence, getStats } from "@/lib/data";
+import { GRACE_DAYS } from "@/lib/loops";
 
+/**
+ * Pulse.
+ *
+ * Rebuilt. This page previously led with a completion ring reading "0 of 4
+ * tasks completed, all time" — a ratio that rises when you add work, and the
+ * one number the product exists to reject. It also contradicted the sidebar,
+ * which counts loops needing an answer, so the app was running two different
+ * models of itself on one screen.
+ *
+ * Every number here now has a decision attached, and the headline is energy
+ * truth: what the app has learned about your real shape from logged sessions
+ * rather than from an assumption it made on day one.
+ */
 export default async function StatsPage() {
-  const stats = await getStats();
-  const avgEnergy = stats.energyThisWeek.length
-    ? (stats.energyThisWeek.reduce((a, b) => a + b, 0) / stats.energyThisWeek.length).toFixed(1)
-    : "—";
-  const rateStory = stats.completionRate >= 70
-    ? "You're closing the loop on most of what you start. That's real momentum."
-    : stats.completionRate >= 40
-    ? "Steady progress. A couple more finished tasks a day compounds fast."
-    : stats.totalTasks > 0
-    ? "Every list starts messy. Pick one thing from Right Now and finish it."
-    : "Capture your first task and watch this fill in.";
+  const [pressure, truth, evidence, stats] = await Promise.all([
+    getPressure(),
+    getEnergyTruth(),
+    getClosureEvidence(30),
+    getStats(),
+  ]);
+
+  const needsAnswer = pressure.rotting_count + pressure.aging_count + pressure.unclear_count;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-8">
-      <header>
-        <h1 className="text-2xl font-bold text-foreground tracking-tight font-display">Pulse</h1>
-        <p className="text-sm text-foreground-muted mt-1">Your momentum, made visible.</p>
-      </header>
+    <div className="max-w-[1180px] mx-auto px-5 sm:px-7 pt-7 pb-16 space-y-5">
+      <p className="text-[14.5px] text-[#6B6459] max-w-[620px]">
+        Six numbers, each attached to something you could do today. Nothing here is a score.
+      </p>
 
-      <Card variant="focused" className="p-6 flex items-center gap-6">
-        <Meter value={stats.completionRate / 100} size={84} strokeWidth={7}>
-          <span className="text-xl font-extrabold text-foreground number-mono">{stats.completionRate}%</span>
-        </Meter>
-        <div>
-          <p className="text-sm font-bold text-foreground">{stats.completedTasks} of {stats.totalTasks} tasks completed, all time</p>
-          <p className="text-sm text-foreground-muted mt-1 leading-relaxed">{rateStory}</p>
+      {/* ── Energy truth ── */}
+      <section className="rounded-[18px] border border-[#E6DFD2] bg-[#FFFDF8] p-[22px]">
+        <div className="flex items-baseline justify-between gap-3.5 flex-wrap">
+          <h2 className="text-[14.5px] font-semibold">Energy truth</h2>
+          <span className="font-mono text-[11px] text-[#9A9285]">
+            {truth ? `${truth.total} logged sessions · 60 days` : "needs 5 logged sessions"}
+          </span>
         </div>
-      </Card>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        <StatCard label="Done today" value={String(stats.completedToday)} hex="#F59E0B" />
-        <StatCard label="Habits this week" value={String(stats.habitsThisWeek)} hex="#3B82F6" />
-        <StatCard label="Avg energy" value={String(avgEnergy)} hex="#7C3AED" />
-        <StatCard label="Total tasks" value={String(stats.totalTasks)} hex="#14B8A6" />
-        <StatCard label="Completed" value={String(stats.completedTasks)} hex="#10B981" />
-        <StatCard label="Completion rate" value={`${stats.completionRate}%`} hex="#6C5CE7" />
-      </div>
+        {truth ? (
+          <>
+            <p className="mt-3 font-display text-[26px] leading-[1.2] max-w-[38ch]">
+              {truth.worstDay
+                ? <>Your blocks on <em className="italic text-[#5B4FE9]">{truth.worstDay}</em> rarely work. Stop planning deep work there.</>
+                : truth.bestDay
+                ? <><em className="italic text-[#5B4FE9]">{truth.bestDay}</em> is where your good blocks land. Protect it.</>
+                : <>No weekday pattern yet — keep logging how each block went.</>}
+            </p>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card variant="ambient" className="p-5 space-y-4">
-          <p className="text-2xs uppercase tracking-[0.15em] text-foreground-muted font-bold">Energy this week</p>
-          {stats.energyThisWeek.length ? (
-            <EnergyChart levels={stats.energyThisWeek} />
-          ) : (
-            <p className="text-sm text-foreground-muted italic py-8 text-center">No check-ins yet. Set your energy on Right Now or Plan.</p>
-          )}
-        </Card>
-
-        <Card variant="ambient" className="p-5 space-y-3">
-          <p className="text-2xs uppercase tracking-[0.15em] text-foreground-muted font-bold">Done per day</p>
-          {stats.completionByDay ? (
-            <div className="grid grid-cols-7 gap-2">
-              {stats.completionByDay.map((d, i) => {
-                const days = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
-                const max = Math.max(...stats.completionByDay, 1);
-                const pct = (d / max) * 100;
+            <div className="grid grid-cols-7 gap-2 mt-5">
+              {truth.byDay.map((d) => {
+                const rate = d.sessions ? d.good / d.sessions : 0;
                 return (
-                  <div key={i} className="flex flex-col items-center gap-1.5">
-                    <span className="text-[10px] font-bold text-foreground-muted number-mono">{d}</span>
-                    <div className="w-full h-20 rounded-lg bg-base-overlay relative overflow-hidden">
-                      <div className="absolute bottom-0 w-full rounded-b-lg transition-all duration-500" style={{ height: `${Math.max(pct, 4)}%`, background: d > 0 ? "linear-gradient(to top, #7C3AED, #A78BFA)" : "transparent" }} />
+                  <div key={d.day} className="flex flex-col items-center gap-1.5">
+                    <div className="w-full h-16 rounded-lg bg-[#F1EDE3] flex flex-col justify-end overflow-hidden"
+                      title={`${d.good} of ${d.sessions} felt good`}>
+                      {d.sessions > 0 && (
+                        <div className="w-full bg-[#5B4FE9]" style={{ height: `${Math.max(rate * 100, 6)}%` }} />
+                      )}
                     </div>
-                    <span className="text-2xs text-foreground-subtle font-semibold">{days[i]}</span>
+                    <span className="font-mono text-[10px] text-[#9A9285]">{d.day.slice(0, 2)}</span>
+                    <span className="font-mono text-[10px] text-[#C4BCAC]">{d.sessions || "—"}</span>
                   </div>
                 );
               })}
             </div>
-          ) : (
-            <p className="text-sm text-foreground-muted italic">No completed tasks this week.</p>
-          )}
-        </Card>
+            <p className="mt-3 text-[12.5px] text-[#8A8378]">
+              Bar height is the share of blocks that felt like flow or solid. The number below is sessions logged.
+            </p>
+          </>
+        ) : (
+          <p className="mt-3 text-[13.5px] text-[#8A8378] leading-[1.55] max-w-[52ch]">
+            Finish a few focus sessions and answer “how did it go”. After five, this becomes the most useful
+            number in the app — the only thing that can correct your capacity from evidence instead of
+            assumption.{" "}
+            <Link href="/focus" className="text-[#5B4FE9] font-medium hover:underline">Start a session →</Link>
+          </p>
+        )}
+      </section>
+
+      {/* ── Numbers with an action attached ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-[14px]">
+        <Metric value={needsAnswer} label="Need an answer"
+          sub={`${pressure.rotting_count} rotting · ${pressure.aging_count} aging`}
+          href="/loops?filter=rotting" cta="Triage them" alert={pressure.rotting_count > 0} />
+        <Metric value={pressure.owed_count} label="People waiting on you"
+          sub={pressure.owed_count ? "The heaviest thing you carry" : "Nobody is waiting"}
+          href="/loops?filter=owed" cta="See who" alert={pressure.owed_count > 0} />
+        <Metric value={pressure.blocked_count} label="You are waiting on"
+          sub={pressure.blocked_count ? "Thirty seconds moves these" : "Nothing is with anyone else"}
+          href="/unblock" cta="Send the nudges" />
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-[14px]">
+        <Metric value={evidence.closedOld} label={`Closed that were older than ${GRACE_DAYS} days`}
+          sub={`${evidence.closed} loops closed in 30 days`} href="/review" cta="See the week" good />
+        <Metric value={evidence.released} label="Let go, on purpose" sub="Still restorable"
+          href="/loops?filter=released" cta="Review them" />
+        <Metric value={stats.habitsThisWeek} label="Rituals kept this week" sub="Evidence, not pressure"
+          href="/habits" cta="Open rituals" good />
       </div>
     </div>
   );
 }
 
-function StatCard({ label, value, hex }: { label: string; value: string; hex: string }) {
+/**
+ * One number, one sentence, one place to go.
+ *
+ * The old page rendered six tiles in six different saturated colours, three of
+ * which restated the ring above them. Colour here is semantic only — it marks
+ * something needing attention, never decorates a count.
+ */
+function Metric({ value, label, sub, href, cta, alert, good }: {
+  value: number; label: string; sub: string; href: string; cta: string;
+  alert?: boolean; good?: boolean;
+}) {
+  const tone = alert ? "#D9552F" : good ? "#0E8C7E" : "#171512";
   return (
-    <div className="rounded-2xl glass-ambient p-4 transition-all duration-300 hover:-translate-y-0.5">
-      <p className="text-2xl font-extrabold tabular-nums mb-1 number-mono" style={{ color: hex }}>{value}</p>
-      <p className="text-xs font-semibold text-foreground-muted">{label}</p>
-    </div>
+    <Link href={href}
+      className="group rounded-[18px] border border-[#E6DFD2] bg-[#FFFDF8] p-5 flex flex-col hover:border-[#C9C0B0] transition-colors focus-ring">
+      <span className="font-mono text-[30px] leading-none tracking-[-0.02em]" style={{ color: tone }}>{value}</span>
+      <span className="mt-2.5 text-[13.5px] font-semibold leading-snug">{label}</span>
+      <span className="mt-1 text-[12px] text-[#9A9285] leading-snug">{sub}</span>
+      <span className="mt-3 text-[12.5px] font-medium text-[#5B4FE9] group-hover:underline underline-offset-2">{cta} →</span>
+    </Link>
   );
 }
