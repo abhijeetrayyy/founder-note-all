@@ -4,7 +4,9 @@
 *.env
 notes app/lib/config/supabase_config.dart
 
-# Nested git repos (we manage everything from root)
+# Nested git repos (we manage everything from root).
+# founder-web/.git was removed — it shadowed the root repo, so commits made
+# from inside founder-web/ silently landed there instead and looked successful.
 founder-web/.git/
 
 # Web
