@@ -7,7 +7,7 @@ import { toggleTask, saveEnergyLevel } from "@/lib/actions";
 import { useToast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 import { InlineCapture } from "@/components/inline-capture";
-import { EMPTY_PRESSURE, capacityFit, draftNextMove, decayTone, loopAge, type Pressure } from "@/lib/loops";
+import { EMPTY_PRESSURE, DEFAULT_CAPACITY, capacityFit, draftNextMove, decayTone, loopAge, type Pressure, type CapacityShape } from "@/lib/loops";
 import { energyLabel, type Task, type Note, type Goal, type Habit, type HabitLog, type DailyPlan } from "@/lib/supabase/types";
 
 /**
@@ -20,19 +20,20 @@ import { energyLabel, type Task, type Note, type Goal, type Habit, type HabitLog
  */
 export function TodayClient({
   energy, plan, mits, restTasks, habits, habitLogs, notes: _notes, goals: _goals,
-  name: _name, summary, pressure = EMPTY_PRESSURE, antiList = [],
+  name: _name, summary, pressure = EMPTY_PRESSURE, antiList = [], capacity: limit,
 }: {
   name: string | null; energy: number; plan: DailyPlan | null;
   mits: Task[]; restTasks: Task[]; habits: Habit[]; habitLogs: HabitLog[]; goals: Goal[]; notes: Note[];
   summary: { inbox_count: number; due_today_count: number; completed_today_count: number; habits_done_today: number };
-  pressure?: Pressure; antiList?: Task[];
+  pressure?: Pressure; antiList?: Task[]; capacity?: CapacityShape;
 }) {
   const activeMits = mits.filter((t) => !t.completed);
   const openRest = restTasks.filter((t) => !t.completed);
   const one = activeMits[0] ?? openRest[0] ?? null;
   const dayTasks = [...mits, ...restTasks];
   const doneCount = dayTasks.filter((t) => t.completed).length;
-  const capacity = capacityFit(dayTasks);
+  // Uses the founder's tuned numbers when they have set them.
+  const capacity = capacityFit(dayTasks, limit ?? { ...DEFAULT_CAPACITY });
   const rotting = [...mits, ...restTasks].filter((t) => decayTone(t) !== "fresh");
 
   return (
@@ -45,6 +46,8 @@ export function TodayClient({
           <CapacityCard fit={capacity} />
 
           {rotting.length > 0 && <RottingCard loops={rotting} />}
+
+          <UnblockPrompt count={pressure.blocked_count} />
 
           <div className="rounded-[18px] border border-[#E6DFD2] bg-[#FFFDF8] overflow-hidden">
             <div className="px-5 py-4 border-b border-[#EFE9DD] flex items-center justify-between">
@@ -146,6 +149,35 @@ function NoPlanCard() {
         Plan the day · 60s
       </Link>
     </section>
+  );
+}
+
+/* ── Unblock ──
+   The daily batch has to arrive, not be discovered. It appears in the
+   afternoon, when deep work is over and admin is possible — thirty seconds
+   that moves several loops into someone else's court. */
+function UnblockPrompt({ count }: { count: number }) {
+  const [show, setShow] = React.useState(false);
+  React.useEffect(() => {
+    // Decided after mount: the server's clock is in a different timezone.
+    setShow(count > 0 && new Date().getHours() >= 14);
+  }, [count]);
+
+  if (!show) return null;
+  return (
+    <Link href="/unblock"
+      className="group rounded-[18px] border border-[#E6DFD2] bg-[#FFFDF8] p-[22px] flex items-center gap-4 hover:border-[#C9C0B0] transition-colors focus-ring">
+      <div className="flex-1">
+        <h3 className="text-[14.5px] font-semibold">
+          You are waiting on {count} {count === 1 ? "person" : "people"}
+        </h3>
+        <p className="mt-1.5 text-[13.5px] text-[#8A8378] leading-[1.5]">
+          Thirty seconds to move {count === 1 ? "it" : "them all"} into someone else&apos;s court.
+          The drafts are already written.
+        </p>
+      </div>
+      <span className="text-[#C4BCAC] group-hover:text-[#5B4FE9] transition-colors">→</span>
+    </Link>
   );
 }
 

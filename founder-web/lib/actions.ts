@@ -433,6 +433,74 @@ export async function replanDay(keepIds: string[], pushIds: string[]) {
   return { success: true };
 }
 
+/**
+ * Turn a loop into a decision, or back into a task.
+ *
+ * A decision is not doable in a focus block, so it survives every triage pass
+ * and rots longest — the longest-lived item in most founders' lists is one.
+ * Marking it changes the question the app asks: not "do it now" but "when will
+ * you know enough, and what would settle it?"
+ */
+export async function setLoopKind(
+  id: string,
+  kind: 0 | 1,
+  opts?: { decideBy?: string | null; unlock?: string },
+) {
+  const supabase = await createClient();
+  const updates: Record<string, unknown> = { kind, updated_at: new Date().toISOString() };
+  if (kind === 1) {
+    if (opts?.decideBy !== undefined) updates.decide_by = opts.decideBy || null;
+    if (opts?.unlock !== undefined) updates.decision_unlock = opts.unlock.trim();
+  } else {
+    // Reverting to a task clears the decision-only fields rather than leaving
+    // orphaned values that would reappear if it were ever flipped back.
+    updates.decide_by = null;
+    updates.decision_unlock = "";
+  }
+  const { error } = await supabase.from("tasks").update(updates).eq("id", id);
+  if (error) return { error: error.message };
+  revalidateLoops();
+  return { success: true };
+}
+
+/**
+ * Kill a goal, and everything that only existed to serve it.
+ *
+ * A drift warning that only warns is a nag. Deleting a goal on its own left its
+ * projects and loops behind, so pruning the commitment did not actually reduce
+ * anything — the work just carried on with nothing to justify itself against.
+ */
+export async function killGoal(goalId: string, reason: string = "goal dropped") {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  const now = new Date().toISOString();
+
+  // Projects named after the goal are the only link we have — there is no
+  // goal_id on projects — so the cascade is scoped to loops tagged with it.
+  const { data: loops } = await supabase
+    .from("tasks")
+    .select("id")
+    .eq("completed", false)
+    .is("released_at", null)
+    .ilike("description", `%goal:${goalId}%`);
+
+  const ids = (loops ?? []).map((l) => (l as { id: string }).id);
+  if (ids.length) {
+    await supabase.from("tasks")
+      .update({ released_at: now, release_reason: reason, updated_at: now })
+      .in("id", ids);
+  }
+
+  const { error } = await supabase.from("goals").update({ archived: true }).eq("id", goalId);
+  if (error) return { error: error.message };
+
+  revalidatePath("/goals");
+  revalidateLoops();
+  return { success: true, released: ids.length };
+}
+
 /** Soft drop with a way back. */
 export async function releaseLoop(id: string, reason: string = "") {
   const supabase = await createClient();
@@ -677,9 +745,75 @@ export async function toggleHabit(habitId: string, date: string = todayKey()) {
     });
     if (error) return { error: error.message };
   }
+  await refreshHabitStreak(habitId);
   revalidatePath("/habits");
   revalidatePath("/today");
   return { success: true };
+}
+
+/**
+ * Recompute a habit's streak into the habit_streaks cache.
+ *
+ * The table has existed since migration 00002 and nothing had ever written to
+ * it, while every habits page load pulled 60 days of logs per habit and
+ * recomputed. Best streak in particular could not survive a page load.
+ *
+ * Failures are swallowed: a streak is a nicety, and it must never be the reason
+ * ticking off a habit reports an error.
+ */
+async function refreshHabitStreak(habitId: string) {
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from("habit_logs")
+      .select("log_date")
+      .eq("habit_id", habitId)
+      .eq("done", true)
+      .order("log_date", { ascending: false })
+      .limit(400);
+
+    const dates = new Set((data ?? []).map((l) => (l as { log_date: string }).log_date));
+    if (dates.size === 0) {
+      await supabase.from("habit_streaks").upsert(
+        { habit_id: habitId, current_streak: 0, best_streak: 0, last_log_date: null, updated_at: new Date().toISOString() },
+        { onConflict: "habit_id" },
+      );
+      return;
+    }
+
+    const key = (d: Date) => d.toISOString().slice(0, 10);
+    const day = 86_400_000;
+
+    // Current streak counts back from today, but tolerates today not being
+    // ticked yet — a streak should not read as broken at 9am.
+    let current = 0;
+    const start = new Date();
+    if (!dates.has(key(start))) start.setTime(start.getTime() - day);
+    for (let d = new Date(start); dates.has(key(d)); d.setTime(d.getTime() - day)) current++;
+
+    const sorted = [...dates].sort();
+    let best = 0, run = 0;
+    let prev: number | null = null;
+    for (const s of sorted) {
+      const t = new Date(s).getTime();
+      run = prev !== null && Math.round((t - prev) / day) === 1 ? run + 1 : 1;
+      best = Math.max(best, run);
+      prev = t;
+    }
+
+    await supabase.from("habit_streaks").upsert(
+      {
+        habit_id: habitId,
+        current_streak: current,
+        best_streak: Math.max(best, current),
+        last_log_date: sorted[sorted.length - 1],
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "habit_id" },
+    );
+  } catch {
+    // Non-fatal by design.
+  }
 }
 
 export async function createJournalEntry(formData: FormData) {
@@ -863,6 +997,44 @@ export async function updateProfile(formData: FormData) {
     .eq("id", user.id);
   if (error) return { error: error.message };
   revalidatePath("/settings");
+  return { success: true };
+}
+
+/**
+ * Save tuning preferences into users_profile.preferences.
+ *
+ * Capacity in particular: the 3/4/8 default is a guess the app made on day one,
+ * and until now the founder had no way to correct it from their own experience.
+ */
+export async function savePreferences(formData: FormData) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  const num = (k: string, fallback: number) => {
+    const n = Number(formData.get(k));
+    return Number.isFinite(n) && n >= 0 && n <= 24 ? Math.round(n) : fallback;
+  };
+  const time = (k: string, fallback: string) => {
+    const v = String(formData.get(k) ?? "");
+    return /^\d{2}:\d{2}$/.test(v) ? v : fallback;
+  };
+
+  const prefs = {
+    capacity: { deep: num("deep", 3), medium: num("medium", 4), admin: num("admin", 8) },
+    planAt: time("planAt", "09:00"),
+    shutdownAt: time("shutdownAt", "19:00"),
+  };
+
+  const { error } = await supabase
+    .from("users_profile")
+    .update({ preferences: prefs, updated_at: new Date().toISOString() })
+    .eq("id", user.id);
+  if (error) return { error: error.message };
+
+  revalidatePath("/settings");
+  revalidatePath("/today");
+  revalidatePath("/plan");
   return { success: true };
 }
 

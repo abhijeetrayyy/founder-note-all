@@ -174,6 +174,45 @@ export const DEFAULT_CAPACITY = { deep: 3, medium: 4, admin: 8 } as const;
 
 export type CapacityShape = { deep: number; medium: number; admin: number };
 
+export interface Prefs {
+  capacity: CapacityShape;
+  planAt: string;
+  shutdownAt: string;
+}
+
+export const DEFAULT_PREFS: Prefs = {
+  capacity: { ...DEFAULT_CAPACITY },
+  planAt: "09:00",
+  shutdownAt: "19:00",
+};
+
+/**
+ * Read preferences out of the profile's jsonb blob, clamping anything absurd.
+ *
+ * Capacity was previously a constant the founder could not touch, which made
+ * the app's most confident moment — telling you the day is full — also the one
+ * most likely to be wrong.
+ */
+export function readPrefs(raw: unknown): Prefs {
+  const p = (raw ?? {}) as Partial<Prefs> & { capacity?: Partial<CapacityShape> };
+  const clamp = (v: unknown, fallback: number) => {
+    const n = Number(v);
+    return Number.isFinite(n) && n >= 0 && n <= 24 ? Math.round(n) : fallback;
+  };
+  const time = (v: unknown, fallback: string) =>
+    typeof v === "string" && /^\d{2}:\d{2}$/.test(v) ? v : fallback;
+
+  return {
+    capacity: {
+      deep: clamp(p.capacity?.deep, DEFAULT_CAPACITY.deep),
+      medium: clamp(p.capacity?.medium, DEFAULT_CAPACITY.medium),
+      admin: clamp(p.capacity?.admin, DEFAULT_CAPACITY.admin),
+    },
+    planAt: time(p.planAt, DEFAULT_PREFS.planAt),
+    shutdownAt: time(p.shutdownAt, DEFAULT_PREFS.shutdownAt),
+  };
+}
+
 export interface CapacityFit {
   used: CapacityShape;
   limit: CapacityShape;

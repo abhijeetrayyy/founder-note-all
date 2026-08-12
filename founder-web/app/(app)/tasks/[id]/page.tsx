@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { TaskActions } from "./task-actions";
 import { TaskBreakdown } from "@/components/task-breakdown";
 import { OwedControl } from "@/components/owed-control";
+import { DecisionControl } from "@/components/decision-control";
 import { priorityLabel, energyLabel, recurrenceLabel } from "@/lib/supabase/types";
 
 export default async function TaskDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -18,7 +19,7 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-5">
       <div className="flex items-center justify-between">
-        <Link href="/tasks" className="text-sm font-semibold text-foreground-muted hover:text-foreground transition-colors">← Tasks</Link>
+        <Link href="/loops" className="text-sm font-semibold text-foreground-muted hover:text-foreground transition-colors">← Loops</Link>
         <TaskActions taskId={task.id} completed={task.completed} />
       </div>
 
@@ -64,6 +65,8 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
       {!task.completed && <TaskBreakdown task={task} />}
 
       {!task.completed && <OwedControl task={task} />}
+
+      {!task.completed && <DecisionControl task={task} />}
 
       {!task.completed && (
         <Link

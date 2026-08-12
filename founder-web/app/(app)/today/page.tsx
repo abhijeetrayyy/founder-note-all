@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getProfile, getTasksDueToday, getHabits, getHabitLogsForDate, getEnergyLog, getNotes, getGoals, getTodaySummary, getDailyPlan, getPressure, getAntiList } from "@/lib/data";
 import { todayKey } from "@/lib/utils";
+import { readPrefs } from "@/lib/loops";
 import { TodayClient } from "./today-client";
 import type { Task, Note, Goal, Habit, HabitLog, DailyPlan, EnergyLog, UserProfile } from "@/lib/supabase/types";
 
@@ -39,6 +40,7 @@ export default async function TodayPage() {
       summary={summary}
       pressure={pressure}
       antiList={antiList}
+      capacity={readPrefs(profile?.preferences).capacity}
     />
   );
 }

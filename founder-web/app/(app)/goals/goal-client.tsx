@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
-import { updateGoalProgress, createGoalMilestone, toggleGoalMilestone, deleteGoal } from "@/lib/actions";
+import { updateGoalProgress, createGoalMilestone, toggleGoalMilestone, killGoal } from "@/lib/actions";
 import { useToast } from "@/components/ui/toast";
 import { Meter } from "@/components/ui/card";
 import { cn, todayKey } from "@/lib/utils";
@@ -48,17 +48,42 @@ export function GoalClient({ goal, milestones }: { goal: Goal; milestones: GoalM
     else router.refresh();
   }
 
+  // Killing a goal archives it and releases the loops that only existed to
+  // serve it. Deleting the goal alone left the work behind with nothing left to
+  // justify itself against, so the pruning reduced nothing.
   async function onDelete() {
-    if (!confirm("Delete this goal and all its milestones?")) return;
-    const result = await deleteGoal(goal.id);
-    if (result.error) toast.show(result.error, "error");
-    else router.refresh();
+    const result = await killGoal(goal.id, "goal dropped");
+    if (result.error) { toast.show(result.error, "error"); return; }
+    toast.show(
+      result.released ? `Goal dropped · ${result.released} loops released` : "Goal dropped",
+      "success",
+    );
+    router.refresh();
   }
+
+  // Drift: nothing has moved this in a while. A warning that only warns is a
+  // nag, so it comes with the question and the exit rather than a red dot.
+  const idleDays = Math.floor((Date.now() - new Date(goal.updated_at).getTime()) / 86_400_000);
+  const drifting = idleDays >= 10 && progress < 100;
 
   const ringColor = progress >= 75 ? "stroke-state-done" : progress >= 40 ? "stroke-accent" : "stroke-state-attention";
 
   return (
     <div className="p-4 rounded-card glass-ambient">
+      {drifting && (
+        <div className="mb-3 -mt-1 flex items-start gap-2.5 p-3 rounded-xl bg-state-attention-surface border border-state-attention/30">
+          <span aria-hidden="true" className="mt-1.5 w-1.5 h-1.5 rounded-full bg-state-attention flex-none" />
+          <div className="flex-1 min-w-0">
+            <p className="text-[13px] font-semibold text-foreground">
+              Nothing has moved this in {idleDays} days.
+            </p>
+            <p className="mt-0.5 text-[12.5px] text-foreground-muted">
+              Is it dead, or is it the only thing that matters? Both are fine answers — leaving it
+              undecided is the one that costs you.
+            </p>
+          </div>
+        </div>
+      )}
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 flex-1 min-w-0">
           <Meter value={progress / 100} size={44} strokeWidth={4} className={ringColor}>

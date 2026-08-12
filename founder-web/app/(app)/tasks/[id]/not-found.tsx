@@ -15,7 +15,7 @@ export default function TaskNotFound() {
         <p className="text-sm text-foreground-muted">
           This task doesn&apos;t exist or was deleted.
         </p>
-        <Link href="/tasks" className="inline-block pt-2">
+        <Link href="/loops" className="inline-block pt-2">
           <Button className="h-11 px-6">Go to Tasks</Button>
         </Link>
       </Card>

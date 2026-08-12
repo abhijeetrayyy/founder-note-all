@@ -4,6 +4,7 @@ import { getNote, getProjects, getNoteTags } from "@/lib/data";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { NoteActions } from "./note-actions";
+import { ExtractLoop } from "@/components/extract-loop";
 
 export default async function NoteDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -16,6 +17,7 @@ export default async function NoteDetailPage({ params }: { params: Promise<{ id:
       <div className="flex items-center justify-between">
         <Link href="/notes" className="text-sm font-semibold text-foreground-muted hover:text-foreground transition-colors">← Notes</Link>
         <NoteActions noteId={note.id} isPinned={note.is_pinned} isArchived={note.is_archived} />
+        <ExtractLoop noteTitle={note.title} />
       </div>
 
       <Card variant="focused" className="p-6 space-y-5">
