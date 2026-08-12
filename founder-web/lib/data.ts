@@ -482,6 +482,50 @@ export const getEnergyTruth = cache(async (): Promise<{
   };
 });
 
+/**
+ * Momentum — the quiet evidence that this is working.
+ *
+ * Deliberately not a streak in the gamified sense: no fire icons, no "don't
+ * break the chain", and a missed day does not zero anything. It answers one
+ * question a founder actually asks — has this been doing anything for me? —
+ * and the answer survives a bad week.
+ */
+export const getMomentum = cache(async () => {
+  const supabase = await createClient();
+  const since = new Date(Date.now() - 30 * 86_400_000).toISOString();
+
+  const { data, error } = await supabase
+    .from("tasks")
+    .select("completed_at, created_at")
+    .eq("completed", true)
+    .is("released_at", null)
+    .gte("completed_at", since)
+    .limit(500);
+  if (error || !data) return { closingDays: 0, run: 0, last7: 0, oldestClosed: 0 };
+
+  const rows = data as { completed_at: string | null; created_at: string }[];
+  const days = new Set(rows.filter((r) => r.completed_at).map((r) => r.completed_at!.slice(0, 10)));
+
+  // Consecutive days ending today, tolerating today not having happened yet —
+  // a run should not read as broken at 9am.
+  const key = (d: Date) => d.toISOString().slice(0, 10);
+  const cursor = new Date();
+  if (!days.has(key(cursor))) cursor.setTime(cursor.getTime() - 86_400_000);
+  let run = 0;
+  while (days.has(key(cursor))) { run++; cursor.setTime(cursor.getTime() - 86_400_000); }
+
+  const weekAgo = Date.now() - 7 * 86_400_000;
+  const last7 = rows.filter((r) => r.completed_at && new Date(r.completed_at).getTime() >= weekAgo).length;
+
+  // The single most satisfying number in the app: the age of the oldest thing
+  // you managed to finish. That is the one that was actually weighing.
+  const oldestClosed = Math.max(0, ...rows
+    .filter((r) => r.completed_at && new Date(r.completed_at).getTime() >= weekAgo)
+    .map((r) => Math.floor((new Date(r.completed_at!).getTime() - new Date(r.created_at).getTime()) / 86_400_000)));
+
+  return { closingDays: days.size, run, last7, oldestClosed };
+});
+
 /** Loops closed in the last n days, split by whether they had been open a while. */
 export const getClosureEvidence = cache(async (days = 30) => {
   const supabase = await createClient();

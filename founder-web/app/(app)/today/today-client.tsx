@@ -21,11 +21,13 @@ import { energyLabel, type Task, type Note, type Goal, type Habit, type HabitLog
 export function TodayClient({
   energy, plan, mits, restTasks, habits, habitLogs, notes: _notes, goals: _goals,
   name: _name, summary, pressure = EMPTY_PRESSURE, antiList = [], capacity: limit,
+  momentum = { run: 0, last7: 0, oldestClosed: 0 },
 }: {
   name: string | null; energy: number; plan: DailyPlan | null;
   mits: Task[]; restTasks: Task[]; habits: Habit[]; habitLogs: HabitLog[]; goals: Goal[]; notes: Note[];
   summary: { inbox_count: number; due_today_count: number; completed_today_count: number; habits_done_today: number };
   pressure?: Pressure; antiList?: Task[]; capacity?: CapacityShape;
+  momentum?: { run: number; last7: number; oldestClosed: number };
 }) {
   const activeMits = mits.filter((t) => !t.completed);
   const openRest = restTasks.filter((t) => !t.completed);
@@ -38,10 +40,16 @@ export function TodayClient({
 
   return (
     <div className="flex-1 w-full max-w-[1180px] mx-auto px-5 sm:px-7 pt-7 pb-16">
+      <Welcome momentum={momentum} shipped={summary.completed_today_count} />
+
       <div className="grid grid-cols-1 lg:grid-cols-[1.55fr_1fr] gap-[22px] items-start">
         {/* ── Left ── */}
         <div className="flex flex-col gap-5">
-          {one ? <OneThing task={one} energy={energy} /> : <NoPlanCard />}
+          {/* Keyed by task id so the card remounts when the one thing changes.
+              Without it React reuses the instance across the post-completion
+              refresh, and the *next* task inherits done=true — telling the
+              founder something is closed when it is not. */}
+          {one ? <OneThing key={one.id} task={one} energy={energy} /> : <NoPlanCard />}
 
           <CapacityCard fit={capacity} />
 
@@ -82,15 +90,38 @@ function OneThing({ task, energy }: { task: Task; energy: number }) {
   const move = draftNextMove(task);
   const minutes = task.energy_level === 2 ? 50 : task.energy_level === 1 ? 25 : 10;
 
+  // How long this had been carried. The one number worth saying back.
+  const age = Math.floor((Date.now() - new Date(task.created_at).getTime()) / 86_400_000);
+
   async function complete() {
     setDone(true);
     const r = await toggleTask(task.id, true);
     if (r.error) { toast.show(r.error, "error"); setDone(false); return; }
-    setTimeout(() => router.refresh(), 500);
+    // Long enough to read the acknowledgement, short enough not to be theatre.
+    setTimeout(() => router.refresh(), 2400);
+  }
+
+  // The moment. Not a celebration — a receipt for something that was weighing.
+  if (done) {
+    return (
+      <section className="rounded-[20px] bg-[#171512] text-[#FBF8F2] p-[30px] animate-rise">
+        <p className="font-mono text-2xs tracking-[0.14em] uppercase text-[#4FCBB6]">Closed</p>
+        <h2 className="mt-3 font-display text-4xl leading-[1.1] line-through decoration-[#4A453C] decoration-1">
+          {task.title}
+        </h2>
+        <p className="mt-4 text-base text-[#B3AB9C] animate-rise delay-2">
+          {age >= 7
+            ? `You had been carrying that one for ${age} days.`
+            : age >= 1
+            ? `Open since ${age === 1 ? "yesterday" : `${age} days ago`}. Gone now.`
+            : "Straight through. Nothing left of it."}
+        </p>
+      </section>
+    );
   }
 
   return (
-    <section className={cn("rounded-[20px] bg-[#171512] text-[#FBF8F2] p-[30px] relative overflow-hidden transition-opacity", done && "opacity-40")}>
+    <section className="rounded-[20px] bg-[#171512] text-[#FBF8F2] p-[30px] relative overflow-hidden">
       <p className="font-mono text-2xs tracking-[0.14em] uppercase text-[#8B8272]">
         The one thing · matched to {energyLabel(energy as 0 | 1 | 2)} energy
       </p>
@@ -123,9 +154,9 @@ function OneThing({ task, energy }: { task: Task; energy: number }) {
           className="rounded-[11px] bg-[#5B4FE9] hover:bg-[#6E63FF] text-white text-base font-semibold px-[18px] py-3 flex items-center gap-2 transition-colors focus-ring">
           <PlayIcon /> Start focus · {minutes}m
         </Link>
-        <button onClick={complete} disabled={done}
-          className="rounded-[11px] border border-[#3A362F] hover:border-[#8B8272] text-[#E7E1D6] text-base px-4 py-3 transition-colors focus-ring disabled:opacity-50">
-          {done ? "Done" : "Mark done"}
+        <button onClick={complete}
+          className="rounded-[11px] border border-[#3A362F] hover:border-[#8B8272] text-[#E7E1D6] text-base px-4 py-3 transition-colors focus-ring">
+          Mark done
         </button>
         <Link href="/loops"
           className="rounded-[11px] border border-[#3A362F] hover:border-[#8B8272] text-[#E7E1D6] text-base px-4 py-3 transition-colors focus-ring">
@@ -149,6 +180,48 @@ function NoPlanCard() {
         Plan the day · 60s
       </Link>
     </section>
+  );
+}
+
+/* ── The return ──
+   The first line a founder reads when they come back. Its whole job is to make
+   opening the app feel like relief rather than an inbox.
+
+   It never says what you failed to do, and it never nags. When the app has
+   nothing useful to say it says nothing at all — an app that greets you every
+   single time is a needy one. */
+function Welcome({ momentum, shipped }: {
+  momentum: { run: number; last7: number; oldestClosed: number };
+  shipped: number;
+}) {
+  const [line, setLine] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    const KEY = "founderos:lastVisit";
+    const prev = Number(localStorage.getItem(KEY) ?? 0);
+    const hoursAway = prev ? (Date.now() - prev) / 3_600_000 : 0;
+    localStorage.setItem(KEY, String(Date.now()));
+
+    // Only worth saying on a genuine return, not on every navigation.
+    if (prev && hoursAway < 6) return;
+
+    if (shipped > 0) {
+      setLine(`${shipped} closed already today.`);
+    } else if (momentum.oldestClosed >= 7) {
+      setLine(`This week you finished something that had been open ${momentum.oldestClosed} days.`);
+    } else if (momentum.run >= 3) {
+      setLine(`You have closed something on ${momentum.run} days running.`);
+    } else if (momentum.last7 > 0) {
+      setLine(`${momentum.last7} loops closed in the last week.`);
+    }
+  }, [momentum.run, momentum.last7, momentum.oldestClosed, shipped]);
+
+  if (!line) return null;
+
+  return (
+    <p className="mb-5 text-base text-[#6B6459] animate-rise">
+      <span className="text-[#0E8C7E]">●</span> {line}
+    </p>
   );
 }
 
@@ -264,20 +337,31 @@ function TaskRow({ task }: { task: Task }) {
   const tint: Record<number, string> = { 0: "#14B8A6", 1: "#3B82F6", 2: "#5B4FE9" };
   const c = tint[task.energy_level] ?? "#3B82F6";
 
+  // Optimistic: the tick lands the instant it is pressed, and the row settles
+  // out before the refresh. Waiting on a round trip to acknowledge a tap is
+  // what makes an app feel like paperwork.
   async function toggle(e: React.MouseEvent) {
     e.preventDefault();
-    const r = await toggleTask(task.id, !done);
-    if (r.error) { toast.show(r.error, "error"); return; }
-    setDone(!done);
-    setTimeout(() => router.refresh(), 600);
+    const next = !done;
+    setDone(next);
+    const r = await toggleTask(task.id, next);
+    if (r.error) { toast.show(r.error, "error"); setDone(!next); return; }
+    setTimeout(() => router.refresh(), next ? 700 : 300);
   }
 
   return (
-    <Link href={`/tasks/${task.id}`} className="flex items-center gap-[13px] px-5 py-3.5 border-b border-[#F2ECE1] last:border-b-0 hover:bg-[#FBF8F2] transition-colors">
+    <Link href={`/tasks/${task.id}`}
+      className={cn(
+        "flex items-center gap-[13px] px-5 py-3.5 border-b border-[#F2ECE1] last:border-b-0 hover:bg-[#FBF8F2] transition-colors",
+        done && !task.completed && "animate-settle",
+      )}>
       <button onClick={toggle} aria-label={done ? "Mark not done" : "Mark done"}
         className={cn("w-[19px] h-[19px] rounded-md flex-none flex items-center justify-center transition-colors focus-ring",
           done ? "bg-[#5B4FE9] text-white" : "border-[1.5px] border-[#D8D0C0] text-transparent")}>
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5"><path d="M20 6 9 17l-5-5"/></svg>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5"
+          className={done ? "check-draw" : undefined}>
+          <path d="M20 6 9 17l-5-5" />
+        </svg>
       </button>
       <div className="flex-1 min-w-0">
         <p className={cn("text-base", done ? "text-[#A69E90] line-through" : "font-medium")}>{task.title}</p>

@@ -197,15 +197,37 @@ function PressureCard({ pressure }: { pressure: Pressure }) {
   const owed = pressure.owed_count;
   const pct = Math.min(100, needsAnswer * 12);
 
+  // Watching this fall is the reward loop. Without a remembered previous value
+  // the number just silently changes and the founder never sees the thing they
+  // did land — so it is kept across renders and the drop is acknowledged once.
+  const [dropped, setDropped] = React.useState(0);
+  const prev = React.useRef<number | null>(null);
+
+  React.useEffect(() => {
+    if (prev.current !== null && needsAnswer < prev.current) {
+      setDropped(prev.current - needsAnswer);
+      const t = setTimeout(() => setDropped(0), 4000);
+      prev.current = needsAnswer;
+      return () => clearTimeout(t);
+    }
+    prev.current = needsAnswer;
+  }, [needsAnswer]);
+
   return (
     <div className="mx-3.5 mb-3.5 p-3.5 rounded-[13px] bg-[#F1EDE3] border border-[#E6DFD2]">
       <div className="flex items-baseline justify-between gap-2.5">
         <p className="font-mono text-2xs tracking-[0.14em] uppercase text-[#A69E90]">Needs an answer</p>
-        {owed > 0 && <p className="font-mono text-2xs text-[#D9552F]">{owed} owed</p>}
+        {dropped > 0
+          ? <p className="font-mono text-2xs text-[#0E8C7E] animate-relieve">−{dropped}</p>
+          : owed > 0 && <p className="font-mono text-2xs text-[#D9552F]">{owed} owed</p>}
       </div>
-      <p className="mt-1.5 font-mono text-3xl leading-none tracking-[-0.02em] text-[#171512]">{needsAnswer}</p>
+      <p key={needsAnswer}
+        className={cn("mt-1.5 font-mono text-3xl leading-none tracking-[-0.02em]",
+          dropped > 0 ? "text-[#0E8C7E] animate-relieve" : "text-[#171512]")}>
+        {needsAnswer}
+      </p>
       <div className="h-[5px] rounded-full bg-[#E1DACB] mt-[11px] overflow-hidden">
-        <div className="h-[5px] rounded-full bg-[#5B4FE9] transition-all duration-500" style={{ width: `${pct}%` }} />
+        <div className="h-[5px] rounded-full bg-[#5B4FE9] transition-all duration-700 ease-out" style={{ width: `${pct}%` }} />
       </div>
       <p className="mt-[9px] text-2xs leading-[1.45] text-[#8A8378]">
         {needsAnswer === 0

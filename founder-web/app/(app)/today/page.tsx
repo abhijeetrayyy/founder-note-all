@@ -1,12 +1,12 @@
 import Link from "next/link";
-import { getProfile, getTasksDueToday, getHabits, getHabitLogsForDate, getEnergyLog, getNotes, getGoals, getTodaySummary, getDailyPlan, getPressure, getAntiList } from "@/lib/data";
+import { getProfile, getTasksDueToday, getHabits, getHabitLogsForDate, getEnergyLog, getNotes, getGoals, getTodaySummary, getDailyPlan, getPressure, getAntiList, getMomentum } from "@/lib/data";
 import { todayKey } from "@/lib/utils";
 import { readPrefs } from "@/lib/loops";
 import { TodayClient } from "./today-client";
 import type { Task, Note, Goal, Habit, HabitLog, DailyPlan, EnergyLog, UserProfile } from "@/lib/supabase/types";
 
 export default async function TodayPage() {
-  const [profile, tasks, habits, habitLogs, energy, notes, goals, summary, plan, pressure, antiList] = await Promise.all([
+  const [profile, tasks, habits, habitLogs, energy, notes, goals, summary, plan, pressure, antiList, momentum] = await Promise.all([
     getProfile(),
     getTasksDueToday(),
     getHabits(),
@@ -18,6 +18,7 @@ export default async function TodayPage() {
     getDailyPlan(),
     getPressure(),
     getAntiList(),
+    getMomentum(),
   ]);
 
   const mitIds = plan?.mit_task_ids ?? [];
@@ -40,6 +41,7 @@ export default async function TodayPage() {
       summary={summary}
       pressure={pressure}
       antiList={antiList}
+      momentum={momentum}
       capacity={readPrefs(profile?.preferences).capacity}
     />
   );
