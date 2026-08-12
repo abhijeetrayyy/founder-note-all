@@ -1,116 +1,218 @@
 import Link from "next/link";
-import { Card } from "@/components/ui/card";
+import { CaptureDemo } from "@/components/marketing/capture-demo";
 
-const PAINS = [
-  {
-    title: "Too many options, no next step",
-    body: "Your list has forty things on it and every one of them looks equally urgent. So you open Twitter instead.",
-    fix: "FounderOS shows you one task at a time — the right one, not the whole pile.",
-  },
-  {
-    title: "The task is too big to start",
-    body: "\"Launch the new pricing page\" isn't a task, it's a project wearing a trench coat. No wonder you keep skipping it.",
-    fix: "Break anything into a first physical step and a trigger for when you'll do it.",
-  },
-  {
-    title: "Progress doesn't feel real",
-    body: "You did get things done this week. You just have no evidence of it, so it doesn't feel like it counted.",
-    fix: "Streaks, a daily momentum ring, and a weekly review that shows the work you already did.",
-  },
+/**
+ * The landing page, built to `FounderOS Site.dc.html`.
+ *
+ * It argues one thing: completion percentages rise when you add work, so they
+ * can never make a founder feel better. Everything on the page follows from
+ * that, and none of it promises features the app does not have — the previous
+ * version still sold "Right Now", a momentum ring and streaks, all of which
+ * were removed from the product for exactly the reason this page now states.
+ */
+
+const MECHANICS = [
+  { title: "Loops expire", body: "Seven days turns amber. Fourteen forces one of four answers: do it, schedule it, hand it off, or drop it. Nothing sits there quietly generating guilt." },
+  { title: "Capacity you can correct", body: "A day holds so much deep work and no more. The planner warns you past it and says what to cut — then learns your real number from what you actually finish." },
+  { title: "The anti-list", body: "A visible list of what you are not doing this week, with reasons. Naming it is what stops it following you around." },
+  { title: "Shutdown ritual", body: "Under a minute that ends the day: what shipped, what is parked with its next move, tomorrow's one thing. Nobody else builds the screen that lets you stop." },
+  { title: "First-move breakdown", body: "Every loop carries a two-minute first move. “Launch the homepage” never appears as a bare checkbox." },
+  { title: "Who is waiting on you", body: "Loops carry people, in both directions. One screen shows everything sitting in someone else's court, with the nudge already drafted." },
+  { title: "Energy truth", body: "Sessions log how a block actually felt against what you planned, then tell you the real shape of your week. Mondays are not deep-work days for most founders." },
+  { title: "Evidence, not vibes", body: "Friday assembles what you shipped from real completions. The antidote to “I did nothing this week.”" },
+  { title: "Letting go is free", body: "Anything dropped is recoverable for thirty days, and Friday can release everything older than three weeks in one click. Lists only shrink when deleting stops feeling like failing." },
 ];
 
-const FEATURES = [
-  { title: "Right Now", desc: "One recommended task, matched to your energy and priorities — with a reason attached." },
-  { title: "Task breakdown", desc: "Turn \"too big to start\" into a two-minute first step and an if-then trigger." },
-  { title: "Focus sessions", desc: "Pomodoro, deep work, or a quick sprint — timed, logged, and tied to the task you picked." },
-  { title: "Daily & weekly rituals", desc: "A short morning plan, an evening reflection, and a weekly review that closes the loop." },
-  { title: "Momentum & streaks", desc: "Habits, energy, and completions turn into a visible trend instead of disappearing into a log." },
-  { title: "Everything else you need", desc: "Notes, projects, goals, and an inbox that doesn't just pile up." },
+const DEAL = [
+  { title: "You get everything, free", body: "No tier games. If it is built, you have it — including whatever ships next month." },
+  { title: "I get your honest reaction", body: "What you actually opened, what you ignored, and the thing that made you close the tab. Bluntly." },
+  { title: "Price comes later, with warning", body: "When there is a price, beta users hear it first and keep a permanent discount. Nothing switches off overnight." },
+  { title: "Your data stays yours", body: "One-click export, any time, whether you stay or not." },
 ];
 
-export default function HomePage() {
+export default function LandingPage() {
   return (
-    <main className="min-h-screen flex flex-col">
-      <header className="w-full sticky top-0 z-40 glass-surface border-b border-base-border">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2.5 font-bold text-lg text-foreground font-display">
-            <span className="w-8 h-8 rounded-xl bg-gradient-to-br from-accent-600 to-accent-700 text-white flex items-center justify-center text-sm font-extrabold">F</span>
-            Founder<span className="text-gradient">OS</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Link href="/login" className="h-10 px-4 rounded-xl text-sm font-semibold text-foreground-muted hover:text-foreground hover:bg-base-raised transition-colors flex items-center focus-ring">
-              Log in
-            </Link>
-            <Link href="/signup" className="h-10 px-4 rounded-xl text-sm font-semibold text-white bg-gradient-to-br from-accent-600 to-accent-700 hover:shadow-glow-strong transition-all flex items-center focus-ring">
-              Get started
-            </Link>
-          </div>
-        </div>
+    <main className="bg-paper text-foreground">
+      {/* ── Nav ── */}
+      <header className="max-w-[1160px] mx-auto px-7 h-[72px] flex items-center justify-between">
+        <span className="font-display text-2xl tracking-[-0.015em]">
+          Founder<span className="italic text-[#5B4FE9]">OS</span>
+        </span>
+        <nav className="flex items-center gap-2">
+          <Link href="/login" className="px-4 py-2 rounded-xl text-sm text-foreground hover:bg-base-overlay transition-colors focus-ring">
+            Sign in
+          </Link>
+          <Link href="/signup" className="px-4 py-2 rounded-xl text-sm font-medium bg-[#5B4FE9] text-white hover:bg-[#4A3EDA] transition-colors focus-ring">
+            Join the beta
+          </Link>
+        </nav>
       </header>
 
-      <section className="px-6 pt-20 pb-16 sm:pt-28 sm:pb-24 text-center">
-        <span className="inline-flex items-center h-7 px-3 rounded-full text-2xs font-bold tracking-wide bg-accent-muted text-accent border border-accent-muted-strong mb-6">
-          BUILT FOR FOUNDERS WHO GET STUCK
-        </span>
-        <h1 className="text-4xl sm:text-hero max-w-3xl mx-auto leading-[1.08] text-foreground font-display">
-          The to-do list isn&apos;t the problem.
-          <br />
-          <span className="text-gradient">Choosing from it is.</span>
-        </h1>
-        <p className="mt-6 text-lg text-foreground-muted max-w-xl mx-auto leading-relaxed">
-          FounderOS picks the one thing you should do right now, helps you break it down when it feels
-          too big, and shows you the momentum you&apos;re already building.
+      {/* ── Hero ── */}
+      <section className="max-w-[1160px] mx-auto px-7 pt-16 sm:pt-20 relative">
+        <div className="max-w-[880px]">
+          <div className="inline-flex items-center gap-2.5 px-3 py-1.5 border border-[#DCD5C7] rounded-full bg-[#FFFDF8] font-mono text-2xs tracking-[0.12em] uppercase text-[#6B6459]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#14B8A6]" />
+            The execution system for founders
+          </div>
+
+          <h1 className="font-display font-normal mt-6 text-[clamp(44px,8vw,88px)] leading-[0.96] tracking-[-0.025em] text-balance">
+            Your list is not the problem.
+            <br />
+            <span className="italic text-[#5B4FE9]">It never shrinking</span> is.
+          </h1>
+
+          <p className="mt-6 text-lg sm:text-xl leading-[1.5] text-[#57514A] max-w-[610px]">
+            Every other tool measures how much you completed — a number that goes up when you add
+            more work, so it can never make you feel better. FounderOS measures the{" "}
+            <strong className="font-semibold text-[#171512]">pressure in your head</strong>, and
+            every screen is built to bring it down.
+          </p>
+
+          <div className="flex flex-wrap items-center gap-3 mt-8">
+            <Link href="/signup"
+              className="inline-flex items-center gap-2 bg-[#5B4FE9] hover:bg-[#4A3EDA] text-white text-lg font-medium px-6 py-3.5 rounded-[13px] transition-colors focus-ring"
+              style={{ boxShadow: "0 10px 24px -12px rgba(91,79,233,0.85)" }}>
+              Join the free beta
+              <span aria-hidden="true">→</span>
+            </Link>
+            <Link href="/login"
+              className="inline-flex items-center text-lg text-[#171512] px-5 py-3.5 rounded-[13px] border border-[#DCD5C7] bg-[#FFFDF8] hover:border-[#171512] transition-colors focus-ring">
+              I already have an account
+            </Link>
+            <span className="font-mono text-xs text-[#605A50] sm:ml-1.5">
+              free while we build · no card, no trial clock
+            </span>
+          </div>
+        </div>
+
+        {/* Product frame. Rather than an empty screenshot slot, this is the real
+            "one thing" card the app renders — the most honest thing to show. */}
+        <div className="mt-16 relative">
+          <div className="rounded-[20px] border border-[#E0D9CB] bg-[#FFFDF8] overflow-hidden"
+            style={{ boxShadow: "0 40px 80px -50px rgba(23,21,18,0.45)" }}>
+            <div className="flex items-center gap-2 px-4 py-3 border-b border-[#EDE7DB] bg-[#FBF8F2]">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#E7E0D2]" />
+              <span className="w-2.5 h-2.5 rounded-full bg-[#E7E0D2]" />
+              <span className="w-2.5 h-2.5 rounded-full bg-[#E7E0D2]" />
+              <span className="ml-3 font-mono text-2xs text-[#6B6459]">founderos.app/today</span>
+            </div>
+
+            <div className="bg-[#F3EFE6] p-6 sm:p-10">
+              <div className="rounded-[20px] bg-[#171512] text-[#FBF8F2] p-6 sm:p-8 max-w-[620px]">
+                <p className="font-mono text-2xs tracking-[0.14em] uppercase text-[#9C9384]">
+                  The one thing · matched to Deep energy
+                </p>
+                <h2 className="font-display text-[clamp(26px,4vw,36px)] leading-[1.1] tracking-[-0.015em] mt-3.5">
+                  Rewrite the pricing page hero copy
+                </h2>
+                <div className="mt-5 p-4 rounded-[13px] bg-[#201D18] border border-[#302C25]">
+                  <p className="font-mono text-2xs tracking-[0.12em] uppercase text-[#9C9384]">First micro-step</p>
+                  <p className="mt-2 text-base text-[#E7E1D6]">
+                    Open the doc and write three bad headlines. Bad ones. Two minutes.
+                  </p>
+                </div>
+                <div className="flex gap-2.5 mt-5 flex-wrap">
+                  <span className="rounded-[11px] bg-[#5B4FE9] text-white text-base font-semibold px-[18px] py-3">
+                    Start focus · 50m
+                  </span>
+                  <span className="rounded-[11px] border border-[#3A362F] text-[#E7E1D6] text-base px-4 py-3">
+                    Not now, show another
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <CaptureDemo />
+        </div>
+      </section>
+
+      {/* ── The problem ── */}
+      <section className="max-w-[1160px] mx-auto px-7 pt-40 sm:pt-48">
+        <p className="font-mono text-2xs tracking-[0.14em] uppercase text-[#6B6459]">The problem</p>
+        <h2 className="font-display font-normal mt-4 text-[clamp(32px,5vw,52px)] leading-[1.05] tracking-[-0.02em] max-w-[18ch] text-balance">
+          A founder does not have a <span className="italic text-[#5B4FE9]">task</span> problem.
+        </h2>
+        <p className="mt-5 text-lg leading-[1.55] text-[#57514A] max-w-[620px]">
+          They have an open-loop problem. A worry, a decision they keep deferring, a person they owe
+          a reply, a number they have not looked at. Tasks are only the loops that already got named.
         </p>
-        <div className="mt-9 flex flex-col sm:flex-row gap-3 justify-center">
-          <Link href="/signup" className="h-12 px-7 rounded-xl text-base font-bold text-white bg-gradient-to-br from-accent-600 to-accent-700 shadow-md hover:shadow-glow-strong hover:-translate-y-px transition-all flex items-center justify-center focus-ring">
-            Start for free
-          </Link>
-          <Link href="/login" className="h-12 px-7 rounded-xl text-base font-semibold text-foreground border border-base-border hover:bg-base-raised transition-colors flex items-center justify-center focus-ring">
-            I already have an account
-          </Link>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-12">
+          {[
+            { n: "01", t: "Wrong unit", b: "The unit is a loop, not a task. Most of what weighs on you was never written down as a checkbox." },
+            { n: "02", t: "Wrong direction", b: "Completion percentage rewards adding small tasks. It rises when you take on more, which is the opposite of relief." },
+            { n: "03", t: "Wrong assumption", b: "A day has capacity, not slots. Burnout is an overcommit bug, so it gets fixed at the input." },
+          ].map((c) => (
+            <div key={c.n} className="rounded-[18px] border border-[#E6DFD2] bg-[#FFFDF8] p-6">
+              <p className="font-mono text-2xs text-[#5B4FE9]">{c.n}</p>
+              <h3 className="mt-3 text-lg font-semibold">{c.t}</h3>
+              <p className="mt-2 text-base leading-[1.55] text-[#605A50]">{c.b}</p>
+            </div>
+          ))}
         </div>
       </section>
 
-      <section className="px-6 pb-20">
-        <div className="max-w-5xl mx-auto">
-          <p className="text-center text-2xs uppercase tracking-[0.14em] font-bold text-foreground-subtle mb-6">Why founders stall — and what actually helps</p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {PAINS.map((p) => (
-              <Card key={p.title} variant="ambient" className="p-6 text-left">
-                <h3 className="font-bold text-base text-foreground leading-snug">{p.title}</h3>
-                <p className="mt-2.5 text-sm text-foreground-muted leading-relaxed">{p.body}</p>
-                <p className="mt-4 pt-4 border-t border-base-border text-sm font-semibold text-accent leading-relaxed">{p.fix}</p>
-              </Card>
+      {/* ── Mechanics ── */}
+      <section className="max-w-[1160px] mx-auto px-7 pt-40">
+        <p className="font-mono text-2xs tracking-[0.14em] uppercase text-[#6B6459]">What is actually in it</p>
+        <h2 className="font-display font-normal mt-4 text-[clamp(32px,5vw,52px)] leading-[1.05] tracking-[-0.02em] max-w-[20ch] text-balance">
+          Strip these out and it is a <span className="italic text-[#5B4FE9]">to-do app</span>.
+        </h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-12">
+          {MECHANICS.map((m) => (
+            <div key={m.title} className="rounded-[18px] border border-[#E6DFD2] bg-[#FFFDF8] p-6">
+              <h3 className="text-lg font-semibold">{m.title}</h3>
+              <p className="mt-2 text-base leading-[1.55] text-[#605A50]">{m.body}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Free beta ── */}
+      <section className="max-w-[1160px] mx-auto px-7 pt-40">
+        <div className="rounded-[24px] border border-[#E0D9CB] bg-[#FFFDF8] p-8 sm:p-12">
+          <p className="font-mono text-2xs tracking-[0.14em] uppercase text-[#6B6459]">The deal</p>
+          <h2 className="font-display font-normal mt-4 text-[clamp(30px,4.5vw,46px)] leading-[1.05] tracking-[-0.02em] max-w-[16ch] text-balance">
+            Free while we build. <span className="italic text-[#5B4FE9]">Honestly</span> free.
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-7 mt-10">
+            {DEAL.map((d) => (
+              <div key={d.title}>
+                <h3 className="text-lg font-semibold">{d.title}</h3>
+                <p className="mt-1.5 text-base leading-[1.55] text-[#605A50]">{d.body}</p>
+              </div>
             ))}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3 mt-10">
+            <Link href="/signup"
+              className="inline-flex items-center gap-2 bg-[#5B4FE9] hover:bg-[#4A3EDA] text-white text-lg font-medium px-6 py-3.5 rounded-[13px] transition-colors focus-ring">
+              Join the free beta
+              <span aria-hidden="true">→</span>
+            </Link>
+            <span className="font-mono text-xs text-[#605A50]">web, iOS and Android · synced</span>
           </div>
         </div>
       </section>
 
-      <section className="px-6 pb-24">
-        <div className="max-w-5xl mx-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {FEATURES.map((f) => (
-              <Card key={f.title} variant="ambient" interactive className="p-5">
-                <h3 className="font-bold text-base text-foreground">{f.title}</h3>
-                <p className="mt-2 text-sm text-foreground-muted leading-relaxed">{f.desc}</p>
-              </Card>
-            ))}
+      {/* ── Footer ── */}
+      <footer className="max-w-[1160px] mx-auto px-7 pt-24 pb-16">
+        <div className="pt-8 border-t border-[#E6DFD2] flex flex-wrap items-center justify-between gap-4">
+          <span className="font-display text-lg">
+            Founder<span className="italic text-[#5B4FE9]">OS</span>
+          </span>
+          <p className="text-sm text-[#605A50] max-w-[46ch]">
+            Built to end the day with less in your head than it started.
+          </p>
+          <div className="flex items-center gap-4 text-sm">
+            <Link href="/login" className="text-[#605A50] hover:text-[#171512] transition-colors">Sign in</Link>
+            <Link href="/signup" className="text-[#605A50] hover:text-[#171512] transition-colors">Join the beta</Link>
           </div>
         </div>
-      </section>
-
-      <section className="px-6 pb-24">
-        <Card variant="focused" className="max-w-3xl mx-auto p-10 text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold text-foreground font-display">Pick one thing. Start today.</h2>
-          <p className="mt-3 text-foreground-muted">No credit card, no setup ritual — just tell us what&apos;s on your mind.</p>
-          <Link href="/signup" className="mt-7 inline-flex h-12 px-7 rounded-xl text-base font-bold text-white bg-gradient-to-br from-accent-600 to-accent-700 shadow-md hover:shadow-glow-strong hover:-translate-y-px transition-all items-center justify-center focus-ring">
-            Start for free
-          </Link>
-        </Card>
-      </section>
-
-      <footer className="px-6 py-8 border-t border-base-border text-center text-sm text-foreground-subtle">
-        FounderOS — built for the founder who has forty tabs open and no idea which one to close first.
       </footer>
     </main>
   );

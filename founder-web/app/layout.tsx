@@ -50,7 +50,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {`(() => { const h = new Date().getHours(); const c = document.documentElement.classList; if (h >= 17 && h < 22) c.add('evening'); if (h >= 22 || h < 5) c.add('night'); })()`}
         </Script>
       </head>
-      <body className={`${sans.variable} ${serif.variable} ${mono.variable} font-sans antialiased bg-base text-foreground`}>
+      <body className={`${sans.variable} ${serif.variable} ${mono.variable} font-sans antialiased bg-paper text-foreground`}>
         <ToastProvider>{children}</ToastProvider>
       </body>
     </html>

@@ -126,7 +126,7 @@ export function AppShell({ children, profile, pressure, energy = 1, onQuickAdd }
         <div className="p-3.5 border-t border-[#E6DFD2] flex items-center gap-2.5">
           <UserBadge profile={profile} />
           <form action={signOut} className="flex">
-            <button type="submit" aria-label="Sign out" className="text-[#A69E90] hover:text-[#171512] transition-colors focus-ring rounded">
+            <button type="submit" aria-label="Sign out" className="text-[#6B6459] hover:text-[#171512] transition-colors focus-ring rounded">
               <LogOutIcon className="w-[15px] h-[15px]" />
             </button>
           </form>
@@ -141,8 +141,8 @@ export function AppShell({ children, profile, pressure, energy = 1, onQuickAdd }
             </button>
             <h1 className="font-display text-2xl leading-none truncate">{title}</h1>
             {/* What this screen is for, in one line, always visible. */}
-            {hint && <span className="hidden md:block text-xs text-[#8A8378] truncate">{hint}</span>}
-            {meta && <span className="hidden sm:block font-mono text-2xs text-[#9A9285] truncate">{meta}</span>}
+            {hint && <span className="hidden md:block text-xs text-[#605A50] truncate">{hint}</span>}
+            {meta && <span className="hidden sm:block font-mono text-2xs text-[#6B6459] truncate">{meta}</span>}
           </div>
           <EnergyChip energy={energy} />
         </header>
@@ -157,7 +157,7 @@ export function AppShell({ children, profile, pressure, energy = 1, onQuickAdd }
               <PlusIcon className="w-5 h-5 text-white" />
             </button>
             <MobileLink href="/review" label="Review" icon={ActivityIcon} pathname={pathname} />
-            <button onClick={() => setMenuOpen(true)} className="flex items-center justify-center w-12 h-12 focus-ring rounded-xl text-[#A69E90]" aria-label="More">
+            <button onClick={() => setMenuOpen(true)} className="flex items-center justify-center w-12 h-12 focus-ring rounded-xl text-[#6B6459]" aria-label="More">
               <MenuIcon className="w-5 h-5" />
             </button>
           </div>
@@ -216,7 +216,7 @@ function PressureCard({ pressure }: { pressure: Pressure }) {
   return (
     <div className="mx-3.5 mb-3.5 p-3.5 rounded-[13px] bg-[#F1EDE3] border border-[#E6DFD2]">
       <div className="flex items-baseline justify-between gap-2.5">
-        <p className="font-mono text-2xs tracking-[0.14em] uppercase text-[#A69E90]">Needs an answer</p>
+        <p className="font-mono text-2xs tracking-[0.14em] uppercase text-[#6B6459]">Needs an answer</p>
         {dropped > 0
           ? <p className="font-mono text-2xs text-[#0E8C7E] animate-relieve">−{dropped}</p>
           : owed > 0 && <p className="font-mono text-2xs text-[#D9552F]">{owed} owed</p>}
@@ -229,7 +229,7 @@ function PressureCard({ pressure }: { pressure: Pressure }) {
       <div className="h-[5px] rounded-full bg-[#E1DACB] mt-[11px] overflow-hidden">
         <div className="h-[5px] rounded-full bg-[#5B4FE9] transition-all duration-700 ease-out" style={{ width: `${pct}%` }} />
       </div>
-      <p className="mt-[9px] text-2xs leading-[1.45] text-[#8A8378]">
+      <p className="mt-[9px] text-2xs leading-[1.45] text-[#605A50]">
         {needsAnswer === 0
           ? "Nothing is waiting on you."
           : `${pressure.rotting_count} rotting · ${pressure.aging_count} aging · ${pressure.unclear_count} with no next move`}
@@ -241,7 +241,7 @@ function PressureCard({ pressure }: { pressure: Pressure }) {
 function NavGroup({ group, pathname, onClick }: { group: NavGroupDef; pathname: string; onClick?: () => void }) {
   return (
     <div className="flex flex-col gap-0.5">
-      <p className="mb-[5px] px-2.5 font-mono text-2xs tracking-[0.16em] uppercase text-[#A69E90]">{group.label}</p>
+      <p className="mb-[5px] px-2.5 font-mono text-2xs tracking-[0.16em] uppercase text-[#6B6459]">{group.label}</p>
       {group.items.map((it) => {
         const active = pathname === it.href || pathname.startsWith(`${it.href}/`);
         return (
@@ -253,7 +253,7 @@ function NavGroup({ group, pathname, onClick }: { group: NavGroupDef; pathname: 
             )}>
             <it.icon className="w-[17px] h-[17px] flex-none" />
             <span className="truncate">{it.label}</span>
-            {it.badge && <span className="ml-auto font-mono text-2xs text-[#A69E90]">{it.badge}</span>}
+            {it.badge && <span className="ml-auto font-mono text-2xs text-[#6B6459]">{it.badge}</span>}
           </Link>
         );
       })}
@@ -265,7 +265,7 @@ function MobileLink({ href, label, icon: Icon, pathname }: { href: string; label
   const active = pathname === href || pathname.startsWith(`${href}/`);
   return (
     <Link href={href} aria-label={label}
-      className={cn("flex items-center justify-center w-12 h-12 rounded-xl transition-colors focus-ring", active ? "text-[#5B4FE9]" : "text-[#A69E90]")}>
+      className={cn("flex items-center justify-center w-12 h-12 rounded-xl transition-colors focus-ring", active ? "text-[#5B4FE9]" : "text-[#6B6459]")}>
       <Icon className="w-5 h-5" />
     </Link>
   );
@@ -279,7 +279,7 @@ function UserBadge({ profile }: { profile: UserProfile | null }) {
       <span className="w-8 h-8 rounded-full bg-[#DCD8FC] text-[#4A3EDA] flex items-center justify-center text-sm font-semibold flex-none">{initials}</span>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold truncate">{name}</p>
-        <p className="mt-px text-2xs text-[#8A8378]">Free plan</p>
+        <p className="mt-px text-2xs text-[#605A50]">Free plan</p>
       </div>
     </>
   );

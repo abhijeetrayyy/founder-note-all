@@ -39,7 +39,7 @@ export function DecisionControl({ task }: { task: Task }) {
       <div className="flex items-start justify-between gap-3">
         <div>
           <h3 className="text-base font-semibold">Is this a decision?</h3>
-          <p className="mt-0.5 text-xs text-[#8A8378] leading-[1.5]">
+          <p className="mt-0.5 text-xs text-[#605A50] leading-[1.5]">
             Decisions are not doable in a focus block, so they survive every triage pass.
           </p>
         </div>
@@ -60,7 +60,7 @@ export function DecisionControl({ task }: { task: Task }) {
       {isDecision && (
         <div className="space-y-3 pt-1">
           <label className="block">
-            <span className="font-mono text-2xs tracking-[0.12em] uppercase text-[#A69E90]">
+            <span className="font-mono text-2xs tracking-[0.12em] uppercase text-[#6B6459]">
               When will you know enough?
             </span>
             <input
@@ -72,7 +72,7 @@ export function DecisionControl({ task }: { task: Task }) {
           </label>
 
           <label className="block">
-            <span className="font-mono text-2xs tracking-[0.12em] uppercase text-[#A69E90]">
+            <span className="font-mono text-2xs tracking-[0.12em] uppercase text-[#6B6459]">
               What would make this obvious?
             </span>
             <input

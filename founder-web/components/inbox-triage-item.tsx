@@ -103,7 +103,7 @@ export function InboxTriageItem({ task, focused, onFocus }: {
           {task.title}
         </p>
         {task.description && (
-          <p className="mt-1 text-xs text-[#8A8378] line-clamp-2">{task.description}</p>
+          <p className="mt-1 text-xs text-[#605A50] line-clamp-2">{task.description}</p>
         )}
       </Link>
 

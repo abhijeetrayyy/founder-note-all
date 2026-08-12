@@ -129,7 +129,7 @@ export function FocusTimer({ tasks, initialTaskId = "" }: { tasks: Task[]; initi
           {MODES.map((m) => (
             <button key={m.key} onClick={() => { setMode(m); setSecondsLeft(m.minutes * 60); }}
               className={cn("py-3 px-2 rounded-[11px] border text-xs transition-colors focus-ring",
-                mode.key === m.key ? "border-[#5B4FE9] bg-[#EFECFE] text-[#4A3EDA] font-semibold" : "border-[#E0D9CB] bg-[#FBF8F2] text-[#6B6459] hover:border-[#C9C0B0]")}>
+                mode.key === m.key ? "border-[#5B4FE9] bg-[#EFECFE] text-[#4A3EDA] font-semibold" : "border-[#E0D9CB] bg-[#FBF8F2] text-[#A69E90] hover:border-[#C9C0B0]")}>
               {m.label}
               <span className="block font-mono text-2xs mt-0.5 opacity-70">{m.minutes}m</span>
             </button>
@@ -168,7 +168,7 @@ export function FocusTimer({ tasks, initialTaskId = "" }: { tasks: Task[]; initi
         <h2 className="mt-2 font-display text-3xl leading-[1.1]">
           {Math.max(1, Math.round(elapsed / 60))} minutes on {task ? `“${task.title}”` : "the block"}.
         </h2>
-        <p className="mt-3 text-base text-[#6B6459]">
+        <p className="mt-3 text-base text-[#A69E90]">
           How did it actually go? This is the only way the app learns your real shape.
         </p>
 
@@ -185,7 +185,7 @@ export function FocusTimer({ tasks, initialTaskId = "" }: { tasks: Task[]; initi
                 setSecondsLeft(mode.minutes * 60);
                 setIntention("");
               }}
-              className="text-left px-4 py-3 rounded-xl border border-[#E0D9CB] bg-[#FBF8F2] text-sm text-[#6B6459] hover:border-[#5B4FE9] hover:text-[#4A3EDA] transition-colors focus-ring">
+              className="text-left px-4 py-3 rounded-xl border border-[#E0D9CB] bg-[#FBF8F2] text-sm text-[#A69E90] hover:border-[#5B4FE9] hover:text-[#4A3EDA] transition-colors focus-ring">
               {f.label}
             </button>
           ))}

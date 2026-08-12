@@ -60,10 +60,10 @@ export function TodayClient({
           <div className="rounded-[18px] border border-[#E6DFD2] bg-[#FFFDF8] overflow-hidden">
             <div className="px-5 py-4 border-b border-[#EFE9DD] flex items-center justify-between">
               <h3 className="text-base font-semibold">Today · {dayTasks.length} {dayTasks.length === 1 ? "task" : "tasks"}</h3>
-              <span className="font-mono text-2xs text-[#9A9285]">{doneCount} done</span>
+              <span className="font-mono text-2xs text-[#6B6459]">{doneCount} done</span>
             </div>
             {dayTasks.length ? dayTasks.map((t) => <TaskRow key={t.id} task={t} />) : (
-              <p className="px-5 py-6 text-sm text-[#8A8378]">Nothing committed to today yet.</p>
+              <p className="px-5 py-6 text-sm text-[#605A50]">Nothing committed to today yet.</p>
             )}
           </div>
 
@@ -145,7 +145,7 @@ function OneThing({ task, energy }: { task: Task; energy: number }) {
       </div>
 
       <div className="mt-5 p-4 rounded-[13px] bg-[#201D18] border border-[#302C25]">
-        <p className="font-mono text-2xs tracking-[0.12em] uppercase text-[#8B8272]">First micro-step</p>
+        <p className="font-mono text-2xs tracking-[0.12em] uppercase text-[#9C9384]">First micro-step</p>
         <p className="mt-2 text-base text-[#E7E1D6]">{move}</p>
       </div>
 
@@ -244,12 +244,12 @@ function UnblockPrompt({ count }: { count: number }) {
         <h3 className="text-base font-semibold">
           You are waiting on {count} {count === 1 ? "person" : "people"}
         </h3>
-        <p className="mt-1.5 text-sm text-[#8A8378] leading-[1.5]">
+        <p className="mt-1.5 text-sm text-[#605A50] leading-[1.5]">
           Thirty seconds to move {count === 1 ? "it" : "them all"} into someone else&apos;s court.
           The drafts are already written.
         </p>
       </div>
-      <span className="text-[#C4BCAC] group-hover:text-[#5B4FE9] transition-colors">→</span>
+      <span className="text-[#8A8378] group-hover:text-[#5B4FE9] transition-colors">→</span>
     </Link>
   );
 }
@@ -265,7 +265,7 @@ function CapacityCard({ fit }: { fit: ReturnType<typeof capacityFit> }) {
     <section className="rounded-[18px] border border-[#E6DFD2] bg-[#FFFDF8] p-[22px]">
       <div className="flex items-baseline justify-between gap-3.5">
         <h3 className="text-base font-semibold">Today&apos;s capacity</h3>
-        <span className="font-mono text-2xs text-[#9A9285]">
+        <span className="font-mono text-2xs text-[#6B6459]">
           {fit.advice ? "over budget" : "what a day of yours holds"}
         </span>
       </div>
@@ -276,7 +276,7 @@ function CapacityCard({ fit }: { fit: ReturnType<typeof capacityFit> }) {
             <div key={l.k}>
               <div className="flex justify-between text-xs mb-1.5">
                 <span className="font-medium">{l.label}</span>
-                <span className="font-mono text-2xs text-[#8A8378]">{used} of {total} used</span>
+                <span className="font-mono text-2xs text-[#605A50]">{used} of {total} used</span>
               </div>
               <div className="flex gap-1">
                 {Array.from({ length: Math.max(total, used) }, (_, i) => (
@@ -334,8 +334,12 @@ function TaskRow({ task }: { task: Task }) {
   const router = useRouter();
   const toast = useToast();
   const [done, setDone] = React.useState(task.completed);
+  // Separate ink from tint: one hex for both meant the label sat on a 14%
+  // wash of itself and never cleared contrast.
   const tint: Record<number, string> = { 0: "#14B8A6", 1: "#3B82F6", 2: "#5B4FE9" };
+  const ink: Record<number, string> = { 0: "#0E6B60", 1: "#2E6BD0", 2: "#4A3EDA" };
   const c = tint[task.energy_level] ?? "#3B82F6";
+  const fg = ink[task.energy_level] ?? "#2E6BD0";
 
   // Optimistic: the tick lands the instant it is pressed, and the row settles
   // out before the refresh. Waiting on a round trip to acknowledge a tap is
@@ -364,10 +368,10 @@ function TaskRow({ task }: { task: Task }) {
         </svg>
       </button>
       <div className="flex-1 min-w-0">
-        <p className={cn("text-base", done ? "text-[#A69E90] line-through" : "font-medium")}>{task.title}</p>
-        {task.first_step && <p className="mt-[3px] text-xs text-[#9A9285] truncate">{task.first_step}</p>}
+        <p className={cn("text-base", done ? "text-[#6B6459] line-through" : "font-medium")}>{task.title}</p>
+        {task.first_step && <p className="mt-[3px] text-xs text-[#6B6459] truncate">{task.first_step}</p>}
       </div>
-      <span className="flex-none text-2xs font-medium px-2.5 py-1 rounded-md" style={{ color: c, background: `${c}14` }}>
+      <span className="flex-none text-2xs font-medium px-2.5 py-1 rounded-md" style={{ color: fg, background: `${c}14` }}>
         {energyLabel(task.energy_level as 0 | 1 | 2)}
       </span>
     </Link>
@@ -394,7 +398,7 @@ function EnergyCard({ energy, plan }: { energy: number; plan: DailyPlan | null }
   return (
     <section className="rounded-[18px] border border-[#E6DFD2] bg-[#FFFDF8] p-5">
       <h3 className="text-base font-semibold">How is your energy?</h3>
-      <p className="mt-1.5 text-sm text-[#8A8378] leading-[1.5]">
+      <p className="mt-1.5 text-sm text-[#605A50] leading-[1.5]">
         {plan?.energy_level != null ? "We match tasks to this." : "Three taps. Everything reshapes around the answer."}
       </p>
       <div className="grid grid-cols-3 gap-2 mt-3.5">
@@ -419,7 +423,7 @@ function MitsCard({ mits }: { mits: Task[] }) {
     <section className="rounded-[18px] border border-[#E6DFD2] bg-[#FFFDF8] p-5">
       <div className="flex items-center justify-between">
         <h3 className="text-base font-semibold">Today&apos;s 3 MITs</h3>
-        <Link href="/plan" className="text-[#A69E90] hover:text-[#5B4FE9] transition-colors focus-ring rounded" aria-label="Edit plan">
+        <Link href="/plan" className="text-[#6B6459] hover:text-[#5B4FE9] transition-colors focus-ring rounded" aria-label="Edit plan">
           <PencilIcon />
         </Link>
       </div>
@@ -427,7 +431,7 @@ function MitsCard({ mits }: { mits: Task[] }) {
         {mits.length ? mits.slice(0, 3).map((t, i) => (
           <Link key={t.id} href={`/tasks/${t.id}`} className="flex gap-2.5 items-start text-sm leading-[1.45] hover:text-[#5B4FE9] transition-colors">
             <span className="font-mono text-2xs text-[#5B4FE9] mt-0.5">{String(i + 1).padStart(2, "0")}</span>
-            <span className={cn("flex-1", t.completed && "line-through text-[#A69E90]")}>{t.title}</span>
+            <span className={cn("flex-1", t.completed && "line-through text-[#6B6459]")}>{t.title}</span>
           </Link>
         )) : (
           <Link href="/plan" className="text-sm text-[#5B4FE9] font-medium hover:underline">Pick your three →</Link>
@@ -444,17 +448,17 @@ function AntiListCard({ tasks }: { tasks: Task[] }) {
         <ShieldOffIcon />
         <h3 className="text-base font-semibold">Not doing this week</h3>
       </div>
-      <p className="mt-[7px] text-xs text-[#8A8378] leading-[1.5]">
+      <p className="mt-[7px] text-xs text-[#605A50] leading-[1.5]">
         Named on purpose. It stops following you around.
       </p>
       <div className="flex flex-col gap-2.5 mt-3.5">
         {tasks.length ? tasks.map((t) => (
           <div key={t.id}>
             <p className="text-sm text-[#57514A] line-through decoration-[#C4BCAC]">{t.title}</p>
-            {t.anti_reason && <p className="mt-0.5 font-mono text-2xs text-[#A69E90]">{t.anti_reason}</p>}
+            {t.anti_reason && <p className="mt-0.5 font-mono text-2xs text-[#6B6459]">{t.anti_reason}</p>}
           </div>
         )) : (
-          <p className="text-xs text-[#A69E90]">Nothing parked yet. Name something and it stops chasing you.</p>
+          <p className="text-xs text-[#6B6459]">Nothing parked yet. Name something and it stops chasing you.</p>
         )}
       </div>
     </section>
@@ -466,7 +470,7 @@ function RitualsCard({ habits, logs, done }: { habits: Habit[]; logs: HabitLog[]
     <section className="rounded-[18px] border border-[#E6DFD2] bg-[#FFFDF8] p-5">
       <div className="flex items-center justify-between mb-3.5">
         <h3 className="text-base font-semibold">Rituals</h3>
-        <span className="font-mono text-2xs text-[#9A9285]">{done}/{habits.length}</span>
+        <span className="font-mono text-2xs text-[#6B6459]">{done}/{habits.length}</span>
       </div>
       {habits.length ? habits.slice(0, 4).map((h) => {
         const isDone = logs.some((l) => l.habit_id === h.id && l.done);
@@ -475,7 +479,7 @@ function RitualsCard({ habits, logs, done }: { habits: Habit[]; logs: HabitLog[]
             <span className="w-[26px] h-[26px] rounded-lg bg-[#F1EDE3] flex items-center justify-center flex-none" style={{ color: isDone ? "#0E8C7E" : "#5B4FE9" }}>
               <FlameSmall />
             </span>
-            <span className={cn("flex-1 text-sm", isDone && "text-[#A69E90] line-through")}>{h.name}</span>
+            <span className={cn("flex-1 text-sm", isDone && "text-[#6B6459] line-through")}>{h.name}</span>
           </div>
         );
       }) : (

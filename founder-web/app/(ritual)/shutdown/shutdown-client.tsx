@@ -58,11 +58,11 @@ export function ShutdownClient({
         <div className="flex items-center gap-3">
           {step > 0 && step < 3 && (
             <button onClick={() => setStep((s) => s - 1)}
-              className="text-xs text-[#8A8378] hover:text-[#FBF8F2] transition-colors focus-ring rounded">
+              className="text-xs text-[#A79488] hover:text-[#FBF8F2] transition-colors focus-ring rounded">
               ← Back
             </button>
           )}
-          <Link href="/today" className="text-xs text-[#8A8378] hover:text-[#FBF8F2] transition-colors">
+          <Link href="/today" className="text-xs text-[#A79488] hover:text-[#FBF8F2] transition-colors">
             Leave — nothing is lost
           </Link>
         </div>
@@ -268,7 +268,7 @@ function Tomorrow({ rows, onDone }: { rows: Task[]; onDone: () => void }) {
           ))}
         </div>
       ) : (
-        <p className="text-sm text-[#8A8378]">Nothing open to carry forward. Tomorrow starts clean.</p>
+        <p className="text-sm text-[#A79488]">Nothing open to carry forward. Tomorrow starts clean.</p>
       )}
 
       <button onClick={onDone}

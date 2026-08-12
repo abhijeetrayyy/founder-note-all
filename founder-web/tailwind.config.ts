@@ -27,10 +27,15 @@ const config: Config = {
           400: "#9F94F3", 500: "#7A70F0", 600: "#5B4FE9", 700: "#4A3EDA",
           800: "#3B31AE", 900: "#2E2686",
         },
+        // The page ground. Deliberately NOT `base.DEFAULT`: Tailwind's `text-*`
+        // prefix serves both colour and font-size, so a colour named `base`
+        // makes `text-base` resolve to colour-paper instead of 14px — text the
+        // exact shade of the background it sits on. That shipped, and it is why
+        // headings like "Today's capacity" were invisible.
+        paper: "#F6F3EC",
         // Paper, not white. The warmth is the point — it is what makes long
         // sessions feel like a notebook rather than a dashboard.
         base: {
-          DEFAULT: "#F6F3EC",
           surface: "#FFFDF8",
           raised: "#FBF8F2",
           overlay: "#F1EDE3",

@@ -84,13 +84,13 @@ function ProjectRow({ h }: { h: Awaited<ReturnType<typeof getProjectHealth>>[num
       <div className="hidden sm:flex flex-col items-end gap-1 flex-none">
         <span className="font-mono text-xs text-[#6B6459]">{open} open</span>
         {idleDays !== null && (
-          <span className="font-mono text-2xs text-[#A69E90]">
+          <span className="font-mono text-2xs text-[#6B6459]">
             {idleDays === 0 ? "touched today" : `${idleDays}d since a change`}
           </span>
         )}
       </div>
 
-      <span className="text-[#C4BCAC] group-hover:text-[#5B4FE9] transition-colors flex-none">→</span>
+      <span className="text-[#8A8378] group-hover:text-[#5B4FE9] transition-colors flex-none">→</span>
     </Link>
   );
 }

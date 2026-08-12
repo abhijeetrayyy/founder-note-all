@@ -35,7 +35,7 @@ export default async function StatsPage() {
       <section className="rounded-[18px] border border-[#E6DFD2] bg-[#FFFDF8] p-[22px]">
         <div className="flex items-baseline justify-between gap-3.5 flex-wrap">
           <h2 className="text-base font-semibold">Energy truth</h2>
-          <span className="font-mono text-2xs text-[#9A9285]">
+          <span className="font-mono text-2xs text-[#6B6459]">
             {truth ? `${truth.total} logged sessions · 60 days` : "needs 5 logged sessions"}
           </span>
         </div>
@@ -61,18 +61,18 @@ export default async function StatsPage() {
                         <div className="w-full bg-[#5B4FE9]" style={{ height: `${Math.max(rate * 100, 6)}%` }} />
                       )}
                     </div>
-                    <span className="font-mono text-2xs text-[#9A9285]">{d.day.slice(0, 2)}</span>
-                    <span className="font-mono text-2xs text-[#C4BCAC]">{d.sessions || "—"}</span>
+                    <span className="font-mono text-2xs text-[#6B6459]">{d.day.slice(0, 2)}</span>
+                    <span className="font-mono text-2xs text-[#8A8378]">{d.sessions || "—"}</span>
                   </div>
                 );
               })}
             </div>
-            <p className="mt-3 text-xs text-[#8A8378]">
+            <p className="mt-3 text-xs text-[#605A50]">
               Bar height is the share of blocks that felt like flow or solid. The number below is sessions logged.
             </p>
           </>
         ) : (
-          <p className="mt-3 text-sm text-[#8A8378] leading-[1.55] max-w-[52ch]">
+          <p className="mt-3 text-sm text-[#605A50] leading-[1.55] max-w-[52ch]">
             Finish a few focus sessions and answer “how did it go”. After five, this becomes the most useful
             number in the app — the only thing that can correct your capacity from evidence instead of
             assumption.{" "}
@@ -123,7 +123,7 @@ function Metric({ value, label, sub, href, cta, alert, good }: {
       className="group rounded-[18px] border border-[#E6DFD2] bg-[#FFFDF8] p-5 flex flex-col hover:border-[#C9C0B0] transition-colors focus-ring">
       <span className="font-mono text-3xl leading-none tracking-[-0.02em]" style={{ color: tone }}>{value}</span>
       <span className="mt-2.5 text-sm font-semibold leading-snug">{label}</span>
-      <span className="mt-1 text-xs text-[#9A9285] leading-snug">{sub}</span>
+      <span className="mt-1 text-xs text-[#6B6459] leading-snug">{sub}</span>
       <span className="mt-3 text-xs font-medium text-[#5B4FE9] group-hover:underline underline-offset-2">{cta} →</span>
     </Link>
   );
