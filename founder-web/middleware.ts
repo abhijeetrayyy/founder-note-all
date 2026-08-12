@@ -1,26 +1,42 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { updateSession } from "@/lib/supabase/middleware";
+
+const AUTH_ROUTES = ["/login", "/signup", "/auth"];
+
+/** Routes reachable without a session. Everything else requires one. */
+function isPublic(path: string) {
+  return path === "/" || AUTH_ROUTES.some((r) => path.startsWith(r));
+}
 
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
-  const isAuthRoute = path.startsWith("/login") || path.startsWith("/signup") || path.startsWith("/auth");
-  const isPublicRoute = path === "/" || isAuthRoute || path === "/onboarding";
 
-  const hasSession = request.cookies.getAll().some(c => c.name.startsWith("sb-") && c.name.includes("-auth-token"));
+  // Refreshes the token and tells us whether the session is genuinely valid,
+  // rather than merely whether a cookie is lying around.
+  const { response, user } = await updateSession(request);
 
-  if (!hasSession && !isPublicRoute) {
+  if (!user && !isPublic(path)) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
-    url.searchParams.set("next", path);
+    url.search = "";
+    // Only round-trip in-app paths, and never a bare "/" — an open redirect
+    // here would let a crafted link bounce someone off-site after sign-in.
+    if (path !== "/" && path.startsWith("/") && !path.startsWith("//")) {
+      url.searchParams.set("next", path + request.nextUrl.search);
+    }
     return NextResponse.redirect(url);
   }
 
-  if (hasSession && isAuthRoute) {
+  // Signed in and sitting on a sign-in screen: send them somewhere useful.
+  // /auth is excluded because callbacks must be allowed to complete.
+  if (user && (path.startsWith("/login") || path.startsWith("/signup"))) {
     const url = request.nextUrl.clone();
     url.pathname = "/today";
+    url.search = "";
     return NextResponse.redirect(url);
   }
 
-  return NextResponse.next();
+  return response;
 }
 
 export const config = {

@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { getProfile, getTasksDueToday, getHabits, getHabitLogsForDate, getEnergyLog, getNotes, getGoals, getTodaySummary, getDailyPlan } from "@/lib/data";
+import { getProfile, getTasksDueToday, getHabits, getHabitLogsForDate, getEnergyLog, getNotes, getGoals, getTodaySummary, getDailyPlan, getPressure, getAntiList } from "@/lib/data";
 import { todayKey } from "@/lib/utils";
 import { TodayClient } from "./today-client";
 import type { Task, Note, Goal, Habit, HabitLog, DailyPlan, EnergyLog, UserProfile } from "@/lib/supabase/types";
 
 export default async function TodayPage() {
-  const [profile, tasks, habits, habitLogs, energy, notes, goals, summary, plan] = await Promise.all([
+  const [profile, tasks, habits, habitLogs, energy, notes, goals, summary, plan, pressure, antiList] = await Promise.all([
     getProfile(),
     getTasksDueToday(),
     getHabits(),
@@ -15,6 +15,8 @@ export default async function TodayPage() {
     getGoals(),
     getTodaySummary(),
     getDailyPlan(),
+    getPressure(),
+    getAntiList(),
   ]);
 
   const mitIds = plan?.mit_task_ids ?? [];
@@ -35,6 +37,8 @@ export default async function TodayPage() {
       goals={goals}
       notes={notes}
       summary={summary}
+      pressure={pressure}
+      antiList={antiList}
     />
   );
 }

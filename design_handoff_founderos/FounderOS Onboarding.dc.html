@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@0.446.0/dist/umd/lucide.min.js"></script>
+<style>
+  body { margin:0; background:#F6F3EC; -webkit-font-smoothing:antialiased; }
+  * { box-sizing:border-box; }
+  a { color:#5B4FE9; text-decoration:none; }
+  a:hover { color:#3E32C7; }
+  ::selection { background:#DCD8FC; }
+</style>
+</helmet>
+
+<div style="min-height:100vh;background:#F6F3EC;color:#171512;font-family:'Instrument Sans',system-ui,sans-serif;display:flex;flex-direction:column">
+
+  <div style="flex:none;display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid #E6DFD2;background:#FBF8F2;overflow-x:auto">
+    <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#A69E90;flex:none;padding-right:6px">Signup &amp; onboarding</span>
+    <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="9">
+      <button onClick="{{ t.go }}" style="{{ t.style }}">{{ t.label }}</button>
+    </sc-for>
+  </div>
+
+  <div style="flex:1;display:flex;align-items:stretch">
+
+    <sc-if value="{{ isSignup }}" hint-placeholder-val="{{ true }}">
+      <div style="flex:1;display:grid;grid-template-columns:1fr 1fr">
+        <div style="display:flex;align-items:center;justify-content:center;padding:56px 40px">
+          <div style="width:100%;max-width:380px">
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="width:28px;height:28px;border-radius:9px;background:#5B4FE9;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Instrument Serif',serif;font-size:18px;line-height:1">F</div>
+              <span style="font-weight:600;font-size:16px;letter-spacing:-0.01em">FounderOS</span>
+            </div>
+            <h1 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:42px;line-height:1.05;letter-spacing:-0.02em;margin:30px 0 0">Let's get the noise out of your head.</h1>
+            <p style="margin:12px 0 0;font-size:15.5px;line-height:1.55;color:#57514A">Four minutes of setup. You will finish with one real task started, not an empty app staring at you.</p>
+
+            <button style="width:100%;margin-top:28px;height:48px;border:1px solid #E0D9CB;border-radius:12px;background:#FFFDF8;font-family:inherit;font-size:14.5px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px" style-hover="border-color:#171512">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:14px;color:#5B4FE9">G</span> Continue with Google
+            </button>
+            <div style="display:flex;align-items:center;gap:12px;margin:20px 0">
+              <span style="flex:1;height:1px;background:#E6DFD2"></span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.1em;text-transform:uppercase;color:#A69E90">or email</span>
+              <span style="flex:1;height:1px;background:#E6DFD2"></span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:11px">
+              <div style="height:48px;border:1px solid #E0D9CB;border-radius:12px;background:#FFFDF8;display:flex;align-items:center;padding:0 15px;font-size:14.5px;color:#171512">aditya@</div>
+              <div style="height:48px;border:1px solid #E0D9CB;border-radius:12px;background:#FFFDF8;display:flex;align-items:center;padding:0 15px;font-size:14.5px;color:#C4BCAC">Password — 8 characters minimum</div>
+            </div>
+            <button style="width:100%;margin-top:16px;height:48px;border:none;border-radius:12px;background:#5B4FE9;color:#fff;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer" style-hover="background:#4A3EDA">Create my account</button>
+            <p style="margin:16px 0 0;font-size:13px;color:#8A8378;line-height:1.55">Already set up? <a href="#login">Log in instead</a>. No card, ever, until you ask.</p>
+          </div>
+        </div>
+        <div style="background:#171512;color:#FBF8F2;display:flex;align-items:center;padding:56px 48px">
+          <div style="max-width:400px">
+            <p style="margin:0;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:#8B8272">Why this is different</p>
+            <h2 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:34px;line-height:1.1;margin:14px 0 0;color:#FBF8F2">Your list is not the problem. <span style="font-style:italic;color:#A79DFF">It never shrinking is.</span></h2>
+            <div style="display:flex;flex-direction:column;gap:20px;margin-top:30px">
+              <sc-for list="{{ signupPoints }}" as="p" hint-placeholder-count="3">
+                <div style="display:flex;gap:13px;align-items:flex-start">
+                  <span style="width:28px;height:28px;flex:none;border-radius:9px;background:#201D18;border:1px solid #302C25;display:flex;align-items:center;justify-content:center;color:#A79DFF"><i data-lucide="{{ p.icon }}" width="14" height="14"></i></span>
+                  <div>
+                    <p style="margin:0;font-size:15px;font-weight:600;color:#FBF8F2">{{ p.title }}</p>
+                    <p style="margin:5px 0 0;font-size:13.5px;line-height:1.55;color:#B3AB9C">{{ p.body }}</p>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:56px 28px">
+        <div style="width:100%;max-width:380px">
+          <div style="width:28px;height:28px;border-radius:9px;background:#5B4FE9;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Instrument Serif',serif;font-size:18px;line-height:1">F</div>
+          <h1 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:38px;line-height:1.08;margin:24px 0 0;letter-spacing:-0.02em">Welcome back.</h1>
+          <p style="margin:10px 0 0;font-size:15px;color:#57514A;line-height:1.55">Pressure was at 34 when you left. Four loops closed since Monday.</p>
+          <div style="display:flex;flex-direction:column;gap:11px;margin-top:26px">
+            <div style="height:48px;border:1px solid #E0D9CB;border-radius:12px;background:#FFFDF8;display:flex;align-items:center;padding:0 15px;font-size:14.5px">aditya@founderos.app</div>
+            <div style="height:48px;border:1px solid #E0D9CB;border-radius:12px;background:#FFFDF8;display:flex;align-items:center;padding:0 15px;font-size:14.5px;color:#C4BCAC">Password</div>
+          </div>
+          <button style="width:100%;margin-top:14px;height:48px;border:none;border-radius:12px;background:#5B4FE9;color:#fff;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer" style-hover="background:#4A3EDA">Log in</button>
+          <button style="width:100%;margin-top:10px;height:48px;border:1px solid #E0D9CB;border-radius:12px;background:#FFFDF8;font-family:inherit;font-size:14.5px;cursor:pointer" style-hover="border-color:#171512">Email me a magic link</button>
+          <p style="margin:18px 0 0;font-size:13px;color:#8A8378">Forgot it? <a href="#reset">Reset your password</a>.</p>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isStep1 }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:56px 28px">
+        <div style="width:100%;max-width:600px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <sc-for list="{{ dots1 }}" as="d" hint-placeholder-count="6"><span style="{{ d.style }}"></span></sc-for>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#A69E90;margin-left:8px">1 of 6</span>
+          </div>
+          <h1 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:48px;line-height:1.03;letter-spacing:-0.02em;margin:26px 0 0">First — who is doing the building?</h1>
+          <div style="margin-top:28px">
+            <p style="margin:0 0 9px;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.12em;text-transform:uppercase;color:#9A9285">Your name</p>
+            <div style="height:52px;border:1px solid #5B4FE9;border-radius:13px;background:#FFFDF8;display:flex;align-items:center;padding:0 17px;font-size:17px">Aditya<span style="display:inline-block;width:2px;height:20px;background:#5B4FE9;margin-left:2px"></span></div>
+          </div>
+          <div style="margin-top:22px">
+            <p style="margin:0 0 11px;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.12em;text-transform:uppercase;color:#9A9285">Which one are you right now?</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <sc-for list="{{ roles }}" as="r" hint-placeholder-count="4">
+                <button style="{{ r.style }}">
+                  <span style="display:block;font-size:15px;font-weight:600">{{ r.label }}</span>
+                  <span style="display:block;font-size:12.5px;color:#8A8378;margin-top:4px">{{ r.hint }}</span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+          <button onClick="{{ goStep2 }}" style="margin-top:28px;border:none;border-radius:12px;background:#171512;color:#FBF8F2;font-family:inherit;font-size:14.5px;font-weight:500;padding:14px 22px;cursor:pointer" style-hover="background:#5B4FE9">Continue</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isStep2 }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:56px 28px">
+        <div style="width:100%;max-width:660px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <sc-for list="{{ dots2 }}" as="d" hint-placeholder-count="6"><span style="{{ d.style }}"></span></sc-for>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#A69E90;margin-left:8px">2 of 6 · the important one</span>
+          </div>
+          <h1 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:48px;line-height:1.03;letter-spacing:-0.02em;margin:26px 0 0">What is eating you right now?</h1>
+          <p style="margin:14px 0 0;font-size:17px;line-height:1.55;color:#57514A">Three things. Type them the way you would say them out loud — we will sort out the dates and priorities. This is your first capture, and it is the habit the whole thing runs on.</p>
+          <div style="display:flex;flex-direction:column;gap:11px;margin-top:28px">
+            <sc-for list="{{ firstLoops }}" as="l" hint-placeholder-count="3">
+              <div style="{{ l.rowStyle }}">
+                <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#5B4FE9;flex:none">{{ l.n }}</span>
+                <span style="flex:1;font-size:16px;line-height:1.4;min-width:0">{{ l.text }}</span>
+                <div style="display:flex;gap:6px;flex:none;flex-wrap:wrap">
+                  <sc-for list="{{ l.chips }}" as="c" hint-placeholder-count="2">
+                    <span style="{{ c.style }}">{{ c.text }}</span>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+          <p style="margin:16px 0 0;font-size:13.5px;color:#8A8378;line-height:1.55">Parsed automatically. You never fill in a form in this app — ⌘K and plain sentences, forever.</p>
+          <button onClick="{{ goStep3 }}" style="margin-top:26px;border:none;border-radius:12px;background:#171512;color:#FBF8F2;font-family:inherit;font-size:14.5px;font-weight:500;padding:14px 22px;cursor:pointer" style-hover="background:#5B4FE9">That is enough for now</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isStep3 }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:56px 28px">
+        <div style="width:100%;max-width:680px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <sc-for list="{{ dots3 }}" as="d" hint-placeholder-count="6"><span style="{{ d.style }}"></span></sc-for>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#A69E90;margin-left:8px">3 of 6</span>
+          </div>
+          <h1 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:48px;line-height:1.03;letter-spacing:-0.02em;margin:26px 0 0">When is your head actually clear?</h1>
+          <p style="margin:14px 0 0;font-size:17px;line-height:1.55;color:#57514A">We will protect those hours for deep work and stop handing you hard things when you have nothing left.</p>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:28px">
+            <sc-for list="{{ energyBlocks }}" as="b" hint-placeholder-count="4">
+              <button style="{{ b.style }}">
+                <i data-lucide="{{ b.icon }}" width="18" height="18"></i>
+                <span style="display:block;font-size:14.5px;font-weight:600;margin-top:9px">{{ b.label }}</span>
+                <span style="display:block;font-size:12px;color:#8A8378;margin-top:3px">{{ b.time }}</span>
+              </button>
+            </sc-for>
+          </div>
+          <div style="margin-top:24px;padding:18px 20px;border-radius:14px;background:#EFECFE;border:1px solid #DCD8FC">
+            <p style="margin:0;font-size:14.5px;line-height:1.55;color:#3E32C7"><strong style="font-weight:600">So your day holds:</strong> 3 deep units in the morning, 4 medium, 8 admin. The planner will not let you book past that — that is the feature, not a limitation.</p>
+          </div>
+          <button onClick="{{ goStep4 }}" style="margin-top:26px;border:none;border-radius:12px;background:#171512;color:#FBF8F2;font-family:inherit;font-size:14.5px;font-weight:500;padding:14px 22px;cursor:pointer" style-hover="background:#5B4FE9">Continue</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isStep4 }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:56px 28px">
+        <div style="width:100%;max-width:640px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <sc-for list="{{ dots4 }}" as="d" hint-placeholder-count="6"><span style="{{ d.style }}"></span></sc-for>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#A69E90;margin-left:8px">4 of 6</span>
+          </div>
+          <h1 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:48px;line-height:1.03;letter-spacing:-0.02em;margin:26px 0 0">One thing that has to be true in 90 days.</h1>
+          <p style="margin:14px 0 0;font-size:17px;line-height:1.55;color:#57514A">Just one. Everything in the app will be measured against it — including whether you are quietly avoiding it.</p>
+          <div style="margin-top:28px">
+            <div style="min-height:56px;border:1px solid #5B4FE9;border-radius:13px;background:#FFFDF8;display:flex;align-items:center;padding:14px 17px;font-size:18px;line-height:1.4">Close the seed round<span style="display:inline-block;width:2px;height:22px;background:#5B4FE9;margin-left:2px"></span></div>
+            <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
+              <div style="flex:1;min-width:160px;border:1px solid #E0D9CB;border-radius:12px;background:#FBF8F2;padding:13px 15px">
+                <p style="margin:0;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:#9A9285">How we will know</p>
+                <p style="margin:6px 0 0;font-size:14.5px">Two term sheets signed</p>
+              </div>
+              <div style="flex:1;min-width:160px;border:1px solid #E0D9CB;border-radius:12px;background:#FBF8F2;padding:13px 15px">
+                <p style="margin:0;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:#9A9285">Deadline</p>
+                <p style="margin:6px 0 0;font-size:14.5px">10 November 2026</p>
+              </div>
+            </div>
+          </div>
+          <p style="margin:18px 0 0;font-size:13.5px;color:#8A8378;line-height:1.55">Two of the three loops you captured already point at this. We will link them.</p>
+          <button onClick="{{ goStep5 }}" style="margin-top:26px;border:none;border-radius:12px;background:#171512;color:#FBF8F2;font-family:inherit;font-size:14.5px;font-weight:500;padding:14px 22px;cursor:pointer" style-hover="background:#5B4FE9">Continue</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isStep5 }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:56px 28px">
+        <div style="width:100%;max-width:660px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <sc-for list="{{ dots5 }}" as="d" hint-placeholder-count="6"><span style="{{ d.style }}"></span></sc-for>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#A69E90;margin-left:8px">5 of 6</span>
+          </div>
+          <h1 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:48px;line-height:1.03;letter-spacing:-0.02em;margin:26px 0 0">Two bookends. Pick your times.</h1>
+          <p style="margin:14px 0 0;font-size:17px;line-height:1.55;color:#57514A">The morning plan and the shutdown are the whole system. Sixty seconds and two minutes. Skip these and you have bought another to-do list.</p>
+          <div style="display:flex;flex-direction:column;gap:12px;margin-top:28px">
+            <sc-for list="{{ rituals }}" as="r" hint-placeholder-count="4">
+              <div style="{{ r.rowStyle }}">
+                <span style="{{ r.iconStyle }}"><i data-lucide="{{ r.icon }}" width="16" height="16"></i></span>
+                <div style="flex:1;min-width:0">
+                  <p style="margin:0;font-size:15.5px;font-weight:600">{{ r.name }}</p>
+                  <p style="margin:4px 0 0;font-size:13px;color:#8A8378;line-height:1.45">{{ r.why }}</p>
+                </div>
+                <span style="{{ r.timeStyle }}">{{ r.time }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <button onClick="{{ goStep6 }}" style="margin-top:26px;border:none;border-radius:12px;background:#171512;color:#FBF8F2;font-family:inherit;font-size:14.5px;font-weight:500;padding:14px 22px;cursor:pointer" style-hover="background:#5B4FE9">Set them up</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isStep6 }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:56px 28px;background:#171512">
+        <div style="width:100%;max-width:640px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <sc-for list="{{ dots6 }}" as="d" hint-placeholder-count="6"><span style="{{ d.style }}"></span></sc-for>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#6E675C;margin-left:8px">done · 3 min 40 s</span>
+          </div>
+          <p style="margin:26px 0 0;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:#8B8272">Your first one thing</p>
+          <h1 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:46px;line-height:1.04;letter-spacing:-0.02em;margin:14px 0 0;color:#FBF8F2">Call the investor — put a time on it.</h1>
+          <p style="margin:14px 0 0;font-size:16.5px;line-height:1.55;color:#B3AB9C">Of the three things eating you, this is the only one with someone else waiting. It is also twelve minutes of work, which is why it has been sitting there.</p>
+          <div style="margin-top:26px;padding:20px;border-radius:15px;background:#201D18;border:1px solid #302C25">
+            <p style="margin:0;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.12em;text-transform:uppercase;color:#8B8272">First move</p>
+            <p style="margin:9px 0 0;font-size:16px;line-height:1.5;color:#E7E1D6">Open the thread and send one line: “Does 3pm tomorrow work?” Nothing else.</p>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:26px;flex-wrap:wrap">
+            <button style="border:none;border-radius:13px;background:#5B4FE9;color:#fff;font-family:inherit;font-size:15.5px;font-weight:600;padding:15px 24px;display:flex;align-items:center;gap:9px;cursor:pointer" style-hover="background:#6E63FF"><i data-lucide="play" width="16" height="16"></i> Start · 10 minute sprint</button>
+            <button style="border:1px solid #3A362F;border-radius:13px;background:transparent;color:#E7E1D6;font-family:inherit;font-size:15px;padding:15px 20px;cursor:pointer" style-hover="border-color:#8B8272">Take me to Today</button>
+          </div>
+          <p style="margin:22px 0 0;font-family:'JetBrains Mono',monospace;font-size:11px;color:#6E675C">Starting mind pressure: 22 · three loops open, none rotting yet</p>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:56px 28px">
+        <div style="width:100%;max-width:560px;text-align:center">
+          <div style="width:56px;height:56px;margin:0 auto;border-radius:17px;background:#E4F6F2;display:flex;align-items:center;justify-content:center;color:#0E8C7E"><i data-lucide="check" width="26" height="26"></i></div>
+          <h1 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:44px;line-height:1.05;letter-spacing:-0.02em;margin:26px 0 0">Triage is empty.</h1>
+          <p style="margin:14px 0 0;font-size:17px;line-height:1.55;color:#57514A">Nothing is rotting, nothing is waiting on a decision. Mind pressure is 11 — the lowest it has been in three weeks.</p>
+          <p style="margin:20px 0 0;font-size:15px;line-height:1.55;color:#8A8378">This screen is supposed to be empty most days. Go and build something.</p>
+          <div style="display:flex;gap:10px;margin-top:28px;justify-content:center;flex-wrap:wrap">
+            <button style="border:none;border-radius:12px;background:#171512;color:#FBF8F2;font-family:inherit;font-size:14.5px;font-weight:500;padding:14px 20px;cursor:pointer" style-hover="background:#5B4FE9">Back to today</button>
+            <button style="border:1px solid #E0D9CB;border-radius:12px;background:#FFFDF8;font-family:inherit;font-size:14.5px;color:#6B6459;padding:14px 18px;cursor:pointer" style-hover="border-color:#171512;color:#171512">Capture something · ⌘K</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:880},&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;signup&quot;,&quot;login&quot;,&quot;s1&quot;,&quot;s2&quot;,&quot;s3&quot;,&quot;s4&quot;,&quot;s5&quot;,&quot;s6&quot;,&quot;empty&quot;],&quot;default&quot;:&quot;signup&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+const TABS = [
+  { id: "signup", label: "Sign up" },
+  { id: "login", label: "Log in" },
+  { id: "s1", label: "1 · Who" },
+  { id: "s2", label: "2 · First capture" },
+  { id: "s3", label: "3 · Energy shape" },
+  { id: "s4", label: "4 · The 90-day goal" },
+  { id: "s5", label: "5 · Rituals" },
+  { id: "s6", label: "6 · Your first thing" },
+  { id: "empty", label: "Empty state" }
+];
+
+const dots = active => [0, 1, 2, 3, 4, 5].map(i => ({
+  style: "width:30px;height:4px;border-radius:99px;display:block;background:" + (i <= active ? "#5B4FE9" : "#E1DACB")
+}));
+
+class Component extends DCLogic {
+  state = { screen: null };
+  componentDidMount() { this.icons(); }
+  componentDidUpdate() { this.icons(); }
+  componentWillUnmount() { clearInterval(this._w); }
+  icons() {
+    if (window.lucide) { try { window.lucide.createIcons(); } catch (e) {} }
+    else if (!this._w) {
+      this._w = setInterval(() => { if (window.lucide) { clearInterval(this._w); this._w = null; window.lucide.createIcons(); } }, 200);
+    }
+  }
+  go(id) { return () => { this.setState({ screen: id }); window.scrollTo(0, 0); }; }
+
+  renderVals() {
+    const s = this.state.screen || this.props.startScreen || "signup";
+    const chip = (text, tone) => ({
+      text,
+      style: "padding:5px 9px;border-radius:7px;font-size:11.5px;white-space:nowrap;color:" + tone + ";background:" + tone + "14"
+    });
+    const darkDots = [0, 1, 2, 3, 4, 5].map(() => ({
+      style: "width:30px;height:4px;border-radius:99px;display:block;background:#5B4FE9"
+    }));
+
+    return {
+      tabs: TABS.map(t => ({
+        ...t,
+        go: this.go(t.id),
+        style: "flex:none;padding:8px 13px;border-radius:9px;font-family:inherit;font-size:12.5px;cursor:pointer;border:1px solid "
+          + (t.id === s ? "#5B4FE9;background:#5B4FE9;color:#fff;font-weight:600" : "#E0D9CB;background:#FFFDF8;color:#6B6459")
+      })),
+      isSignup: s === "signup", isLogin: s === "login", isEmpty: s === "empty",
+      isStep1: s === "s1", isStep2: s === "s2", isStep3: s === "s3",
+      isStep4: s === "s4", isStep5: s === "s5", isStep6: s === "s6",
+      goStep2: this.go("s2"), goStep3: this.go("s3"), goStep4: this.go("s4"),
+      goStep5: this.go("s5"), goStep6: this.go("s6"),
+
+      dots1: dots(0), dots2: dots(1), dots3: dots(2), dots4: dots(3), dots5: dots(4), dots6: darkDots,
+
+      signupPoints: [
+        { icon: "gauge", title: "One number, and it goes down", body: "Mind pressure, not a completion percentage. Adding work never makes it look better." },
+        { icon: "hourglass", title: "Loops expire", body: "At fourteen days the app stops you and makes you answer: do it, schedule it, hand it off, or drop it." },
+        { icon: "moon", title: "A ritual that ends the day", body: "The screen nobody else builds — the one that gives you permission to close the laptop." }
+      ],
+
+      roles: [
+        { label: "Solo founder", hint: "Everything is yours" },
+        { label: "Co-founder", hint: "Two of you, still not enough" },
+        { label: "Indie maker", hint: "Shipping weekly, alone" },
+        { label: "Early-career builder", hint: "First time running your own time" }
+      ].map((r, i) => ({
+        ...r,
+        style: "padding:16px 17px;border-radius:13px;font-family:inherit;cursor:pointer;text-align:left;border:1px solid "
+          + (i === 0 ? "#5B4FE9;background:#F4F2FF" : "#E0D9CB;background:#FFFDF8")
+      })),
+
+      firstLoops: [
+        { n: "01", text: "call the investor back, been putting it off for a week", chips: [chip("Deep", "#5B4FE9"), chip("someone waiting", "#D9552F")] },
+        { n: "02", text: "pricing page is embarrassing, needs a rewrite", chips: [chip("Deep", "#5B4FE9"), chip("@Marketing", "#0E8C7E")] },
+        { n: "03", text: "no idea if our churn is getting better or worse", chips: [chip("Medium", "#2E6BD0"), chip("needs data", "#B07C15")] }
+      ].map(l => ({
+        ...l,
+        rowStyle: "display:flex;align-items:center;gap:13px;padding:16px 18px;border-radius:14px;border:1px solid #E0D9CB;background:#FFFDF8;flex-wrap:wrap"
+      })),
+
+      energyBlocks: [
+        { label: "Early morning", time: "6 – 9 am", icon: "sunrise" },
+        { label: "Late morning", time: "9 am – 12 pm", icon: "sun" },
+        { label: "Afternoon", time: "1 – 5 pm", icon: "cloud-sun" },
+        { label: "Late night", time: "9 pm – 1 am", icon: "moon" }
+      ].map((b, i) => ({
+        ...b,
+        style: "padding:18px 14px;border-radius:14px;font-family:inherit;cursor:pointer;text-align:left;color:" + (i === 1 ? "#4A3EDA" : "#6B6459") + ";border:1px solid "
+          + (i === 1 ? "#5B4FE9;background:#F4F2FF" : "#E0D9CB;background:#FFFDF8")
+      })),
+
+      rituals: [
+        { name: "Morning plan", why: "Sixty seconds. Replaces twenty minutes of deciding.", time: "8:30 am", icon: "sunrise", on: true },
+        { name: "Shutdown", why: "Two minutes. The one that lets you actually stop.", time: "7:00 pm", icon: "moon", on: true },
+        { name: "Weekly review", why: "Twelve minutes of evidence, every Friday.", time: "Fri 4:00 pm", icon: "calendar-check", on: true },
+        { name: "Mid-day energy check", why: "Optional. Three taps when a block goes flat.", time: "off", icon: "battery-medium", on: false }
+      ].map(r => ({
+        ...r,
+        rowStyle: "display:flex;align-items:center;gap:15px;padding:17px 19px;border-radius:14px;border:1px solid "
+          + (r.on ? "#5B4FE9;background:#F4F2FF" : "#E0D9CB;background:#FFFDF8"),
+        iconStyle: "width:34px;height:34px;flex:none;border-radius:11px;display:flex;align-items:center;justify-content:center;"
+          + (r.on ? "background:#5B4FE9;color:#fff" : "background:#F1EDE3;color:#A69E90"),
+        timeStyle: "flex:none;font-family:'JetBrains Mono',monospace;font-size:12.5px;padding:7px 11px;border-radius:9px;"
+          + (r.on ? "background:#DCD8FC;color:#3E32C7" : "background:#F1EDE3;color:#A69E90")
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -13,34 +13,26 @@ html {
 }
 
 body {
-  font-family: var(--font-sans), "Inter", system-ui, sans-serif;
-  background: #FAFAFC;
-  color: #1A1A2E;
+  font-family: var(--font-sans), "Instrument Sans", system-ui, sans-serif;
+  background: #F6F3EC;
+  color: #171512;
   min-height: 100dvh;
-  line-height: 1.7;
-  letter-spacing: -0.01em;
-  position: relative;
+  /* Tighter than prose. This is a tool being scanned, not an article being read. */
+  line-height: 1.45;
 }
 
-/* Ambient light mesh so glass surfaces have something to refract instead of flat white. */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background:
-    radial-gradient(38rem 28rem at 8% -6%, rgba(124, 58, 237, 0.10), transparent 60%),
-    radial-gradient(34rem 26rem at 100% 8%, rgba(20, 184, 166, 0.08), transparent 60%),
-    radial-gradient(30rem 24rem at 12% 100%, rgba(245, 158, 11, 0.06), transparent 60%);
-}
+/* Headlines are the serif, and the emphasis word is its italic. That pairing is
+   the single most recognisable thing in the visual system — it is what stops
+   this reading like every other productivity dashboard. */
+.font-display { letter-spacing: -0.02em; }
+h1, h2, h3 { text-wrap: balance; }
 
-::selection { background: rgba(124,58,237,0.12); color: #1A1A2E; }
+::selection { background: rgba(91,79,233,0.14); color: #171512; }
 
-::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.10); border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.18); }
+::-webkit-scrollbar-thumb { background: #E0D9CB; border-radius: 99px; border: 3px solid #F6F3EC; }
+::-webkit-scrollbar-thumb:hover { background: #D0C7B5; }
 
 @layer base {
   * { @apply border-base-border; }
@@ -48,37 +40,50 @@ body::before {
 }
 
 @layer components {
+  /* These kept their names from the old glass theme so every component that
+     already uses them re-skins for free. There is no glass any more: paper has
+     edges, and a real 1px border reads as a considered boundary where a blur
+     reads as an unfinished one. */
   .glass-ambient {
-    background: rgba(255,255,255,0.55);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(0,0,0,0.05);
-    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    background: #FFFDF8;
+    border: 1px solid #E6DFD2;
   }
   .glass-active {
-    background: rgba(255,255,255,0.72);
-    backdrop-filter: blur(28px);
-    -webkit-backdrop-filter: blur(28px);
-    border: 1px solid rgba(124,58,237,0.10);
-    box-shadow: 0 4px 24px rgba(0,0,0,0.05);
+    background: #FFFDF8;
+    border: 1px solid #DCD3C2;
+    box-shadow: 0 2px 10px rgba(23,21,18,0.05);
   }
   .glass-focused {
-    background: rgba(255,255,255,0.88);
-    backdrop-filter: blur(40px);
-    -webkit-backdrop-filter: blur(40px);
-    border: 1px solid rgba(124,58,237,0.18);
-    box-shadow: 0 8px 40px rgba(124,58,237,0.08), 0 2px 8px rgba(0,0,0,0.06);
+    background: #FFFDF8;
+    border: 1px solid #E0D9CB;
+    box-shadow: 0 8px 30px rgba(23,21,18,0.07);
   }
   .glass-surface {
-    background: rgba(255,255,255,0.64);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid rgba(0,0,0,0.05);
+    background: #FBF8F2;
+    border: 1px solid #E6DFD2;
   }
+
   .focus-ring {
     @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-base;
   }
-  .ambient-glow { animation: breathe 4s ease-in-out infinite; }
+
+  /* The all-caps mono micro-label used for every section heading and data tag. */
+  .label-mono {
+    font-family: var(--font-mono), "JetBrains Mono", ui-monospace, monospace;
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #9A9285;
+  }
+
+  /* Dark surfaces, for the moments that are deliberately not paper: focus
+     sessions and shutdown. */
+  .ink-panel {
+    background: #201D18;
+    border: 1px solid #302C25;
+    color: #FBF8F2;
+  }
 }
 
 @layer utilities {
@@ -87,51 +92,24 @@ body::before {
   .safe-bottom { padding-bottom: max(env(safe-area-inset-bottom), 1rem); }
   .safe-top { padding-top: max(env(safe-area-inset-top), 0.5rem); }
   .shimmer-bg {
-    background: linear-gradient(90deg, rgba(0,0,0,0.04) 25%, rgba(0,0,0,0.08) 50%, rgba(0,0,0,0.04) 75%);
+    background: linear-gradient(90deg, #F1EDE3 25%, #E6DFD2 50%, #F1EDE3 75%);
     background-size: 200% 100%;
     animation: shimmer 2s linear infinite;
   }
-  .text-gradient {
-    background: linear-gradient(135deg, #7C3AED 0%, #8B5CF6 50%, #10B981 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+  /* Was a three-stop violet-to-green gradient. A wordmark that changes hue
+     mid-word is decoration; the accent alone is the brand. */
+  .text-gradient { color: #5B4FE9; }
+  .number-mono {
+    font-family: var(--font-mono), "JetBrains Mono", ui-monospace, monospace;
+    font-feature-settings: "tnum";
+    font-variant-numeric: tabular-nums;
   }
-  .number-mono { font-feature-settings: "tnum"; font-variant-numeric: tabular-nums; }
 }
 
-/* ── Satisfaction glow (task completion) ── */
-@keyframes satisfaction-glow {
-  0%   { box-shadow: inset 0 0 0 0 rgba(16, 185, 129, 0), 0 0 0 0 rgba(16, 185, 129, 0); }
-  30%  { box-shadow: inset 0 0 0 2px rgba(16, 185, 129, 0.3), 0 0 20px rgba(16, 185, 129, 0.15); }
-  100% { box-shadow: inset 0 0 0 0 rgba(16, 185, 129, 0), 0 0 0 0 rgba(16, 185, 129, 0); }
-}
-.animate-satisfaction {
-  animation: satisfaction-glow 1s ease-out forwards;
-}
-
-/* ── Day Won gradient transition ── */
-.day-won-bg::before {
-  background:
-    radial-gradient(50rem 36rem at 50% -10%, rgba(245, 158, 11, 0.12), transparent 60%),
-    radial-gradient(40rem 30rem at 80% 90%, rgba(16, 185, 129, 0.08), transparent 60%),
-    radial-gradient(30rem 24rem at 20% 100%, rgba(124, 58, 237, 0.06), transparent 60%) !important;
-  transition: background 4s ease;
-}
-
-/* ── Evening mode (adaptive) ── */
-html.evening body {
-  transition: background 3s ease;
-}
-html.evening body::before {
-  background:
-    radial-gradient(38rem 28rem at 8% -6%, rgba(245, 158, 11, 0.08), transparent 60%),
-    radial-gradient(34rem 26rem at 100% 8%, rgba(245, 158, 11, 0.06), transparent 60%),
-    radial-gradient(30rem 24rem at 12% 100%, rgba(245, 158, 11, 0.04), transparent 60%) !important;
-  transition: background 3s ease;
-}
-html.night body::before {
-  background:
-    radial-gradient(30rem 24rem at 50% 0%, rgba(124, 58, 237, 0.04), transparent 60%) !important;
-  transition: background 3s ease;
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

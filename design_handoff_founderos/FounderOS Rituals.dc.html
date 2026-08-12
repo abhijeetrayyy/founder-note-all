@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@0.446.0/dist/umd/lucide.min.js"></script>
+<style>
+  body { margin:0; background:#F6F3EC; -webkit-font-smoothing:antialiased; }
+  * { box-sizing:border-box; }
+  a { color:#5B4FE9; text-decoration:none; }
+  a:hover { color:#3E32C7; }
+  ::selection { background:#DCD8FC; }
+</style>
+</helmet>
+
+<div style="min-height:100vh;background:#F6F3EC;color:#171512;font-family:'Instrument Sans',system-ui,sans-serif;display:flex;flex-direction:column">
+
+  <div style="flex:none;display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid #E6DFD2;background:#FBF8F2;overflow-x:auto">
+    <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#A69E90;flex:none;padding-right:6px">Guided flows</span>
+    <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="9">
+      <button onClick="{{ t.go }}" style="{{ t.style }}">{{ t.label }}</button>
+    </sc-for>
+  </div>
+
+  <div style="flex:1;display:flex;align-items:stretch;justify-content:center;padding:0">
+
+    <sc-if value="{{ isPlan }}" hint-placeholder-val="{{ true }}">
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:56px 28px;position:relative">
+        <div style="position:absolute;top:26px;left:0;right:0;display:flex;justify-content:center">
+          <div style="display:flex;align-items:center;gap:10px">
+            <sc-for list="{{ planDots }}" as="d" hint-placeholder-count="4">
+              <span style="{{ d.style }}"></span>
+            </sc-for>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#A69E90;margin-left:8px">step 2 of 4 · 38 seconds in</span>
+          </div>
+        </div>
+
+        <div style="width:100%;max-width:660px">
+          <p style="margin:0;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:#9A9285">Morning plan · Wednesday</p>
+          <h1 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:52px;line-height:1.02;letter-spacing:-0.02em;margin:14px 0 0">Pick the three that would make today count.</h1>
+          <p style="margin:14px 0 0;font-size:17px;line-height:1.55;color:#57514A">You said <strong style="font-weight:600">Deep</strong> energy, so I put the hard one first. Everything you leave here goes on the anti-list — named, not forgotten.</p>
+
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:32px">
+            <sc-for list="{{ planCandidates }}" as="c" hint-placeholder-count="6">
+              <button onClick="{{ c.toggle }}" style="{{ c.style }}">
+                <span style="{{ c.numStyle }}">{{ c.num }}</span>
+                <span style="flex:1;text-align:left;min-width:0">
+                  <span style="display:block;font-size:16px;line-height:1.35;font-weight:500">{{ c.text }}</span>
+                  <span style="display:block;font-size:12.5px;color:#8A8378;margin-top:4px">{{ c.why }}</span>
+                </span>
+                <span style="{{ c.energyStyle }}">{{ c.energy }}</span>
+              </button>
+            </sc-for>
+          </div>
+
+          <div style="margin-top:26px;padding:18px 20px;border-radius:14px;{{ capacityBoxStyle }}">
+            <div style="display:flex;align-items:center;gap:10px">
+              <i data-lucide="{{ capacityIcon }}" width="16" height="16"></i>
+              <p style="margin:0;font-size:14.5px;font-weight:600">{{ capacityHeadline }}</p>
+            </div>
+            <p style="margin:8px 0 0;font-size:13.5px;line-height:1.55">{{ capacityBody }}</p>
+          </div>
+
+          <div style="display:flex;gap:10px;margin-top:26px;flex-wrap:wrap">
+            <button style="{{ planCtaStyle }}">{{ planCtaLabel }}</button>
+            <button style="border:1px solid #E0D9CB;border-radius:12px;background:#FFFDF8;font-family:inherit;font-size:14.5px;color:#6B6459;padding:14px 18px;cursor:pointer" style-hover="border-color:#171512;color:#171512">Back</button>
+            <button style="border:none;background:transparent;font-family:inherit;font-size:13.5px;color:#A69E90;padding:14px 8px;cursor:pointer" style-hover="color:#171512">Skip the ritual today</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isOver }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:56px 28px;background:#EFE9DE">
+        <div style="width:100%;max-width:560px;background:#FFFDF8;border:1px solid #F0D3C6;border-radius:20px;box-shadow:0 40px 80px -40px rgba(23,21,18,0.4);overflow:hidden">
+          <div style="padding:28px 30px;background:#FDF6F2;border-bottom:1px solid #F0D3C6">
+            <div style="display:flex;align-items:center;gap:10px;color:#D9552F">
+              <i data-lucide="alert-triangle" width="17" height="17"></i>
+              <p style="margin:0;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase">Over capacity</p>
+            </div>
+            <h2 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:34px;line-height:1.1;margin:12px 0 0">This is a four-deep day. You have three.</h2>
+            <p style="margin:12px 0 0;font-size:14.5px;line-height:1.55;color:#8A6553">Every founder who plans a four-deep day finishes two and feels like a failure. Cut one now and finish three.</p>
+          </div>
+          <div style="padding:22px 30px">
+            <p style="margin:0 0 12px;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.12em;text-transform:uppercase;color:#9A9285">Pick one to move</p>
+            <sc-for list="{{ overCandidates }}" as="o" hint-placeholder-count="3">
+              <div style="display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid #F2ECE1">
+                <span style="flex:1;font-size:15px;line-height:1.35">{{ o.text }}</span>
+                <button style="height:32px;padding:0 12px;border-radius:9px;border:1px solid #E0D9CB;background:#FBF8F2;font-family:inherit;font-size:12.5px;cursor:pointer;flex:none" style-hover="border-color:#5B4FE9;color:#5B4FE9">{{ o.action }}</button>
+              </div>
+            </sc-for>
+            <p style="margin:16px 0 0;font-size:13px;line-height:1.55;color:#8A8378">Whatever you move lands on the anti-list with a reason. Not deleted — just not today.</p>
+          </div>
+          <div style="padding:16px 30px;background:#FBF8F2;border-top:1px solid #EFE9DD;display:flex;gap:10px;align-items:center">
+            <button style="border:none;border-radius:11px;background:#171512;color:#FBF8F2;font-family:inherit;font-size:14px;font-weight:500;padding:12px 18px;cursor:pointer" style-hover="background:#5B4FE9">Move it and commit</button>
+            <button style="border:none;background:transparent;font-family:inherit;font-size:13px;color:#A69E90;padding:12px 6px;cursor:pointer" style-hover="color:#D9552F">Commit anyway, I know the risk</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isPreflight }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:56px 28px;background:#171512">
+        <div style="width:100%;max-width:620px">
+          <p style="margin:0;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:#8B8272">Pre-flight · deep work, 50 minutes</p>
+          <h1 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:46px;line-height:1.05;letter-spacing:-0.02em;margin:14px 0 0;color:#FBF8F2">Rewrite the pricing page hero copy</h1>
+          <div style="margin-top:28px;padding:20px;border-radius:15px;background:#201D18;border:1px solid #302C25">
+            <p style="margin:0;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.12em;text-transform:uppercase;color:#8B8272">Your first move</p>
+            <p style="margin:9px 0 0;font-size:16px;line-height:1.5;color:#E7E1D6">Open the doc and write three bad headlines. Bad ones. Two minutes.</p>
+          </div>
+          <div style="margin-top:16px">
+            <p style="margin:0 0 9px;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.12em;text-transform:uppercase;color:#8B8272">In one line — what does done look like?</p>
+            <div style="padding:16px 18px;border-radius:13px;background:#201D18;border:1px solid #3A3550;font-size:16px;color:#FBF8F2;line-height:1.45">A subhead I would actually ship<span style="display:inline-block;width:2px;height:18px;background:#5B4FE9;vertical-align:-3px;margin-left:2px"></span></div>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:9px;margin-top:20px">
+            <span style="display:inline-flex;align-items:center;gap:8px;font-size:13px;color:#B3AB9C;border:1px solid #302C25;padding:9px 13px;border-radius:10px"><i data-lucide="bell-off" width="14" height="14"></i> Notifications muted</span>
+            <span style="display:inline-flex;align-items:center;gap:8px;font-size:13px;color:#B3AB9C;border:1px solid #302C25;padding:9px 13px;border-radius:10px"><i data-lucide="inbox" width="14" height="14"></i> Triage hidden until done</span>
+            <span style="display:inline-flex;align-items:center;gap:8px;font-size:13px;color:#B3AB9C;border:1px solid #302C25;padding:9px 13px;border-radius:10px"><i data-lucide="command" width="14" height="14"></i> ⌘K still works</span>
+          </div>
+          <button style="margin-top:28px;border:none;border-radius:13px;background:#5B4FE9;color:#fff;font-family:inherit;font-size:16px;font-weight:600;padding:16px 26px;display:flex;align-items:center;gap:10px;cursor:pointer" style-hover="background:#6E63FF">
+            <i data-lucide="play" width="17" height="17"></i> Begin · 50 minutes
+          </button>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isRunning }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:56px 28px;background:#171512;position:relative">
+        <p style="margin:0;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#6E675C">Deep work · nothing else on this screen</p>
+        <div style="position:relative;width:340px;height:340px;margin-top:34px">
+          <svg viewBox="0 0 340 340" style="width:340px;height:340px;transform:rotate(-90deg)">
+            <circle cx="170" cy="170" r="156" fill="none" stroke="#2A251E" stroke-width="8"></circle>
+            <circle cx="170" cy="170" r="156" fill="none" stroke="#5B4FE9" stroke-width="8" stroke-linecap="round" stroke-dasharray="980" stroke-dashoffset="323"></circle>
+          </svg>
+          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:62px;font-weight:500;letter-spacing:-0.03em;color:#FBF8F2">33:12</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#6E675C">17 min elapsed</span>
+          </div>
+        </div>
+        <p style="margin:32px 0 0;font-family:'Instrument Serif',serif;font-size:30px;line-height:1.2;color:#FBF8F2;text-align:center;max-width:520px">Rewrite the pricing page hero copy</p>
+        <p style="margin:10px 0 0;font-size:14.5px;color:#8B8272;text-align:center">Done looks like: a subhead I would actually ship</p>
+        <div style="display:flex;gap:10px;margin-top:30px;flex-wrap:wrap;justify-content:center">
+          <button style="border:1px solid #3A362F;border-radius:12px;background:transparent;color:#E7E1D6;font-family:inherit;font-size:14px;padding:13px 20px;cursor:pointer" style-hover="border-color:#8B8272">Pause</button>
+          <button onClick="{{ goPark }}" style="border:1px solid #3A362F;border-radius:12px;background:transparent;color:#E7E1D6;font-family:inherit;font-size:14px;padding:13px 20px;cursor:pointer;display:flex;align-items:center;gap:8px" style-hover="border-color:#A79DFF;color:#A79DFF"><i data-lucide="zap" width="15" height="15"></i> Park a thought · ⌘K</button>
+          <button style="border:none;border-radius:12px;background:#2A251E;color:#8B8272;font-family:inherit;font-size:14px;padding:13px 20px;cursor:pointer" style-hover="background:#3A362F;color:#E7E1D6">End early</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isPark }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;display:flex;align-items:flex-start;justify-content:center;padding:14vh 28px 0;background:#171512">
+        <div style="width:100%;max-width:600px">
+          <div style="border-radius:18px;background:#FBF8F2;border:1px solid #E0D9CB;box-shadow:0 40px 80px -30px rgba(0,0,0,0.7);overflow:hidden">
+            <div style="padding:18px 20px;border-bottom:1px solid #EFE9DD;display:flex;align-items:center;gap:12px">
+              <i data-lucide="zap" width="17" height="17" style="color:#5B4FE9"></i>
+              <span style="font-size:16px;color:#171512">check if Stripe supports the new tier mid-cycle</span>
+              <span style="width:2px;height:19px;background:#5B4FE9;display:inline-block"></span>
+            </div>
+            <div style="padding:14px 20px;display:flex;gap:7px;flex-wrap:wrap">
+              <span style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:8px;font-size:12.5px;background:#EFECFE;color:#4A3EDA"><span style="font-family:'JetBrains Mono',monospace;font-size:10px;opacity:0.7">project</span>Pricing</span>
+              <span style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:8px;font-size:12.5px;background:#E4F6F2;color:#0E8C7E"><span style="font-family:'JetBrains Mono',monospace;font-size:10px;opacity:0.7">energy</span>Admin</span>
+            </div>
+            <div style="padding:12px 20px;border-top:1px solid #EFE9DD;background:#F1EDE3;display:flex;align-items:center;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:11px;color:#8A8378">
+              <span>↵ park it · esc to cancel</span><span>timer keeps running · 33:12</span>
+            </div>
+          </div>
+          <p style="margin:18px 0 0;text-align:center;font-size:14px;color:#6E675C;line-height:1.55">Parked, not opened. You will see it in triage after the block — that is the whole point.</p>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isComplete }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:56px 28px">
+        <div style="width:100%;max-width:600px">
+          <p style="margin:0;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:#9A9285">Session complete · 50 minutes, no pauses</p>
+          <h1 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:46px;line-height:1.04;letter-spacing:-0.02em;margin:14px 0 0">That is your deep block done. <span style="font-style:italic;color:#5B4FE9">Before you move —</span></h1>
+          <div style="margin-top:28px;border:1px solid #E6DFD2;border-radius:18px;background:#FFFDF8;padding:24px">
+            <p style="margin:0;font-size:14.5px;font-weight:600">How did it actually feel?</p>
+            <p style="margin:6px 0 0;font-size:13px;color:#8A8378;line-height:1.5">This is what teaches the app the real shape of your week.</p>
+            <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+              <sc-for list="{{ feelOptions }}" as="f" hint-placeholder-count="4">
+                <button style="{{ f.style }}">{{ f.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+          <div style="margin-top:14px;border:1px solid #E6DFD2;border-radius:18px;background:#FFFDF8;padding:24px">
+            <p style="margin:0;font-size:14.5px;font-weight:600">Is the loop closed?</p>
+            <div style="display:flex;gap:9px;margin-top:14px;flex-wrap:wrap">
+              <button style="border:none;border-radius:11px;background:#5B4FE9;color:#fff;font-family:inherit;font-size:14px;font-weight:600;padding:12px 18px;cursor:pointer;display:flex;align-items:center;gap:8px" style-hover="background:#4A3EDA"><i data-lucide="check" width="15" height="15"></i> Shipped it</button>
+              <button style="border:1px solid #E0D9CB;border-radius:11px;background:#FBF8F2;font-family:inherit;font-size:14px;color:#171512;padding:12px 18px;cursor:pointer" style-hover="border-color:#171512">Progress, needs another block</button>
+            </div>
+            <p style="margin:14px 0 0;padding:13px 15px;border-radius:11px;background:#E4F6F2;font-size:13.5px;line-height:1.55;color:#0E6B60">Mind pressure just dropped 34 → 29. One thing parked during the block is waiting in triage.</p>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap">
+            <button style="border:none;border-radius:12px;background:#171512;color:#FBF8F2;font-family:inherit;font-size:14.5px;font-weight:500;padding:14px 20px;cursor:pointer" style-hover="background:#5B4FE9">Take the 10 minute break</button>
+            <button style="border:1px solid #E0D9CB;border-radius:12px;background:#FFFDF8;font-family:inherit;font-size:14.5px;color:#6B6459;padding:14px 18px;cursor:pointer" style-hover="border-color:#171512;color:#171512">Back to today</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isDelegate }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:56px 28px;background:#EFE9DE">
+        <div style="width:100%;max-width:620px;background:#FFFDF8;border:1px solid #E0D9CB;border-radius:20px;box-shadow:0 40px 80px -40px rgba(23,21,18,0.4);overflow:hidden">
+          <div style="padding:26px 30px;border-bottom:1px solid #EFE9DD">
+            <div style="display:flex;align-items:center;gap:10px;color:#0E8C7E">
+              <i data-lucide="user-plus" width="17" height="17"></i>
+              <p style="margin:0;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase">Should this be yours?</p>
+            </div>
+            <h2 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:32px;line-height:1.1;margin:12px 0 0">Reply to Meera about the advisor agreement</h2>
+            <p style="margin:11px 0 0;font-size:14px;line-height:1.55;color:#6B6459">Fourteen days old and it has moved three times. That usually means it is not actually your job — it is just sitting closest to you.</p>
+          </div>
+          <div style="padding:24px 30px">
+            <p style="margin:0 0 11px;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.12em;text-transform:uppercase;color:#9A9285">Hand it to</p>
+            <div style="display:flex;gap:9px;flex-wrap:wrap">
+              <sc-for list="{{ people }}" as="p" hint-placeholder-count="3">
+                <button style="{{ p.style }}"><span style="{{ p.avStyle }}">{{ p.initials }}</span>{{ p.name }}</button>
+              </sc-for>
+            </div>
+            <p style="margin:22px 0 11px;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.12em;text-transform:uppercase;color:#9A9285">Drafted for you — edit before sending</p>
+            <div style="border:1px solid #E6DFD2;border-radius:13px;background:#FBF8F2;padding:16px;font-size:14.5px;line-height:1.6;color:#413B34">Hey Priya — can you take the advisor agreement thread with Meera? Context: she is waiting on the vesting schedule and our standard 4-year/1-year terms apply. Needs a reply by Friday. Shout if you hit anything unusual.</div>
+            <div style="display:flex;align-items:center;gap:12px;margin-top:16px;font-size:13px;color:#8A8378">
+              <i data-lucide="bell" width="14" height="14"></i> I will check back in 3 days if nothing moves.
+            </div>
+          </div>
+          <div style="padding:16px 30px;background:#FBF8F2;border-top:1px solid #EFE9DD;display:flex;gap:10px;align-items:center">
+            <button style="border:none;border-radius:11px;background:#0E8C7E;color:#fff;font-family:inherit;font-size:14px;font-weight:600;padding:12px 18px;cursor:pointer">Send and close the loop</button>
+            <button style="border:none;background:transparent;font-family:inherit;font-size:13px;color:#A69E90;padding:12px 6px;cursor:pointer" style-hover="color:#171512">Keep it, it really is mine</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isRapid }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:56px 28px">
+        <div style="width:100%;max-width:680px;text-align:center">
+          <div style="display:flex;align-items:center;justify-content:center;gap:12px">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#9A9285">Rapid triage</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#5B4FE9">3 of 7</span>
+          </div>
+          <div style="display:flex;gap:5px;justify-content:center;margin-top:12px">
+            <sc-for list="{{ rapidDots }}" as="d" hint-placeholder-count="7">
+              <span style="{{ d.style }}"></span>
+            </sc-for>
+          </div>
+          <div style="margin-top:40px;border:1px solid #F0D3C6;border-radius:20px;background:#FDF6F2;padding:44px 40px">
+            <p style="margin:0;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:#D9552F">16 days old · rotting</p>
+            <h1 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:42px;line-height:1.1;letter-spacing:-0.02em;margin:16px 0 0">Decide on the pricing model change</h1>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:20px">
+            <sc-for list="{{ rapidActions }}" as="a" hint-placeholder-count="4">
+              <button style="{{ a.style }}">
+                <i data-lucide="{{ a.icon }}" width="18" height="18"></i>
+                <span style="font-size:14.5px;font-weight:600">{{ a.label }}</span>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#A69E90">{{ a.key }}</span>
+              </button>
+            </sc-for>
+          </div>
+          <p style="margin:22px 0 0;font-size:13.5px;color:#8A8378">Keyboard only. Four keys, seven loops, ninety seconds — then the list is genuinely empty.</p>
+        </div>
+      </div>
+    </sc-if>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:900},&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;plan&quot;,&quot;over&quot;,&quot;preflight&quot;,&quot;running&quot;,&quot;park&quot;,&quot;complete&quot;,&quot;rapid&quot;,&quot;delegate&quot;],&quot;default&quot;:&quot;plan&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+const TABS = [
+  { id: "plan", label: "Morning · pick three" },
+  { id: "over", label: "Over capacity" },
+  { id: "preflight", label: "Focus · pre-flight" },
+  { id: "running", label: "Focus · running" },
+  { id: "park", label: "Park a thought" },
+  { id: "complete", label: "Session complete" },
+  { id: "rapid", label: "Rapid triage" },
+  { id: "delegate", label: "Delegate handoff" }
+];
+
+const ENERGY = { Admin: "#0E8C7E", Medium: "#2E6BD0", Deep: "#5B4FE9" };
+
+const CANDIDATES = [
+  { text: "Rewrite the pricing page hero copy", why: "Due today · blocks the launch email", energy: "Deep" },
+  { text: "Draft the Series A narrative — section one", why: "Goal: close the seed · nothing moved it in 6 days", energy: "Deep" },
+  { text: "Call Nikhil re: seed terms", why: "He is waiting · 3pm slot held", energy: "Medium" },
+  { text: "Interview a churned user", why: "Two booked, needs one hour", energy: "Medium" },
+  { text: "Ship onboarding email #2", why: "Half written since Monday", energy: "Medium" },
+  { text: "Approve the invoice batch", why: "Five minutes, low stakes", energy: "Admin" }
+];
+
+class Component extends DCLogic {
+  state = { screen: null, picked: [0, 2] };
+
+  componentDidMount() { this.icons(); }
+  componentDidUpdate() { this.icons(); }
+  componentWillUnmount() { clearInterval(this._w); }
+  icons() {
+    if (window.lucide) { try { window.lucide.createIcons(); } catch (e) {} }
+    else if (!this._w) {
+      this._w = setInterval(() => { if (window.lucide) { clearInterval(this._w); this._w = null; window.lucide.createIcons(); } }, 200);
+    }
+  }
+
+  go(id) { return () => { this.setState({ screen: id }); window.scrollTo(0, 0); }; }
+
+  toggle(i) {
+    return () => this.setState(s => ({
+      picked: s.picked.includes(i) ? s.picked.filter(x => x !== i) : s.picked.concat(i)
+    }));
+  }
+
+  renderVals() {
+    const s = this.state.screen || this.props.startScreen || "plan";
+    const picked = this.state.picked;
+    const deepPicked = picked.filter(i => CANDIDATES[i].energy === "Deep").length;
+    const over = picked.length > 3 || deepPicked > 3;
+
+    return {
+      tabs: TABS.map(t => ({
+        ...t,
+        go: this.go(t.id),
+        style: "flex:none;padding:8px 13px;border-radius:9px;font-family:inherit;font-size:12.5px;cursor:pointer;border:1px solid "
+          + (t.id === s ? "#5B4FE9;background:#5B4FE9;color:#fff;font-weight:600" : "#E0D9CB;background:#FFFDF8;color:#6B6459")
+      })),
+      isPlan: s === "plan", isOver: s === "over", isPreflight: s === "preflight", isRunning: s === "running",
+      isPark: s === "park", isComplete: s === "complete", isRapid: s === "rapid", isDelegate: s === "delegate",
+      goPark: this.go("park"),
+
+      planDots: [0, 1, 2, 3].map(i => ({
+        style: "width:38px;height:4px;border-radius:99px;display:block;background:" + (i <= 1 ? "#5B4FE9" : "#E1DACB")
+      })),
+      planCandidates: CANDIDATES.map((c, i) => {
+        const on = picked.includes(i);
+        const rank = on ? picked.indexOf(i) + 1 : null;
+        return {
+          ...c,
+          toggle: this.toggle(i),
+          style: "width:100%;display:flex;align-items:center;gap:14px;padding:17px 19px;border-radius:14px;font-family:inherit;cursor:pointer;text-align:left;transition:border-color .15s;border:1px solid "
+            + (on ? "#5B4FE9;background:#F4F2FF" : "#E0D9CB;background:#FFFDF8"),
+          numStyle: "flex:none;width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:11px;"
+            + (on ? "background:#5B4FE9;color:#fff" : "background:#F1EDE3;color:#A69E90"),
+          num: on ? String(rank).padStart(2, "0") : "—",
+          energyStyle: "flex:none;font-size:11.5px;font-weight:500;padding:5px 10px;border-radius:7px;color:" + ENERGY[c.energy] + ";background:" + ENERGY[c.energy] + "14",
+          energy: c.energy
+        };
+      }),
+      capacityBoxStyle: over
+        ? "background:#FDF6F2;border:1px solid #F0D3C6;color:#8A4A2E"
+        : "background:#E4F6F2;border:1px solid #BFE9E1;color:#0E6B60",
+      capacityIcon: over ? "alert-triangle" : "check-circle-2",
+      capacityHeadline: over
+        ? "That is more than today holds"
+        : picked.length + " picked · " + deepPicked + " of 3 deep units",
+      capacityBody: over
+        ? "You are past your capacity. Drop one before you commit — the day will drop it for you otherwise, and you will not get to choose which."
+        : "This fits. The rest of the list goes on the anti-list with a reason, so it stops chasing you.",
+      planCtaStyle: "border:none;border-radius:12px;font-family:inherit;font-size:14.5px;font-weight:600;padding:14px 22px;cursor:pointer;color:#fff;background:"
+        + (over ? "#D9552F" : "#171512"),
+      planCtaLabel: over ? "Fix the overcommit" : "Next: name the blocker",
+
+      overCandidates: [
+        { text: "Draft the Series A narrative — section one", action: "Move to Thu" },
+        { text: "Interview a churned user", action: "Move to Fri" },
+        { text: "Rewrite the pricing page hero copy", action: "Not this week" }
+      ],
+
+      feelOptions: ["Flow — best block this week", "Solid", "Fought it the whole time", "Wrong task for this energy"].map((l, i) => ({
+        label: l,
+        style: "padding:11px 15px;border-radius:11px;font-family:inherit;font-size:13.5px;cursor:pointer;border:1px solid "
+          + (i === 0 ? "#5B4FE9;background:#EFECFE;color:#4A3EDA;font-weight:600" : "#E0D9CB;background:#FBF8F2;color:#6B6459")
+      })),
+
+      people: [
+        { name: "Priya", initials: "P" }, { name: "Rahul", initials: "R" }, { name: "Ops inbox", initials: "O" }
+      ].map((p, i) => ({
+        ...p,
+        style: "display:flex;align-items:center;gap:9px;padding:9px 14px 9px 9px;border-radius:11px;font-family:inherit;font-size:14px;cursor:pointer;border:1px solid "
+          + (i === 0 ? "#0E8C7E;background:#E4F6F2;color:#0E6B60;font-weight:600" : "#E0D9CB;background:#FBF8F2;color:#413B34"),
+        avStyle: "width:24px;height:24px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:600;"
+          + (i === 0 ? "background:#0E8C7E;color:#fff" : "background:#E7E0D2;color:#8A8378")
+      })),
+
+      rapidDots: [0, 1, 2, 3, 4, 5, 6].map(i => ({
+        style: "width:26px;height:5px;border-radius:99px;display:block;background:" + (i < 2 ? "#5B4FE9" : i === 2 ? "#171512" : "#E1DACB")
+      })),
+      rapidActions: [
+        { label: "Do it", icon: "play", key: "1", tone: "#5B4FE9" },
+        { label: "Schedule", icon: "calendar", key: "2", tone: "#2E6BD0" },
+        { label: "Hand off", icon: "user-plus", key: "3", tone: "#0E8C7E" },
+        { label: "Drop", icon: "x", key: "4", tone: "#D9552F" }
+      ].map(a => ({
+        ...a,
+        style: "display:flex;flex-direction:column;align-items:center;gap:7px;padding:20px 10px;border-radius:14px;background:#FFFDF8;font-family:inherit;cursor:pointer;color:"
+          + a.tone + ";border:1px solid #E0D9CB"
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>

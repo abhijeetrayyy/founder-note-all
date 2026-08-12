@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@0.446.0/dist/umd/lucide.min.js"></script>
+<style>
+  body { margin:0; background:#F6F3EC; -webkit-font-smoothing:antialiased; }
+  * { box-sizing:border-box; }
+  a { color:#5B4FE9; text-decoration:none; }
+  a:hover { color:#3E32C7; }
+  ::selection { background:#DCD8FC; }
+</style>
+</helmet>
+
+<div style="background:#F6F3EC;color:#171512;font-family:'Instrument Sans',system-ui,sans-serif">
+
+  <section style="max-width:1240px;margin:0 auto;padding:72px 32px 0">
+    <div style="display:flex;align-items:baseline;gap:14px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#9A9285">
+      <span style="width:26px;height:1px;background:#D8D0C0;display:block"></span> Product blueprint · v1
+    </div>
+    <h1 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:74px;line-height:0.98;letter-spacing:-0.025em;margin:22px 0 0;max-width:900px">
+      A founder does not have a task problem.<br><span style="font-style:italic;color:#5B4FE9">They have an open-loop problem.</span>
+    </h1>
+    <p style="font-size:19px;line-height:1.55;color:#57514A;max-width:660px;margin:24px 0 0;text-wrap:pretty">
+      Every existing tool measures how much you completed. That is the wrong number — it goes up when you add more, so it can never make you feel better. FounderOS measures the pressure in your head and is designed to bring it <em>down</em>. Everything below follows from that one decision.
+    </p>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:52px">
+      <div style="border-top:2px solid #171512;padding-top:20px">
+        <p style="margin:0;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.13em;text-transform:uppercase;color:#9A9285">Wrong unit</p>
+        <h3 style="font-size:20px;font-weight:600;margin:10px 0 0;letter-spacing:-0.01em">The unit is a loop, not a task</h3>
+        <p style="font-size:14.5px;line-height:1.6;color:#6B6459;margin:9px 0 0">A worry, a decision you keep deferring, a person you owe a reply, a number you have not looked at. Tasks are only the loops that already got named.</p>
+      </div>
+      <div style="border-top:2px solid #171512;padding-top:20px">
+        <p style="margin:0;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.13em;text-transform:uppercase;color:#9A9285">Wrong direction</p>
+        <h3 style="font-size:20px;font-weight:600;margin:10px 0 0;letter-spacing:-0.01em">The list must be able to shrink</h3>
+        <p style="font-size:14.5px;line-height:1.6;color:#6B6459;margin:9px 0 0">Loops decay. At seven days they go amber, at fourteen the app stops you and forces one of four answers. Nothing gets to sit there quietly generating guilt.</p>
+      </div>
+      <div style="border-top:2px solid #171512;padding-top:20px">
+        <p style="margin:0;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.13em;text-transform:uppercase;color:#9A9285">Wrong assumption</p>
+        <h3 style="font-size:20px;font-weight:600;margin:10px 0 0;letter-spacing:-0.01em">A day has capacity, not slots</h3>
+        <p style="font-size:14.5px;line-height:1.6;color:#6B6459;margin:9px 0 0">Three deep units, four medium, eight admin. You cannot plan past it — the planner physically refuses. Burnout is an overcommit bug, so we fix it at input.</p>
+      </div>
+    </div>
+  </section>
+
+  <section style="background:#171512;color:#F6F3EC;margin-top:110px;padding:96px 0">
+    <div style="max-width:1240px;margin:0 auto;padding:0 32px">
+      <div style="display:flex;align-items:baseline;gap:14px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#8B8272">
+        <span style="width:26px;height:1px;background:#3A362F;display:block"></span> The loop
+      </div>
+      <h2 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:52px;line-height:1.05;letter-spacing:-0.02em;margin:18px 0 0;max-width:760px;color:#FBF8F2">
+        Six stages. Every screen in the app belongs to exactly one.
+      </h2>
+      <p style="font-size:16.5px;line-height:1.6;color:#B3AB9C;max-width:620px;margin:16px 0 0">If a feature does not sit on this ring, it does not ship. That is how the app stays small while the problem stays big.</p>
+
+      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-top:52px">
+        <sc-for list="{{ loop }}" as="l" hint-placeholder-count="6">
+          <div style="border-top:1px solid #302C25;padding-top:20px">
+            <div style="display:flex;align-items:center;gap:9px">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#5B4FE9">{{ l.n }}</span>
+              <i data-lucide="{{ l.icon }}" width="16" height="16" style="color:#A79DFF"></i>
+            </div>
+            <h3 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:26px;margin:12px 0 0;color:#FBF8F2">{{ l.name }}</h3>
+            <p style="font-size:13.5px;line-height:1.55;color:#B3AB9C;margin:9px 0 0">{{ l.body }}</p>
+            <p style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#6E675C;margin:12px 0 0">{{ l.when }}</p>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <section style="max-width:1240px;margin:0 auto;padding:110px 32px 0">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:40px;flex-wrap:wrap">
+      <div>
+        <div style="display:flex;align-items:baseline;gap:14px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#9A9285">
+          <span style="width:26px;height:1px;background:#D8D0C0;display:block"></span> Signature mechanics
+        </div>
+        <h2 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:52px;line-height:1.05;letter-spacing:-0.02em;margin:18px 0 0;max-width:700px">
+          The eight things no other tool does.
+        </h2>
+      </div>
+      <p style="font-size:15.5px;line-height:1.6;color:#6B6459;max-width:340px">Strip these out and we are a to-do app. These are the product.</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;margin-top:48px;background:#E6DFD2;border:1px solid #E6DFD2;border-radius:20px;overflow:hidden">
+      <sc-for list="{{ mechanics }}" as="m" hint-placeholder-count="8">
+        <div style="background:#FFFDF8;padding:28px 24px;display:flex;flex-direction:column;gap:10px" style-hover="background:#FFFFFF">
+          <div style="width:34px;height:34px;border-radius:10px;background:#F1EEFF;display:flex;align-items:center;justify-content:center;color:#5B4FE9"><i data-lucide="{{ m.icon }}" width="17" height="17"></i></div>
+          <h3 style="font-size:17px;font-weight:600;letter-spacing:-0.01em;margin:6px 0 0">{{ m.title }}</h3>
+          <p style="font-size:14px;line-height:1.6;color:#6B6459;margin:0;flex:1">{{ m.body }}</p>
+          <p style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#A69E90;margin:0;border-top:1px solid #F2ECE1;padding-top:10px">{{ m.where }}</p>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section style="max-width:1240px;margin:0 auto;padding:110px 32px 0">
+    <div style="display:flex;align-items:baseline;gap:14px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#9A9285">
+      <span style="width:26px;height:1px;background:#D8D0C0;display:block"></span> Complete page map
+    </div>
+    <h2 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:52px;line-height:1.05;letter-spacing:-0.02em;margin:18px 0 0;max-width:720px">
+      Every page, sub-page and modal — <span style="font-style:italic">grouped by the stage it serves.</span>
+    </h2>
+    <p style="font-size:16.5px;line-height:1.6;color:#57514A;max-width:620px;margin:16px 0 0">Solid rows are routes. Indented rows are sub-views inside that route. Dashed rows are modals or sheets that can open from anywhere.</p>
+
+    <div style="display:flex;flex-direction:column;gap:16px;margin-top:44px">
+      <sc-for list="{{ lanes }}" as="lane" hint-placeholder-count="7">
+        <div style="border:1px solid #E6DFD2;border-radius:20px;background:#FFFDF8;overflow:hidden">
+          <div style="display:flex;align-items:center;gap:14px;padding:18px 24px;background:#F1EDE3;border-bottom:1px solid #E6DFD2">
+            <span style="width:30px;height:30px;border-radius:9px;background:#171512;color:#FBF8F2;display:flex;align-items:center;justify-content:center;flex:none"><i data-lucide="{{ lane.icon }}" width="15" height="15"></i></span>
+            <h3 style="margin:0;font-size:17px;font-weight:600;letter-spacing:-0.01em">{{ lane.name }}</h3>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#9A9285">{{ lane.note }}</span>
+            <span style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:11px;color:#9A9285">{{ lane.count }}</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:#F2ECE1">
+            <sc-for list="{{ lane.pages }}" as="p" hint-placeholder-count="4">
+              <div style="background:#FFFDF8;padding:20px 24px">
+                <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
+                  <h4 style="margin:0;font-size:15.5px;font-weight:600">{{ p.name }}</h4>
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#5B4FE9">{{ p.route }}</span>
+                </div>
+                <p style="margin:7px 0 0;font-size:13.5px;line-height:1.6;color:#6B6459">{{ p.job }}</p>
+                <div style="display:flex;flex-direction:column;gap:6px;margin-top:12px">
+                  <sc-for list="{{ p.children }}" as="c" hint-placeholder-count="3">
+                    <div style="display:flex;align-items:flex-start;gap:9px;padding-left:12px;border-left:{{ c.rule }}">
+                      <span style="{{ c.tagStyle }}">{{ c.tag }}</span>
+                      <span style="font-size:13px;line-height:1.5;color:#413B34">{{ c.text }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section style="max-width:1240px;margin:0 auto;padding:110px 32px 0">
+    <div style="display:flex;align-items:baseline;gap:14px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#9A9285">
+      <span style="width:26px;height:1px;background:#D8D0C0;display:block"></span> The three flows that matter
+    </div>
+    <h2 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:52px;line-height:1.05;letter-spacing:-0.02em;margin:18px 0 0;max-width:720px">
+      Get these right and the rest is furniture.
+    </h2>
+
+    <div style="display:flex;flex-direction:column;gap:20px;margin-top:44px">
+      <sc-for list="{{ flows }}" as="f" hint-placeholder-count="3">
+        <div style="border:1px solid #E6DFD2;border-radius:20px;background:#FFFDF8;padding:28px 30px">
+          <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap">
+            <h3 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:30px;margin:0;letter-spacing:-0.015em">{{ f.name }}</h3>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#9A9285">{{ f.budget }}</span>
+          </div>
+          <p style="margin:9px 0 0;font-size:15px;line-height:1.6;color:#6B6459;max-width:760px">{{ f.why }}</p>
+          <div style="display:flex;flex-wrap:wrap;align-items:stretch;gap:10px;margin-top:22px">
+            <sc-for list="{{ f.steps }}" as="s" hint-placeholder-count="5">
+              <div style="flex:1;min-width:170px;border:1px solid #E6DFD2;border-radius:14px;background:#FBF8F2;padding:16px">
+                <p style="margin:0;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.12em;color:#5B4FE9">{{ s.n }}</p>
+                <p style="margin:8px 0 0;font-size:14.5px;font-weight:600;line-height:1.35">{{ s.title }}</p>
+                <p style="margin:6px 0 0;font-size:13px;line-height:1.55;color:#6B6459">{{ s.body }}</p>
+              </div>
+            </sc-for>
+          </div>
+          <p style="margin:18px 0 0;font-size:13.5px;line-height:1.6;color:#413B34;background:#F1EDE3;border-radius:12px;padding:14px 16px"><strong style="font-weight:600">The design rule:</strong> {{ f.rule }}</p>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section style="max-width:1240px;margin:0 auto;padding:110px 32px 0">
+    <div style="display:flex;align-items:baseline;gap:14px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#9A9285">
+      <span style="width:26px;height:1px;background:#D8D0C0;display:block"></span> How data is shown
+    </div>
+    <h2 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:52px;line-height:1.05;letter-spacing:-0.02em;margin:18px 0 0;max-width:760px">
+      Numbers a founder can act on. <span style="font-style:italic">Nothing else on the screen.</span>
+    </h2>
+
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:1px;margin-top:44px;background:#E6DFD2;border:1px solid #E6DFD2;border-radius:20px;overflow:hidden">
+      <sc-for list="{{ dataRules }}" as="d" hint-placeholder-count="6">
+        <div style="background:#FFFDF8;padding:26px 28px">
+          <div style="display:flex;align-items:baseline;gap:12px">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#D9552F;letter-spacing:0.1em;text-transform:uppercase">Never</span>
+            <p style="margin:0;font-size:15px;line-height:1.5;color:#8A8378;text-decoration:line-through">{{ d.never }}</p>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:12px;margin-top:12px">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#0E8C7E;letter-spacing:0.1em;text-transform:uppercase">Instead</span>
+            <p style="margin:0;font-size:15.5px;line-height:1.5;font-weight:500">{{ d.instead }}</p>
+          </div>
+          <p style="margin:12px 0 0;font-size:13.5px;line-height:1.6;color:#6B6459">{{ d.why }}</p>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section style="max-width:1240px;margin:0 auto;padding:110px 32px 120px">
+    <div style="background:#5B4FE9;border-radius:26px;padding:56px 48px;color:#fff">
+      <div style="display:flex;align-items:baseline;gap:14px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.6)">
+        <span style="width:26px;height:1px;background:rgba(255,255,255,0.3);display:block"></span> Build order
+      </div>
+      <h2 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:48px;line-height:1.05;letter-spacing:-0.02em;margin:16px 0 0;max-width:640px">What I design next, in this order.</h2>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:38px">
+        <sc-for list="{{ order }}" as="o" hint-placeholder-count="4">
+          <div style="border-top:1px solid rgba(255,255,255,0.28);padding-top:18px">
+            <p style="margin:0;font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(255,255,255,0.65)">{{ o.n }}</p>
+            <h3 style="font-size:19px;font-weight:600;margin:10px 0 0;letter-spacing:-0.01em">{{ o.title }}</h3>
+            <p style="font-size:14px;line-height:1.6;color:rgba(255,255,255,0.78);margin:8px 0 0">{{ o.body }}</p>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const LOOP = [
+  { n: "01", icon: "zap", name: "Capture", body: "Get it out of your head in under three seconds, from any device, mid-sentence, without choosing a category.", when: "all day · ⌘K" },
+  { n: "02", icon: "filter", name: "Clarify", body: "Turn a vague loop into a named outcome with a first move. This is where most tools quit and most founders stall.", when: "inbox · 90 sec" },
+  { n: "03", icon: "target", name: "Commit", body: "Spend today's capacity on purpose. Three deep units, no more. Everything else goes on the anti-list, named out loud.", when: "morning · 60 sec" },
+  { n: "04", icon: "timer", name: "Execute", body: "One task on screen, a timer running, and a place to park distractions without leaving the session.", when: "in the block" },
+  { n: "05", icon: "moon", name: "Close", body: "Say what shipped, park what is open, hand tomorrow its one thing. The ritual that lets you actually stop.", when: "evening · 2 min" },
+  { n: "06", icon: "trending-up", name: "Review", body: "Weekly: the evidence, the goals, the patterns. Proof you moved, and one system change for next week.", when: "friday · 12 min" }
+];
+
+const MECHANICS = [
+  { icon: "gauge", title: "Mind pressure", body: "One number: unresolved loops weighted by age, ambiguity and stakes. It is the only score in the app, and the goal is to make it go down.", where: "header · pulse" },
+  { icon: "battery-medium", title: "Capacity budget", body: "A day holds 3 deep, 4 medium, 8 admin units. Plan past it and the planner blocks you and says what to cut.", where: "morning plan · today" },
+  { icon: "hourglass", title: "Loop decay", body: "Every loop ages visibly. Seven days turns it amber. Fourteen forces a four-way answer: do it, schedule it, hand it off, or drop it.", where: "inbox · tasks" },
+  { icon: "shield-off", title: "The anti-list", body: "An explicit, visible list of what you are not doing this week. Naming it is what stops it from following you around.", where: "today · week" },
+  { icon: "scissors", title: "First-move breakdown", body: "Every task carries a two-minute first move and an if-then trigger. “Launch the homepage” never appears as a checkbox.", where: "loop detail" },
+  { icon: "user-plus", title: "Should this be yours?", body: "Loops that age get a delegation prompt with a pre-drafted handoff. Founders drown in work that was never theirs.", where: "triage · loop detail" },
+  { icon: "activity", title: "Energy truth", body: "We log how blocks actually felt against what you planned, then tell you the real shape of your week. Mondays are not deep-work days for most founders.", where: "pulse" },
+  { icon: "receipt", title: "Evidence, not vibes", body: "Friday assembles what you shipped from real completions and sessions. The antidote to “I did nothing this week.”", where: "weekly review" }
+];
+
+const t = { page: 0, sub: 1, modal: 2 };
+const child = (kind, text) => ({
+  text,
+  rule: kind === t.modal ? "1px dashed #D8D0C0" : "1px solid #EDE7DB",
+  tag: kind === t.modal ? "modal" : "sub",
+  tagStyle: "flex:none;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.08em;text-transform:uppercase;padding:2px 6px;border-radius:5px;margin-top:2px;"
+    + (kind === t.modal ? "background:#F1EDE3;color:#8A8378" : "background:#EFECFE;color:#5B4FE9")
+});
+
+const LANES = [
+  { name: "Capture", icon: "zap", note: "always available", pages: [
+    { name: "Quick capture", route: "⌘K · global", job: "One field, no form. Parses date, priority, energy, project and tags out of plain typing.", children: [
+      child(t.modal, "Parse review — confirm or correct what we detected, one keystroke each"),
+      child(t.modal, "Voice capture — hold to talk, transcribed into the same field"),
+      child(t.sub, "Capture target — inbox by default, or straight to today if you insist")
+    ]},
+    { name: "Inbox", route: "/inbox", job: "The triage surface. Every raw loop gets one of four answers and nothing survives untouched.", children: [
+      child(t.sub, "Triage card — do now · schedule · hand off · drop"),
+      child(t.sub, "Rapid mode — full-screen, one loop at a time, keyboard only"),
+      child(t.sub, "Aging shelf — loops past seven days, sorted oldest first"),
+      child(t.modal, "Forced decision — appears at fourteen days, cannot be dismissed")
+    ]}
+  ]},
+  { name: "Clarify", icon: "filter", note: "vague → actionable", pages: [
+    { name: "Loop detail", route: "/task/[id]", job: "Where a fuzzy thing becomes a named outcome with a two-minute first move.", children: [
+      child(t.sub, "Breakdown — micro-step, if-then trigger, subtasks"),
+      child(t.sub, "Focus history — sessions logged against this loop"),
+      child(t.modal, "Delegate — pick a person, edit the drafted handoff, send"),
+      child(t.modal, "Defer with a reason — the reason shows up in your weekly review")
+    ]},
+    { name: "Projects", route: "/projects", job: "Outcomes, not folders. Each one owns tasks, notes and a goal it feeds.", children: [
+      child(t.sub, "Project detail — open loops, linked notes, contribution to a 90-day goal"),
+      child(t.sub, "Blocked lane — what is stuck and on whom"),
+      child(t.modal, "New project — name, colour, the goal it serves")
+    ]},
+    { name: "Notes", route: "/notes", job: "Thinking that is not a task yet. Meeting notes, research, half-ideas.", children: [
+      child(t.sub, "Note detail — inline editor, pin, archive"),
+      child(t.sub, "Categories — idea, meeting, research, general"),
+      child(t.modal, "Extract loops — highlight a line, turn it into a task")
+    ]}
+  ]},
+  { name: "Commit", icon: "target", note: "spend the day on purpose", pages: [
+    { name: "Morning plan", route: "/plan", job: "Sixty guided seconds that replace twenty minutes of deciding.", children: [
+      child(t.sub, "Step 1 — energy check-in"),
+      child(t.sub, "Step 2 — pick three MITs from surfaced candidates"),
+      child(t.sub, "Step 3 — name the blocker and the if-then that beats it"),
+      child(t.sub, "Step 4 — capacity check, then commit"),
+      child(t.modal, "Over capacity — “this is a four-deep day. Cut one.”")
+    ]},
+    { name: "Today", route: "/today", job: "The home screen. One thing to do, a capacity bar, and everything you are not doing.", children: [
+      child(t.sub, "The one thing — matched to current energy, with start-focus"),
+      child(t.sub, "Capacity bar — deep / medium / admin units left"),
+      child(t.sub, "Anti-list — named, collapsed, guilt-free"),
+      child(t.modal, "Re-roll — show me a different one and why")
+    ]},
+    { name: "Week", route: "/week", job: "Seven columns with capacity, so the overcommit is visible before it happens.", children: [
+      child(t.sub, "Drag to move a loop between days"),
+      child(t.sub, "Load bars — the day turns amber past capacity"),
+      child(t.sub, "Not this week — the weekly anti-list lives here")
+    ]}
+  ]},
+  { name: "Execute", icon: "timer", note: "protect the block", pages: [
+    { name: "Focus session", route: "/focus", job: "Full-screen, one task, one timer. Pomodoro 25, deep 50, sprint 10.", children: [
+      child(t.sub, "Pre-flight — pick the task, write the intention in one line"),
+      child(t.sub, "Running — ring timer, task title, nothing else"),
+      child(t.modal, "Park a distraction — capture without breaking the session"),
+      child(t.modal, "Session complete — how did it go, log it, take the break")
+    ]},
+    { name: "Energy check-in", icon: "battery", route: "prompted", job: "Three taps. Everything the app surfaces reshapes around the answer.", children: [
+      child(t.modal, "Admin · medium · deep"),
+      child(t.sub, "Mid-day re-check — offered when a session ends flat")
+    ]}
+  ]},
+  { name: "Close", icon: "moon", note: "permission to stop", pages: [
+    { name: "Shutdown ritual", route: "/shutdown", job: "The evening counterpart to the morning plan. This is what makes stopping possible.", children: [
+      child(t.sub, "What shipped — auto-assembled from completions"),
+      child(t.sub, "Park the open loops — write the next move so your brain lets go"),
+      child(t.sub, "Tomorrow's one thing — pre-loaded so the morning is not a decision"),
+      child(t.modal, "Close the laptop — the confirmation screen, deliberately final")
+    ]},
+    { name: "Reflect", route: "/journal", job: "Mood and freeform writing, tied to the day's actual data.", children: [
+      child(t.sub, "Entry detail — mood, prompt, freeform"),
+      child(t.sub, "Mood history — 30-day grid, patterns by weekday"),
+      child(t.modal, "Prompted entry — offered after a hard day, never nagging")
+    ]}
+  ]},
+  { name: "Review", icon: "trending-up", note: "proof and correction", pages: [
+    { name: "Weekly review", route: "/review", job: "Twelve minutes on Friday. Evidence first, then one system change.", children: [
+      child(t.sub, "The evidence — tasks, sessions, deep hours, streaks"),
+      child(t.sub, "Four prompts — what shipped, what was hard, next week's three, what to change"),
+      child(t.sub, "Goal check — did this week move the 90-day goals at all"),
+      child(t.modal, "Carry forward — pick what survives into next week")
+    ]},
+    { name: "Pulse", route: "/stats", job: "Six numbers, each one attached to a decision you could make today.", children: [
+      child(t.sub, "Mind pressure over time — the headline chart"),
+      child(t.sub, "Energy truth — planned versus how it actually felt"),
+      child(t.sub, "Completion and deep-work trends"),
+      child(t.modal, "Drill-down — any metric, by project or weekday")
+    ]},
+    { name: "90-day goals", route: "/goals", job: "Two or three north stars. Everything else has to justify itself against them.", children: [
+      child(t.sub, "Goal detail — milestones, linked projects, weekly contribution"),
+      child(t.sub, "Drift warning — flagged when nothing moved it in ten days"),
+      child(t.modal, "New goal — outcome, measure, deadline")
+    ]},
+    { name: "Habits", route: "/habits", job: "The small rituals that make the rest run. Streaks as evidence, never as pressure.", children: [
+      child(t.sub, "Habit detail — calendar, longest streak, why you started"),
+      child(t.sub, "Repair a broken streak — one grace day, honestly logged"),
+      child(t.modal, "New habit — cadence, reminder, the ritual it attaches to")
+    ]}
+  ]},
+  { name: "System", icon: "settings", note: "setup and account", pages: [
+    { name: "Onboarding", route: "/onboarding", job: "Six screens that end with one real task on screen, not an empty app.", children: [
+      child(t.sub, "Name and role"),
+      child(t.sub, "What is eating you right now — first three loops, captured live"),
+      child(t.sub, "Your energy shape — when you are sharp"),
+      child(t.sub, "One 90-day goal"),
+      child(t.sub, "Pick your rituals and reminder times"),
+      child(t.sub, "Here is your first one thing — start it now")
+    ]},
+    { name: "Auth", route: "/login · /signup", job: "Email, magic link, Google. Nothing else in the way.", children: [
+      child(t.sub, "Login · signup · magic-link sent"),
+      child(t.sub, "Reset password · new password"),
+      child(t.modal, "Session expired — resume where you were")
+    ]},
+    { name: "Settings", route: "/settings", job: "Tuning, not configuration. Sensible from the first minute.", children: [
+      child(t.sub, "Profile · rituals and reminder times"),
+      child(t.sub, "Capacity tuning — what a deep unit means for you"),
+      child(t.sub, "Devices and sync · appearance"),
+      child(t.sub, "Data export · billing · delete account")
+    ]}
+  ]}
+];
+
+const FLOWS = [
+  { name: "The morning", budget: "60 seconds · every weekday", why: "The highest-leverage minute in the product. If this fails, the founder opens Slack instead and the day is gone.",
+    rule: "never more than one decision per screen, and the last screen must end on a task that is already started, not a summary.",
+    steps: [
+      { n: "01", title: "Energy", body: "Three taps. Admin, medium, deep." },
+      { n: "02", title: "Three MITs", body: "We surface six candidates, ranked. You pick three." },
+      { n: "03", title: "The blocker", body: "Name what will stop you, and the if-then that beats it." },
+      { n: "04", title: "Capacity check", body: "Over budget? We say what to cut before you commit." },
+      { n: "05", title: "Start", body: "The one thing is on screen with the timer ready. No dashboard in between." }
+    ]},
+  { name: "The capture", budget: "3 seconds · thirty times a day", why: "This is the habit the whole product depends on. Any friction and it dies in week two, and the mind-pressure number stops being true.",
+    rule: "⌘K works from every screen including a running focus session, and nothing is ever required — a bare sentence is a valid loop.",
+    steps: [
+      { n: "01", title: "⌘K", body: "From anywhere, including mid-session." },
+      { n: "02", title: "Type it raw", body: "“call investor tomorrow 3pm urgent”." },
+      { n: "03", title: "We parse", body: "Date, priority, energy, project shown as chips." },
+      { n: "04", title: "Enter", body: "Lands in inbox. You are back where you were." }
+    ]},
+  { name: "The shutdown", budget: "2 minutes · every evening", why: "Burnout is not caused by working too much — it is caused by never being allowed to stop. This is the screen that gives permission, and it is the one nobody else builds.",
+    rule: "the evidence is assembled for you before you type a word, and the final screen is deliberately terminal — there is nothing to click after it.",
+    steps: [
+      { n: "01", title: "What shipped", body: "Pulled from real completions. Often more than you remember." },
+      { n: "02", title: "Park the open", body: "Write the next move for each, so your brain releases it." },
+      { n: "03", title: "Tomorrow's one", body: "Chosen now, while you still have context." },
+      { n: "04", title: "Close", body: "One button. The app goes dark until morning." }
+    ]}
+];
+
+const DATA_RULES = [
+  { never: "You completed 17 of 24 tasks", instead: "You closed 6 loops that were older than a week", why: "Completion percentage rewards adding small tasks. Loop age rewards finishing the things that were actually weighing on you." },
+  { never: "Productivity score: 78", instead: "Mind pressure: down 12 since Monday", why: "A score you cannot influence directly is decoration. Pressure has a lever attached to it — triage the inbox, and it drops." },
+  { never: "A seven-metric analytics dashboard", instead: "Six numbers, each with the action next to it", why: "Founders do not need a BI tool for their own life. Every number that does not change a decision gets cut." },
+  { never: "Your streak is broken. Start again.", instead: "31 days, one grace day used. Still your best run.", why: "Shame does not build habits, it builds avoidance. The system has to survive a bad week without punishing you." },
+  { never: "Overdue: 14 tasks, in red", instead: "3 loops are rotting. Answer them now.", why: "A red wall is noise you learn to ignore. Three items with a forced four-way choice is something you can finish in a minute." },
+  { never: "Deep work: 6h 40m this week", instead: "Your deep blocks land on Tue and Thu. Mondays never work — stop planning them.", why: "Raw totals are trivia. The pattern with a recommendation attached is the whole reason to log anything." }
+];
+
+const ORDER = [
+  { n: "01", title: "Today + capture", body: "The daily loop end to end — the one thing, capacity, ⌘K, the anti-list. Nothing ships before this feels right." },
+  { n: "02", title: "Triage + decay", body: "Inbox, the four-way answer, the aging shelf and the forced decision. This is what keeps the system honest." },
+  { n: "03", title: "Morning + shutdown", body: "The two rituals that bookend the day, as full-screen guided flows rather than pages." },
+  { n: "04", title: "Review + pulse", body: "Weekly evidence, goal drift, energy truth. The layer that makes month two better than month one." }
+];
+
+class Component extends DCLogic {
+  componentDidMount() { this.icons(); }
+  componentDidUpdate() { this.icons(); }
+  componentWillUnmount() { clearInterval(this._w); }
+  icons() {
+    if (window.lucide) { try { window.lucide.createIcons(); } catch (e) {} }
+    else if (!this._w) {
+      this._w = setInterval(() => { if (window.lucide) { clearInterval(this._w); this._w = null; window.lucide.createIcons(); } }, 200);
+    }
+  }
+  renderVals() {
+    return {
+      loop: LOOP,
+      mechanics: MECHANICS,
+      lanes: LANES.map(l => ({
+        ...l,
+        count: l.pages.length + " routes · " + l.pages.reduce((a, p) => a + p.children.length, 0) + " sub-views"
+      })),
+      flows: FLOWS,
+      dataRules: DATA_RULES,
+      order: ORDER
+    };
+  }
+}
+</script>
+</body>
+</html>

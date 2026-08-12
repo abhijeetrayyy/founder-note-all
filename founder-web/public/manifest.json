@@ -1,0 +1,17 @@
+{
+  "name": "FounderOS",
+  "short_name": "FounderOS",
+  "description": "A founder execution system for tasks, notes, goals, habits, and daily planning",
+  "start_url": "/today",
+  "display": "standalone",
+  "background_color": "#0a0a0f",
+  "theme_color": "#5B4FE9",
+  "icons": [
+    {
+      "src": "/icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any monochrome maskable"
+    }
+  ]
+}

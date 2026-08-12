@@ -31,6 +31,9 @@ export function LoginForm() {
         <h1 className="text-2xl font-bold text-center text-foreground font-display">Welcome back</h1>
         <p className="mt-2 text-sm text-foreground-muted text-center">Pick up where you left off.</p>
         <form onSubmit={onSubmit} className="mt-8 space-y-4">
+          {/* Carries the deep link the middleware interrupted, so signing in
+              returns you to the page you actually asked for. */}
+          <input type="hidden" name="next" value={search?.get("next") ?? ""} />
           <Input name="email" type="email" placeholder="Email" required autoFocus />
           <Input name="password" type="password" placeholder="Password" required />
           {error && <p role="alert" className="text-sm text-state-overdue font-semibold">{error}</p>}

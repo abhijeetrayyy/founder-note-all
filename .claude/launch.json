@@ -1,0 +1,13 @@
+{
+  "version": "0.0.1",
+  "autoPort": true,
+  "configurations": [
+    {
+      "name": "founder-web",
+      "runtimeExecutable": "./node_modules/.bin/next",
+      "runtimeArgs": ["dev"],
+      "cwd": "founder-web",
+      "port": 3007
+    }
+  ]
+}

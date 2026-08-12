@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@0.446.0/dist/umd/lucide.min.js"></script>
+<style>
+  body { margin:0; background:#EFE9DE; -webkit-font-smoothing:antialiased; }
+  * { box-sizing:border-box; }
+  a { color:#5B4FE9; text-decoration:none; }
+  a:hover { color:#3E32C7; }
+  ::selection { background:#DCD8FC; }
+</style>
+</helmet>
+
+<div style="min-height:100vh;background:#EFE9DE;color:#171512;font-family:'Instrument Sans',system-ui,sans-serif;padding:44px 32px 72px">
+
+  <div style="max-width:1420px;margin:0 auto">
+    <div style="display:flex;align-items:baseline;gap:14px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#9A9285">
+      <span style="width:26px;height:1px;background:#D0C8B8;display:block"></span> iOS &amp; Android · same brain, synced
+    </div>
+    <h1 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:52px;line-height:1.02;letter-spacing:-0.02em;margin:20px 0 0;max-width:820px">
+      On the phone, the app does two jobs only: <span style="font-style:italic;color:#5B4FE9">capture, and tell you the one thing.</span>
+    </h1>
+    <p style="font-size:17px;line-height:1.55;color:#57514A;max-width:640px;margin:16px 0 0">Everything analytical stays on the desktop. A phone that shows you a backlog at 11pm is the thing causing the problem.</p>
+
+    <div style="display:flex;flex-wrap:wrap;gap:28px;margin-top:52px">
+      <sc-for list="{{ phones }}" as="p" hint-placeholder-count="8">
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div style="width:330px;height:690px;border-radius:44px;background:#171512;padding:11px;box-shadow:0 40px 70px -40px rgba(23,21,18,0.7);flex:none">
+            <div style="{{ p.screenStyle }}">
+
+              <div style="{{ p.statusStyle }}">
+                <span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:500">9:41</span>
+                <div style="display:flex;align-items:center;gap:5px">
+                  <i data-lucide="signal" width="13" height="13"></i>
+                  <i data-lucide="wifi" width="13" height="13"></i>
+                  <i data-lucide="battery-full" width="16" height="16"></i>
+                </div>
+              </div>
+
+              <div style="flex:1;overflow:hidden;position:relative">
+
+                <sc-if value="{{ p.isToday }}" hint-placeholder-val="{{ false }}">
+                  <div style="padding:8px 18px 0">
+                    <div style="display:flex;align-items:baseline;justify-content:space-between">
+                      <div>
+                        <p style="margin:0;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.13em;text-transform:uppercase;color:#A69E90">Wednesday</p>
+                        <h2 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:30px;margin:5px 0 0;letter-spacing:-0.015em">Today</h2>
+                      </div>
+                      <div style="text-align:right">
+                        <p style="margin:0;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:#A69E90">pressure</p>
+                        <p style="margin:3px 0 0;font-family:'JetBrains Mono',monospace;font-size:20px;line-height:1;color:#171512">34</p>
+                      </div>
+                    </div>
+
+                    <div style="margin-top:18px;border-radius:20px;background:#171512;color:#FBF8F2;padding:20px">
+                      <p style="margin:0;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.13em;text-transform:uppercase;color:#8B8272">The one thing · deep</p>
+                      <p style="margin:10px 0 0;font-family:'Instrument Serif',serif;font-size:25px;line-height:1.12">Rewrite the pricing page hero copy</p>
+                      <p style="margin:12px 0 0;font-size:13px;line-height:1.45;color:#B3AB9C">First move: open the doc, write three bad headlines.</p>
+                      <div style="margin-top:16px;display:flex;align-items:center;justify-content:center;gap:8px;height:48px;border-radius:14px;background:#5B4FE9;color:#fff;font-size:15px;font-weight:600">
+                        <i data-lucide="play" width="16" height="16"></i> Start · 50 min
+                      </div>
+                    </div>
+
+                    <div style="margin-top:14px;padding:15px 17px;border-radius:16px;background:#FFFDF8;border:1px solid #E6DFD2">
+                      <div style="display:flex;justify-content:space-between;font-size:12px;color:#8A8378">
+                        <span>Capacity today</span><span style="font-family:'JetBrains Mono',monospace;font-size:11px">1 / 3 deep</span>
+                      </div>
+                      <div style="display:flex;gap:4px;margin-top:9px">
+                        <span style="flex:1;height:7px;border-radius:99px;background:#5B4FE9"></span>
+                        <span style="flex:1;height:7px;border-radius:99px;background:#E7E0D2"></span>
+                        <span style="flex:1;height:7px;border-radius:99px;background:#E7E0D2"></span>
+                      </div>
+                    </div>
+
+                    <div style="margin-top:14px;display:flex;align-items:center;gap:11px;padding:14px 16px;border-radius:16px;background:#FDF6F2;border:1px solid #F0D3C6">
+                      <i data-lucide="hourglass" width="16" height="16" style="color:#D9552F"></i>
+                      <span style="flex:1;font-size:13.5px;line-height:1.4;color:#8A4A2E">3 loops rotting. 90 seconds to clear.</span>
+                      <i data-lucide="chevron-right" width="15" height="15" style="color:#D9552F"></i>
+                    </div>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ p.isCapture }}" hint-placeholder-val="{{ false }}">
+                  <div style="padding:8px 18px 0;height:100%;display:flex;flex-direction:column">
+                    <div style="display:flex;align-items:center;justify-content:space-between">
+                      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.13em;text-transform:uppercase;color:#A69E90">Capture</span>
+                      <span style="font-size:13.5px;color:#5B4FE9;font-weight:500">Cancel</span>
+                    </div>
+                    <p style="margin:16px 0 0;font-size:20px;line-height:1.35;color:#171512">call investor tomorrow 3pm urgent<span style="display:inline-block;width:2px;height:22px;background:#5B4FE9;vertical-align:-4px;margin-left:2px"></span></p>
+                    <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:16px">
+                      <span style="padding:6px 10px;border-radius:8px;font-size:12px;background:#EFECFE;color:#4A3EDA">Tomorrow 3:00 PM</span>
+                      <span style="padding:6px 10px;border-radius:8px;font-size:12px;background:#FBF1DC;color:#B07C15">Urgent</span>
+                      <span style="padding:6px 10px;border-radius:8px;font-size:12px;background:#E4F6F2;color:#0E8C7E">Deep</span>
+                    </div>
+                    <div style="flex:1"></div>
+                    <div style="display:flex;gap:10px;padding-bottom:12px">
+                      <div style="width:52px;height:52px;border-radius:16px;background:#F1EDE3;display:flex;align-items:center;justify-content:center;color:#5B4FE9;flex:none"><i data-lucide="mic" width="20" height="20"></i></div>
+                      <div style="flex:1;height:52px;border-radius:16px;background:#5B4FE9;color:#fff;display:flex;align-items:center;justify-content:center;gap:9px;font-size:15.5px;font-weight:600"><i data-lucide="arrow-down" width="17" height="17"></i> Park it in triage</div>
+                    </div>
+                    <div style="height:216px;margin:0 -18px;background:#DDD7CB;border-top:1px solid #C9C1B0;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:11px;color:#8A8378">keyboard</div>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ p.isTriage }}" hint-placeholder-val="{{ false }}">
+                  <div style="padding:8px 18px 0">
+                    <h2 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:28px;margin:0;letter-spacing:-0.015em">Triage</h2>
+                    <p style="margin:6px 0 0;font-size:13px;color:#8A8378">Swipe: right to schedule, left to drop.</p>
+                    <div style="margin-top:18px;border-radius:20px;border:1px solid #F0D3C6;background:#FDF6F2;padding:22px;position:relative;transform:rotate(-1.4deg)">
+                      <p style="margin:0;font-family:'JetBrains Mono',monospace;font-size:11px;color:#D9552F">16 days · rotting</p>
+                      <p style="margin:12px 0 0;font-family:'Instrument Serif',serif;font-size:26px;line-height:1.15">Decide on the pricing model change</p>
+                      <div style="display:flex;gap:7px;margin-top:18px">
+                        <span style="flex:1;height:42px;border-radius:12px;background:#FFFDF8;border:1px solid #E0D9CB;display:flex;align-items:center;justify-content:center;color:#5B4FE9"><i data-lucide="play" width="16" height="16"></i></span>
+                        <span style="flex:1;height:42px;border-radius:12px;background:#FFFDF8;border:1px solid #E0D9CB;display:flex;align-items:center;justify-content:center;color:#2E6BD0"><i data-lucide="calendar" width="16" height="16"></i></span>
+                        <span style="flex:1;height:42px;border-radius:12px;background:#FFFDF8;border:1px solid #E0D9CB;display:flex;align-items:center;justify-content:center;color:#0E8C7E"><i data-lucide="user-plus" width="16" height="16"></i></span>
+                        <span style="flex:1;height:42px;border-radius:12px;background:#FFFDF8;border:1px solid #E0D9CB;display:flex;align-items:center;justify-content:center;color:#D9552F"><i data-lucide="x" width="16" height="16"></i></span>
+                      </div>
+                    </div>
+                    <div style="margin-top:-10px;border-radius:18px;border:1px solid #E6DFD2;background:#FFFDF8;padding:16px;transform:rotate(0.8deg);opacity:0.75">
+                      <p style="margin:0;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#B07C15">9 days · aging</p>
+                      <p style="margin:8px 0 0;font-size:15px;line-height:1.35">Look at the churn cohort numbers</p>
+                    </div>
+                    <p style="margin:20px 0 0;text-align:center;font-family:'JetBrains Mono',monospace;font-size:11px;color:#A69E90">2 of 7 · pressure 34 → 19</p>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ p.isFocus }}" hint-placeholder-val="{{ false }}">
+                  <div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 24px">
+                    <p style="margin:0;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#6E675C">Deep work</p>
+                    <div style="position:relative;width:216px;height:216px;margin-top:26px">
+                      <svg viewBox="0 0 216 216" style="width:216px;height:216px;transform:rotate(-90deg)">
+                        <circle cx="108" cy="108" r="98" fill="none" stroke="#2A251E" stroke-width="7"></circle>
+                        <circle cx="108" cy="108" r="98" fill="none" stroke="#5B4FE9" stroke-width="7" stroke-linecap="round" stroke-dasharray="616" stroke-dashoffset="203"></circle>
+                      </svg>
+                      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+                        <span style="font-family:'JetBrains Mono',monospace;font-size:42px;font-weight:500;letter-spacing:-0.02em;color:#FBF8F2">33:12</span>
+                      </div>
+                    </div>
+                    <p style="margin:26px 0 0;font-family:'Instrument Serif',serif;font-size:22px;line-height:1.25;color:#FBF8F2;text-align:center">Rewrite the pricing page hero copy</p>
+                    <div style="display:flex;gap:9px;margin-top:24px;width:100%">
+                      <div style="flex:1;height:46px;border-radius:13px;border:1px solid #3A362F;display:flex;align-items:center;justify-content:center;font-size:14px;color:#E7E1D6">Pause</div>
+                      <div style="flex:1;height:46px;border-radius:13px;border:1px solid #3A362F;display:flex;align-items:center;justify-content:center;gap:7px;font-size:14px;color:#A79DFF"><i data-lucide="zap" width="15" height="15"></i> Park</div>
+                    </div>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ p.isPlan }}" hint-placeholder-val="{{ false }}">
+                  <div style="padding:8px 18px 0">
+                    <div style="display:flex;gap:6px">
+                      <span style="flex:1;height:4px;border-radius:99px;background:#5B4FE9"></span>
+                      <span style="flex:1;height:4px;border-radius:99px;background:#5B4FE9"></span>
+                      <span style="flex:1;height:4px;border-radius:99px;background:#E1DACB"></span>
+                      <span style="flex:1;height:4px;border-radius:99px;background:#E1DACB"></span>
+                    </div>
+                    <h2 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:28px;line-height:1.1;margin:20px 0 0;letter-spacing:-0.015em">Pick three that would make today count.</h2>
+                    <div style="display:flex;flex-direction:column;gap:9px;margin-top:20px">
+                      <sc-for list="{{ planPicks }}" as="pk" hint-placeholder-count="4">
+                        <div style="{{ pk.style }}">
+                          <span style="{{ pk.numStyle }}">{{ pk.num }}</span>
+                          <span style="flex:1;font-size:14px;line-height:1.35;min-width:0">{{ pk.text }}</span>
+                        </div>
+                      </sc-for>
+                    </div>
+                    <div style="margin-top:16px;padding:13px 15px;border-radius:14px;background:#E4F6F2;border:1px solid #BFE9E1">
+                      <p style="margin:0;font-size:13px;line-height:1.5;color:#0E6B60">Fits your day: 2 deep, 1 medium. The rest goes on the anti-list.</p>
+                    </div>
+                    <div style="margin-top:14px;height:48px;border-radius:14px;background:#171512;color:#FBF8F2;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600">Commit to today</div>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ p.isShutdown }}" hint-placeholder-val="{{ false }}">
+                  <div style="padding:8px 18px 0">
+                    <p style="margin:0;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.13em;text-transform:uppercase;color:#8B8272">Shutdown · 7:04 PM</p>
+                    <h2 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:29px;line-height:1.1;margin:14px 0 0;color:#FBF8F2">You did four things today.</h2>
+                    <div style="display:flex;flex-direction:column;gap:10px;margin-top:20px">
+                      <sc-for list="{{ shipped }}" as="sh" hint-placeholder-count="4">
+                        <div style="display:flex;align-items:center;gap:10px;font-size:14px;color:#E7E1D6">
+                          <span style="width:17px;height:17px;flex:none;border-radius:5px;background:#5B4FE9;color:#fff;display:flex;align-items:center;justify-content:center"><i data-lucide="check" width="10" height="10"></i></span>
+                          <span style="min-width:0;line-height:1.35">{{ sh }}</span>
+                        </div>
+                      </sc-for>
+                    </div>
+                    <div style="margin-top:20px;padding:16px;border-radius:15px;background:#201D18;border:1px solid #302C25">
+                      <p style="margin:0;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:#8B8272">Tomorrow's one thing</p>
+                      <p style="margin:9px 0 0;font-family:'Instrument Serif',serif;font-size:19px;line-height:1.25;color:#FBF8F2">Series A narrative — section one</p>
+                    </div>
+                    <div style="margin-top:16px;height:50px;border-radius:15px;background:#5B4FE9;color:#fff;display:flex;align-items:center;justify-content:center;gap:9px;font-size:15px;font-weight:600"><i data-lucide="moon" width="16" height="16"></i> Close the laptop</div>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ p.isWidget }}" hint-placeholder-val="{{ false }}">
+                  <div style="height:100%;padding:22px 18px;display:flex;flex-direction:column;justify-content:center;gap:16px">
+                    <p style="margin:0;text-align:center;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#8B8272">Lock screen</p>
+                    <div style="border-radius:22px;background:rgba(251,248,242,0.94);padding:18px">
+                      <p style="margin:0;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.13em;text-transform:uppercase;color:#A69E90">Your one thing</p>
+                      <p style="margin:9px 0 0;font-family:'Instrument Serif',serif;font-size:21px;line-height:1.2;color:#171512">Rewrite the pricing page hero copy</p>
+                      <div style="display:flex;gap:7px;margin-top:14px">
+                        <span style="flex:1;height:38px;border-radius:11px;background:#5B4FE9;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600">Start</span>
+                        <span style="flex:none;width:44px;height:38px;border-radius:11px;background:#F1EDE3;color:#5B4FE9;display:flex;align-items:center;justify-content:center"><i data-lucide="zap" width="15" height="15"></i></span>
+                      </div>
+                    </div>
+                    <div style="border-radius:22px;background:rgba(251,248,242,0.94);padding:16px 18px">
+                      <p style="margin:0;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.13em;text-transform:uppercase;color:#A69E90">Energy check-in</p>
+                      <div style="display:flex;gap:6px;margin-top:11px">
+                        <span style="flex:1;height:36px;border-radius:10px;background:#E4F6F2;color:#0E8C7E;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:500">Admin</span>
+                        <span style="flex:1;height:36px;border-radius:10px;background:#EAF1FD;color:#2E6BD0;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:500">Medium</span>
+                        <span style="flex:1;height:36px;border-radius:10px;background:#5B4FE9;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:600">Deep</span>
+                      </div>
+                    </div>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ p.isReview }}" hint-placeholder-val="{{ false }}">
+                  <div style="padding:8px 18px 0">
+                    <p style="margin:0;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.13em;text-transform:uppercase;color:#A69E90">Week 33 · read-only on mobile</p>
+                    <h2 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:28px;line-height:1.1;margin:12px 0 0;letter-spacing:-0.015em">You did more than you remember.</h2>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px">
+                      <sc-for list="{{ evidence }}" as="e" hint-placeholder-count="4">
+                        <div style="border-radius:16px;background:#F1EDE3;padding:15px">
+                          <p style="margin:0;font-family:'JetBrains Mono',monospace;font-size:21px;line-height:1">{{ e.n }}</p>
+                          <p style="margin:5px 0 0;font-size:12px;color:#6B6459;line-height:1.35">{{ e.label }}</p>
+                        </div>
+                      </sc-for>
+                    </div>
+                    <div style="margin-top:14px;padding:15px 17px;border-radius:16px;background:#FFFDF8;border:1px solid #E6DFD2">
+                      <p style="margin:0;font-size:13.5px;line-height:1.5;color:#413B34">Your deep blocks land Tue and Thu. Mondays never work — stop planning them.</p>
+                    </div>
+                    <p style="margin:16px 0 0;font-size:12.5px;color:#8A8378;line-height:1.5">Writing the review needs a keyboard. It is waiting on desktop.</p>
+                  </div>
+                </sc-if>
+
+              </div>
+
+              <div style="{{ p.tabBarStyle }}">
+                <sc-for list="{{ p.tabs }}" as="tb" hint-placeholder-count="4">
+                  <div style="{{ tb.style }}">
+                    <i data-lucide="{{ tb.icon }}" width="20" height="20"></i>
+                    <span style="font-size:10px;font-weight:500">{{ tb.label }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+          <div>
+            <p style="margin:0;font-size:14.5px;font-weight:600">{{ p.title }}</p>
+            <p style="margin:4px 0 0;font-size:13px;color:#6B6459;line-height:1.5;max-width:330px">{{ p.note }}</p>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="margin-top:56px;border:1px solid #DFD8C9;border-radius:20px;background:#FBF8F2;padding:30px 32px;max-width:900px">
+      <h2 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:30px;margin:0;letter-spacing:-0.015em">What mobile deliberately does not have</h2>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:22px">
+        <sc-for list="{{ excluded }}" as="x" hint-placeholder-count="3">
+          <div style="border-top:1px solid #E0D9CB;padding-top:16px">
+            <p style="margin:0;font-size:15px;font-weight:600">{{ x.what }}</p>
+            <p style="margin:7px 0 0;font-size:13.5px;line-height:1.55;color:#6B6459">{{ x.why }}</p>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:1000}}">
+const SCREENS = [
+  { key: "isToday", title: "Today", note: "One task, capacity, and the rotting count. No list you can scroll into anxiety.", dark: false, tab: 0 },
+  { key: "isCapture", title: "Capture", note: "The reason the phone app exists. Voice or type, parsed, parked. Three seconds.", dark: false, tab: 1 },
+  { key: "isTriage", title: "Triage", note: "Card stack. Swipe right to schedule, left to drop — the four answers as gestures.", dark: false, tab: 2 },
+  { key: "isFocus", title: "Focus running", note: "Dark, one task, park button. The screen goes dim after ten seconds of no touch.", dark: true, tab: 0 },
+  { key: "isPlan", title: "Morning plan", note: "The same 60-second ritual, thumb-sized. Capacity check included.", dark: false, tab: 0 },
+  { key: "isShutdown", title: "Shutdown", note: "In bed, two minutes, then the app is done for the night.", dark: true, tab: 0 },
+  { key: "isWidget", title: "Lock screen widgets", note: "Your one thing and a three-tap energy check-in without unlocking.", dark: true, tab: -1 },
+  { key: "isReview", title: "Weekly review (read-only)", note: "The evidence and the pattern. Writing it needs a keyboard, so we say so.", dark: false, tab: 3 }
+];
+
+const TABS = [
+  { label: "Today", icon: "sun" },
+  { label: "Capture", icon: "plus-circle" },
+  { label: "Triage", icon: "inbox" },
+  { label: "Review", icon: "trending-up" }
+];
+
+class Component extends DCLogic {
+  componentDidMount() { this.icons(); }
+  componentDidUpdate() { this.icons(); }
+  componentWillUnmount() { clearInterval(this._w); }
+  icons() {
+    if (window.lucide) { try { window.lucide.createIcons(); } catch (e) {} }
+    else if (!this._w) {
+      this._w = setInterval(() => { if (window.lucide) { clearInterval(this._w); this._w = null; window.lucide.createIcons(); } }, 200);
+    }
+  }
+
+  renderVals() {
+    const phones = SCREENS.map(s => {
+      const bg = s.dark ? "#171512" : "#F6F3EC";
+      const fg = s.dark ? "#FBF8F2" : "#171512";
+      const p = {
+        title: s.title, note: s.note,
+        screenStyle: "width:100%;height:100%;border-radius:34px;background:" + bg + ";color:" + fg + ";display:flex;flex-direction:column;overflow:hidden",
+        statusStyle: "flex:none;height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;color:" + fg,
+        tabBarStyle: s.tab < 0
+          ? "display:none"
+          : "flex:none;height:70px;display:flex;align-items:center;padding:0 8px;border-top:1px solid " + (s.dark ? "#302C25" : "#E6DFD2") + ";background:" + (s.dark ? "#201D18" : "#FBF8F2"),
+        tabs: TABS.map((t, i) => ({
+          ...t,
+          style: "flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 0;color:"
+            + (i === s.tab ? "#5B4FE9" : (s.dark ? "#6E675C" : "#A69E90"))
+        }))
+      };
+      SCREENS.forEach(o => { p[o.key] = o.key === s.key; });
+      return p;
+    });
+
+    return {
+      phones,
+      planPicks: [
+        { num: "01", text: "Rewrite the pricing page hero copy", on: true },
+        { num: "02", text: "Call Nikhil re: seed terms", on: true },
+        { num: "—", text: "Draft the Series A narrative", on: false },
+        { num: "—", text: "Approve the invoice batch", on: false }
+      ].map(pk => ({
+        ...pk,
+        style: "display:flex;align-items:center;gap:11px;padding:13px 14px;border-radius:13px;border:1px solid "
+          + (pk.on ? "#5B4FE9;background:#F4F2FF" : "#E0D9CB;background:#FFFDF8"),
+        numStyle: "flex:none;width:22px;height:22px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:10px;"
+          + (pk.on ? "background:#5B4FE9;color:#fff" : "background:#F1EDE3;color:#A69E90")
+      })),
+      shipped: [
+        "Pricing page hero copy",
+        "Called Nikhil re: seed terms",
+        "Cleared five support threads",
+        "Approved the invoice batch"
+      ],
+      evidence: [
+        { n: "17", label: "loops closed" }, { n: "9", label: "focus sessions" },
+        { n: "6h 40m", label: "deep work" }, { n: "−12", label: "pressure change" }
+      ],
+      excluded: [
+        { what: "No full task list", why: "A scrollable backlog on a phone at 11pm is the exact behaviour we are trying to end. Today, and nothing behind it." },
+        { what: "No charts or analytics", why: "Pulse lives on desktop. On mobile you get one sentence: the pattern and what to do about it." },
+        { what: "No editing projects or goals", why: "Structural work needs a keyboard and a wide screen. The phone captures and executes." }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

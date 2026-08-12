@@ -1,0 +1,5 @@
+package com.founderos.app;
+
+import com.getcapacitor.BridgeActivity;
+
+public class MainActivity extends BridgeActivity {}

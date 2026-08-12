@@ -9,10 +9,14 @@ founder-web/.git/
 
 # Web
 founder-web/node_modules/
+# 442MB leftover copy of node_modules — matches neither the pattern above nor
+# any build output, so it would otherwise be committed wholesale.
+founder-web/node_modules_backup/
 founder-web/.next/
 founder-web/out/
 founder-web/dist/
 founder-web/*.log
+founder-web/tsconfig.tsbuildinfo
 
 # Mobile
 notes app/.dart_tool/

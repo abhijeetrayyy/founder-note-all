@@ -1,9 +1,11 @@
 import Link from "next/link";
-import { getTasks, getGoals, getJournalEntries, getWeeklyReview } from "@/lib/data";
+import { getTasks, getGoals, getJournalEntries, getWeeklyReview, getAmnestyCandidates } from "@/lib/data";
 import { todayKey } from "@/lib/utils";
 import { Card, SectionLabel } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ReviewForm } from "@/components/review-form";
+import { Amnesty } from "@/components/amnesty";
+import { GRACE_DAYS } from "@/lib/loops";
 
 function getWeekStart(): string {
   const d = new Date();
@@ -19,18 +21,25 @@ function getWeekAgo(): Date {
 
 export default async function ReviewPage() {
   const weekStart = getWeekStart();
-  const [tasks, goals, entries, review] = await Promise.all([
+  const [tasks, goals, entries, review, amnestyCandidates] = await Promise.all([
     getTasks(),
     getGoals(),
     getJournalEntries(),
     getWeeklyReview(weekStart),
+    getAmnestyCandidates(),
   ]);
   const weekAgo = getWeekAgo();
-  const completedThisWeek = tasks.filter((t) => {
-    if (!t.completed_at) return false;
-    return new Date(t.completed_at) >= weekAgo;
+
+  const closedThisWeek = tasks.filter((t) => t.completed_at && new Date(t.completed_at) >= weekAgo);
+
+  // The number worth showing. Completion counts reward adding small tasks;
+  // closing something that had been open a week is evidence you moved the thing
+  // that was actually weighing on you.
+  const closedOld = closedThisWeek.filter((t) => {
+    const opened = new Date(t.created_at).getTime();
+    const closed = new Date(t.completed_at!).getTime();
+    return closed - opened >= GRACE_DAYS * 86_400_000;
   }).length;
-  const openTasks = tasks.filter((t) => !t.completed).length;
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-6">
@@ -39,16 +48,23 @@ export default async function ReviewPage() {
         <p className="text-sm text-foreground-muted mt-1">Reflect on the week, then reset for the next one.</p>
       </header>
 
+      {/* Evidence, not a ratio. "Still open" used to sit here as a second tile,
+          which turned this into a completion score — a number that goes up when
+          you add work and so can never make anyone feel better. */}
       <div className="grid grid-cols-2 gap-3">
         <Card variant="ambient" className="p-4">
-          <p className="text-3xl font-extrabold text-foreground number-mono">{completedThisWeek}</p>
-          <p className="text-xs font-bold text-foreground-muted mt-1">Completed this week</p>
+          <p className="text-3xl font-extrabold text-foreground number-mono">{closedThisWeek.length}</p>
+          <p className="text-xs font-bold text-foreground-muted mt-1">Loops closed this week</p>
         </Card>
         <Card variant="ambient" className="p-4">
-          <p className="text-3xl font-extrabold text-foreground number-mono">{openTasks}</p>
-          <p className="text-xs font-bold text-foreground-muted mt-1">Still open</p>
+          <p className="text-3xl font-extrabold text-accent number-mono">{closedOld}</p>
+          <p className="text-xs font-bold text-foreground-muted mt-1">
+            of those had been open over a week
+          </p>
         </Card>
       </div>
+
+      <Amnesty candidates={amnestyCandidates} />
 
       <Card variant="ambient" className="p-5 space-y-5">
         <SectionLabel>Review prompts</SectionLabel>

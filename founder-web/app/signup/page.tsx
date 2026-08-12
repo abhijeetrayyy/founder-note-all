@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/card";
 export default function SignupPage() {
   const [error, setError] = React.useState("");
   const [pending, setPending] = React.useState(false);
+  const [confirmEmail, setConfirmEmail] = React.useState("");
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -19,6 +20,28 @@ export default function SignupPage() {
     const result = await signUp(form);
     setPending(false);
     if (result?.error) setError(result.error);
+    else if (result?.needsConfirmation) setConfirmEmail(result.email ?? "");
+  }
+
+  // Email confirmation is on for this project: the account exists but there is
+  // no session yet, so there is nothing useful to send them to.
+  if (confirmEmail) {
+    return (
+      <main className="min-h-screen flex flex-col items-center justify-center px-6 py-12">
+        <div className="w-full max-w-md animate-slide-up">
+          <Card variant="focused" className="p-8 text-center">
+            <h1 className="text-2xl font-bold text-foreground font-display">Check your email</h1>
+            <p className="mt-3 text-sm text-foreground-muted">
+              We sent a confirmation link to <span className="font-semibold text-foreground">{confirmEmail}</span>.
+              Open it and you are in.
+            </p>
+            <Link href="/login" className="mt-6 inline-block text-sm text-accent-600 font-semibold hover:underline">
+              Back to sign in
+            </Link>
+          </Card>
+        </div>
+      </main>
+    );
   }
 
   return (

@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TaskActions } from "./task-actions";
 import { TaskBreakdown } from "@/components/task-breakdown";
+import { OwedControl } from "@/components/owed-control";
 import { priorityLabel, energyLabel, recurrenceLabel } from "@/lib/supabase/types";
 
 export default async function TaskDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -61,6 +62,8 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
       </Card>
 
       {!task.completed && <TaskBreakdown task={task} />}
+
+      {!task.completed && <OwedControl task={task} />}
 
       {!task.completed && (
         <Link

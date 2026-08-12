@@ -69,6 +69,22 @@ export interface TaskRow {
   first_step: string;
   implementation_intention: string;
   is_inbox: boolean;
+  // ---- loop model (migration 00003) ----
+  /** Name of the person attached to this loop. Empty when nobody is waiting. */
+  owed_to: string;
+  /** 0 = they are waiting on you, 1 = you are waiting on them. */
+  owed_direction: number;
+  /** 0 = task, 1 = decision. */
+  kind: number;
+  decide_by: string | null;
+  decision_unlock: string;
+  /** When this loop was triaged. NULL = still raw; only raw loops decay. */
+  answered_at: string | null;
+  /** Soft drop — hidden everywhere, restorable for 30 days. */
+  released_at: string | null;
+  release_reason: string;
+  not_this_week: boolean;
+  anti_reason: string;
   created_at: string;
   updated_at: string;
 }
@@ -242,10 +258,25 @@ export type Database = {
           habits_done_today: number;
         };
       };
+      v_loop_pressure: {
+        Row: {
+          user_id: string;
+          owed_count: number;
+          blocked_count: number;
+          rotting_count: number;
+          aging_count: number;
+          unclear_count: number;
+        };
+      };
     };
     Functions: {
       create_next_recurring_task: { Args: { p_task_id: string }; Returns: string | null };
       add_mit: { Args: { p_date: string; p_task_id: string }; Returns: undefined };
+      release_stale_loops: {
+        Args: { p_older_than_days?: number; p_reason?: string };
+        Returns: { loop_id: string; loop_title: string }[];
+      };
+      purge_released_loops: { Args: Record<string, never>; Returns: number };
     };
     Enums: Record<string, never>;
   };
@@ -280,8 +311,18 @@ export interface FocusSession {
   duration_minutes: number | null;
   completed: boolean;
   pause_duration_seconds: number;
+  /** 0 = flow, 1 = solid, 2 = fought it, 3 = wrong task for this energy. */
+  felt: number | null;
+  intention: string;
   created_at: string;
 }
+
+export const SESSION_FEEL = [
+  { value: 0, label: "Flow — best block this week" },
+  { value: 1, label: "Solid" },
+  { value: 2, label: "Fought it the whole time" },
+  { value: 3, label: "Wrong task for this energy" },
+] as const;
 
 export interface WeeklyReview {
   id: string;

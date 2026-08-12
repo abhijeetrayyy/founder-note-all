@@ -1,12 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { AppShell, type TodaySummary } from "@/components/app-shell";
+import { AppShell } from "@/components/app-shell";
 import { QuickAdd } from "@/components/quick-add";
 import { CommandPalette } from "@/components/command-palette";
+import type { Pressure } from "@/lib/loops";
 import type { UserProfile } from "@/lib/supabase/types";
 
-export function AppShellClient({ children, profile, summary }: { children: React.ReactNode; profile: UserProfile | null; summary?: TodaySummary }) {
+export function AppShellClient({ children, profile, pressure, energy }: { children: React.ReactNode; profile: UserProfile | null; pressure?: Pressure; energy?: number }) {
   const [quickOpen, setQuickOpen] = React.useState(false);
   const [commandOpen, setCommandOpen] = React.useState(false);
 
@@ -20,7 +21,7 @@ export function AppShellClient({ children, profile, summary }: { children: React
   }, []);
 
   return (
-    <AppShell profile={profile} summary={summary} onQuickAdd={() => setQuickOpen(true)}>
+    <AppShell profile={profile} pressure={pressure} energy={energy} onQuickAdd={() => setQuickOpen(true)}>
       {children}
       <QuickAdd open={quickOpen} onClose={() => setQuickOpen(false)} />
       {commandOpen && <CommandPalette onClose={() => setCommandOpen(false)} />}

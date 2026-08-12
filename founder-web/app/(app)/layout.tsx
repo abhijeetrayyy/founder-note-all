@@ -1,10 +1,11 @@
 import { redirect } from "next/navigation";
-import { getUser, getProfile, getTodaySummary } from "@/lib/data";
+import { getUser, getProfile, getPressure, getEnergyLog } from "@/lib/data";
 import { AppShellClient } from "@/components/app-shell-client";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await getUser();
   if (!user) redirect("/login");
-  const [profile, summary] = await Promise.all([getProfile(), getTodaySummary()]);
-  return <AppShellClient profile={profile} summary={summary}>{children}</AppShellClient>;
+  const [profile, pressure, energy] = await Promise.all([getProfile(), getPressure(), getEnergyLog()]);
+  const level = energy?.level ?? profile?.energy_default ?? 1;
+  return <AppShellClient profile={profile} pressure={pressure} energy={level}>{children}</AppShellClient>;
 }

@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@0.446.0/dist/umd/lucide.min.js"></script>
+<style>
+  body { margin:0; background:#F6F3EC; -webkit-font-smoothing:antialiased; }
+  * { box-sizing:border-box; }
+  a { color:#5B4FE9; text-decoration:none; }
+  a:hover { color:#3E32C7; }
+  @keyframes fos-caret { 0%,49%{opacity:1} 50%,100%{opacity:0} }
+  @keyframes fos-float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+  ::selection { background:#DCD8FC; }
+</style>
+<script src="./image-slot.js"></script>
+</helmet>
+
+<div style="background:#F6F3EC;color:#171512;font-family:'Instrument Sans',system-ui,sans-serif;overflow-x:hidden">
+
+  <header style="position:sticky;top:0;z-index:50;backdrop-filter:blur(12px);background:rgba(246,243,236,0.82);border-bottom:1px solid #E6DFD2">
+    <div style="max-width:1160px;margin:0 auto;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;gap:24px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:26px;height:26px;border-radius:8px;background:#5B4FE9;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Instrument Serif',serif;font-size:17px;line-height:1">F</div>
+        <span style="font-weight:600;letter-spacing:-0.01em;font-size:16px">FounderOS</span>
+      </div>
+      <nav style="display:flex;align-items:center;gap:28px;font-size:14px;color:#6B6459">
+        <a href="#problem" style="color:#6B6459" style-hover="color:#171512">The problem</a>
+        <a href="#how" style="color:#6B6459" style-hover="color:#171512">How it works</a>
+        <a href="#features" style="color:#6B6459" style-hover="color:#171512">Features</a>
+        <a href="#platforms" style="color:#6B6459" style-hover="color:#171512">Apps</a>
+        <a href="#pricing" style="color:#6B6459" style-hover="color:#171512">Price</a>
+      </nav>
+      <div style="display:flex;align-items:center;gap:10px">
+        <a href="https://founder-note-all.vercel.app/login" style="font-size:14px;color:#171512;padding:9px 14px;border-radius:10px" style-hover="background:#EDE8DD;color:#171512">Log in</a>
+        <a href="https://founder-note-all.vercel.app/signup" style="font-size:14px;color:#fff;background:#171512;padding:9px 16px;border-radius:10px;font-weight:500" style-hover="background:#5B4FE9;color:#fff">Get started</a>
+      </div>
+    </div>
+  </header>
+
+  <section style="max-width:1160px;margin:0 auto;padding:88px 28px 0;position:relative">
+    <div style="max-width:880px">
+      <div style="display:inline-flex;align-items:center;gap:9px;padding:7px 13px;border:1px solid #DCD5C7;border-radius:99px;background:#FFFDF8;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:#6B6459">
+        <span style="width:6px;height:6px;border-radius:99px;background:#14B8A6;display:inline-block"></span>
+        The execution system for founders
+      </div>
+      <h1 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:88px;line-height:0.96;letter-spacing:-0.025em;margin:26px 0 0;text-wrap:balance">
+        Your list is not the problem.<br><span style="font-style:italic;color:#5B4FE9">It never shrinking</span> is.
+      </h1>
+      <p style="font-size:20px;line-height:1.5;color:#57514A;max-width:610px;margin:26px 0 0;text-wrap:pretty">
+        Every other tool measures how much you completed — a number that goes up when you add more work, so it can never make you feel better. FounderOS measures the <strong style="font-weight:600;color:#171512">pressure in your head</strong>, and every screen is built to bring it down.
+      </p>
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:34px">
+        <a href="https://founder-note-all.vercel.app/signup" style="display:inline-flex;align-items:center;gap:9px;background:#5B4FE9;color:#fff;font-size:16px;font-weight:500;padding:15px 24px;border-radius:13px;box-shadow:0 10px 24px -12px rgba(91,79,233,0.85)" style-hover="background:#4A3EDA;color:#fff">
+          Join the free beta
+          <i data-lucide="arrow-right" width="17" height="17"></i>
+        </a>
+        <a href="https://founder-note-all.vercel.app/login" style="display:inline-flex;align-items:center;gap:9px;color:#171512;font-size:16px;padding:15px 20px;border-radius:13px;border:1px solid #DCD5C7;background:#FFFDF8" style-hover="border-color:#171512;color:#171512">I already have an account</a>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#8A8378;margin-left:6px">free while we build · no card, no trial clock</span>
+      </div>
+    </div>
+
+    <div data-reveal="1" style="margin-top:64px;position:relative">
+      <div style="border-radius:20px;border:1px solid #E0D9CB;background:#FFFDF8;box-shadow:0 40px 80px -50px rgba(23,21,18,0.45);overflow:hidden">
+        <div style="display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid #EDE7DB;background:#FBF8F2">
+          <span style="width:10px;height:10px;border-radius:99px;background:#E7E0D2;display:block"></span>
+          <span style="width:10px;height:10px;border-radius:99px;background:#E7E0D2;display:block"></span>
+          <span style="width:10px;height:10px;border-radius:99px;background:#E7E0D2;display:block"></span>
+          <span style="margin-left:12px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#9A9285">founderos.app/today</span>
+        </div>
+        <div style="position:relative;width:100%;aspect-ratio:16/9;background:#F3EFE6">
+          <image-slot id="hero-shot" shape="rect" placeholder="Drop the /today dashboard screenshot"></image-slot>
+        </div>
+      </div>
+
+      <div style="position:absolute;right:-16px;bottom:-38px;width:392px;max-width:82vw;background:#FFFDF8;border:1px solid #E0D9CB;border-radius:16px;box-shadow:0 28px 50px -28px rgba(23,21,18,0.5);padding:18px;animation:fos-float 7s ease-in-out infinite">
+        <div style="display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#9A9285">
+          <i data-lucide="sparkles" width="13" height="13" style="color:#5B4FE9"></i> Quick capture
+        </div>
+        <div style="margin-top:11px;border:1px solid #E6DFD2;border-radius:11px;padding:12px 13px;background:#FBF8F2;font-size:15px;line-height:1.4;min-height:62px;color:#171512">
+          {{ typed }}<span style="display:inline-block;width:2px;height:16px;background:#5B4FE9;vertical-align:-3px;animation:fos-caret 1s steps(1) infinite"></span>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:12px;min-height:26px">
+          <sc-for list="{{ chips }}" as="chip" hint-placeholder-count="3">
+            <span style="display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border-radius:8px;font-size:12px;font-weight:500;background:#EFECFE;color:#4A3EDA">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;opacity:0.7">{{ chip.kind }}</span>{{ chip.text }}
+            </span>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="problem" style="max-width:1160px;margin:0 auto;padding:150px 28px 0">
+    <div style="display:flex;align-items:baseline;gap:14px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#9A9285">
+      <span style="width:26px;height:1px;background:#D8D0C0;display:block"></span> The problem
+    </div>
+    <h2 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:60px;line-height:1.03;letter-spacing:-0.02em;margin:18px 0 0;max-width:760px">
+      Your to-do list is <span style="font-style:italic">lying</span> to you.
+    </h2>
+    <p style="font-size:19px;line-height:1.55;color:#57514A;max-width:620px;margin:20px 0 0">
+      It says everything matters equally. It never says what ships today. It hands you forty things and lets you pick — which is exactly why you pick nothing.
+    </p>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:52px">
+      <div data-reveal="1" style="background:#FFFDF8;border:1px solid #E6DFD2;border-radius:18px;padding:28px" style-hover="border-color:#C9C1B0;transform:translateY(-3px)">
+        <div style="width:40px;height:40px;border-radius:12px;background:#FDEEE9;display:flex;align-items:center;justify-content:center;color:#D9552F"><i data-lucide="refresh-cw" width="19" height="19"></i></div>
+        <h3 style="font-size:20px;font-weight:600;letter-spacing:-0.01em;margin:18px 0 0">Decision paralysis</h3>
+        <p style="font-size:15px;line-height:1.6;color:#6B6459;margin:9px 0 0">Twenty minutes every morning deciding what to do. By the time you pick, the good hours are gone — spent on choosing, not doing.</p>
+      </div>
+      <div data-reveal="1" style="background:#FFFDF8;border:1px solid #E6DFD2;border-radius:18px;padding:28px" style-hover="border-color:#C9C1B0;transform:translateY(-3px)">
+        <div style="width:40px;height:40px;border-radius:12px;background:#FBF1DC;display:flex;align-items:center;justify-content:center;color:#B07C15"><i data-lucide="package" width="19" height="19"></i></div>
+        <h3 style="font-size:20px;font-weight:600;letter-spacing:-0.01em;margin:18px 0 0">Too big to start</h3>
+        <p style="font-size:15px;line-height:1.6;color:#6B6459;margin:9px 0 0">“Launch the new homepage” is not a task — it is two weeks hiding in one line. No wonder the phone wins.</p>
+      </div>
+      <div data-reveal="1" style="background:#FFFDF8;border:1px solid #E6DFD2;border-radius:18px;padding:28px" style-hover="border-color:#C9C1B0;transform:translateY(-3px)">
+        <div style="width:40px;height:40px;border-radius:12px;background:#E4F6F2;display:flex;align-items:center;justify-content:center;color:#0E8C7E"><i data-lucide="ghost" width="19" height="19"></i></div>
+        <h3 style="font-size:20px;font-weight:600;letter-spacing:-0.01em;margin:18px 0 0">Invisible progress</h3>
+        <p style="font-size:15px;line-height:1.6;color:#6B6459;margin:9px 0 0">You shipped three things this week. No record, no evidence — so your brain files it under “I did nothing.”</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="how" style="background:#171512;color:#F6F3EC;margin-top:150px;padding:110px 0">
+    <div style="max-width:1160px;margin:0 auto;padding:0 28px">
+      <div style="display:flex;align-items:baseline;gap:14px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#8B8272">
+        <span style="width:26px;height:1px;background:#3A362F;display:block"></span> How it works
+      </div>
+      <h2 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:60px;line-height:1.03;letter-spacing:-0.02em;margin:18px 0 0;max-width:700px;color:#FBF8F2">
+        Three moves a day. <span style="font-style:italic;color:#A79DFF">That is the whole method.</span>
+      </h2>
+
+      <div style="display:grid;gap:26px;margin-top:64px">
+        <div data-reveal="1" style="display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;border-top:1px solid #302C25;padding-top:44px">
+          <div>
+            <div style="display:flex;align-items:center;gap:12px"><span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#5B4FE9">01</span><span style="height:1px;flex:1;background:#302C25"></span><i data-lucide="zap" width="17" height="17" style="color:#A79DFF"></i></div>
+            <h3 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:38px;letter-spacing:-0.015em;margin:16px 0 0;color:#FBF8F2">Dump your mind</h3>
+            <p style="font-size:17px;line-height:1.6;color:#B3AB9C;margin:12px 0 0;max-width:460px">Type “call investor tomorrow 3pm urgent” and stop thinking about it. The parser pulls out the date, the priority, the energy, the project, the tags. No forms. No dropdowns.</p>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:18px">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#8B8272;border:1px solid #302C25;padding:5px 9px;border-radius:7px">@Engineering</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#8B8272;border:1px solid #302C25;padding:5px 9px;border-radius:7px">#urgent</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#8B8272;border:1px solid #302C25;padding:5px 9px;border-radius:7px">tomorrow 3pm</span>
+            </div>
+          </div>
+          <div style="position:relative;width:100%;aspect-ratio:4/3;border-radius:16px;overflow:hidden;border:1px solid #302C25;background:#201D18">
+            <image-slot id="how-capture" shape="rect" placeholder="Quick-capture screen"></image-slot>
+          </div>
+        </div>
+
+        <div data-reveal="1" style="display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;border-top:1px solid #302C25;padding-top:44px">
+          <div style="order:2">
+            <div style="display:flex;align-items:center;gap:12px"><span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#5B4FE9">02</span><span style="height:1px;flex:1;background:#302C25"></span><i data-lucide="target" width="17" height="17" style="color:#A79DFF"></i></div>
+            <h3 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:38px;letter-spacing:-0.015em;margin:16px 0 0;color:#FBF8F2">Get exactly one answer</h3>
+            <p style="font-size:17px;line-height:1.6;color:#B3AB9C;margin:12px 0 0;max-width:460px">Each morning you tell it how you feel — Admin, Medium, Deep. It returns a single task you are actually able to do right now, with a Start focus button sitting next to it. Not forty things. One.</p>
+            <div style="display:flex;gap:8px;margin-top:18px">
+              <span style="font-size:12px;font-weight:500;color:#14B8A6;border:1px solid #14B8A6;padding:6px 11px;border-radius:8px">Admin</span>
+              <span style="font-size:12px;font-weight:500;color:#3B82F6;border:1px solid #3B82F6;padding:6px 11px;border-radius:8px">Medium</span>
+              <span style="font-size:12px;font-weight:500;color:#F6F3EC;background:#5B4FE9;border:1px solid #5B4FE9;padding:6px 11px;border-radius:8px">Deep</span>
+            </div>
+          </div>
+          <div style="order:1;position:relative;width:100%;aspect-ratio:4/3;border-radius:16px;overflow:hidden;border:1px solid #302C25;background:#201D18">
+            <image-slot id="how-hero-task" shape="rect" placeholder="Today / hero task screen"></image-slot>
+          </div>
+        </div>
+
+        <div data-reveal="1" style="display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;border-top:1px solid #302C25;padding-top:44px">
+          <div>
+            <div style="display:flex;align-items:center;gap:12px"><span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#5B4FE9">03</span><span style="height:1px;flex:1;background:#302C25"></span><i data-lucide="trending-up" width="17" height="17" style="color:#A79DFF"></i></div>
+            <h3 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:38px;letter-spacing:-0.015em;margin:16px 0 0;color:#FBF8F2">Ship it, then see it</h3>
+            <p style="font-size:17px;line-height:1.6;color:#B3AB9C;margin:12px 0 0;max-width:460px">Tasks, streaks, focus sessions, energy logs and journal entries all roll into a weekly review. Friday stops being “what did I even do?” and starts being a receipt.</p>
+          </div>
+          <div style="position:relative;width:100%;aspect-ratio:4/3;border-radius:16px;overflow:hidden;border:1px solid #302C25;background:#201D18">
+            <image-slot id="how-review" shape="rect" placeholder="Weekly review / stats screen"></image-slot>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" style="max-width:1160px;margin:0 auto;padding:130px 28px 0">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:40px;flex-wrap:wrap">
+      <div>
+        <div style="display:flex;align-items:baseline;gap:14px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#9A9285">
+          <span style="width:26px;height:1px;background:#D8D0C0;display:block"></span> Everything built in
+        </div>
+        <h2 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:60px;line-height:1.03;letter-spacing:-0.02em;margin:18px 0 0;max-width:640px">
+          The nine things <span style="font-style:italic">no other tool does.</span>
+        </h2>
+      </div>
+      <p style="font-size:16px;line-height:1.6;color:#6B6459;max-width:330px">Strip these out and we are a to-do app. These are the product.</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;margin-top:52px;background:#E6DFD2;border:1px solid #E6DFD2;border-radius:20px;overflow:hidden">
+      <sc-for list="{{ features }}" as="f" hint-placeholder-count="9">
+        <div style="background:#FFFDF8;padding:30px 26px" style-hover="background:#FFFFFF">
+          <div style="width:34px;height:34px;border-radius:10px;background:#F1EEFF;display:flex;align-items:center;justify-content:center;color:#5B4FE9"><i data-lucide="{{ f.icon }}" width="17" height="17"></i></div>
+          <h3 style="font-size:17px;font-weight:600;letter-spacing:-0.01em;margin:16px 0 0">{{ f.title }}</h3>
+          <p style="font-size:14.5px;line-height:1.6;color:#6B6459;margin:8px 0 0">{{ f.body }}</p>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section id="platforms" style="max-width:1160px;margin:0 auto;padding:130px 28px 0">
+    <div data-reveal="1" style="background:#FFFDF8;border:1px solid #E6DFD2;border-radius:24px;padding:56px 48px;display:grid;grid-template-columns:1.05fr 1fr;gap:48px;align-items:center;overflow:hidden">
+      <div>
+        <div style="display:flex;align-items:baseline;gap:14px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#9A9285">
+          <span style="width:26px;height:1px;background:#D8D0C0;display:block"></span> Everywhere you think
+        </div>
+        <h2 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:50px;line-height:1.05;letter-spacing:-0.02em;margin:18px 0 0">
+          The idea arrives on the walk.<br><span style="font-style:italic;color:#5B4FE9">Capture it there.</span>
+        </h2>
+        <p style="font-size:17px;line-height:1.6;color:#57514A;margin:18px 0 0;max-width:440px">Web, iOS and Android — the same brain, synced the second you type. Start a focus session on your laptop, finish the streak from bed.</p>
+        <div style="display:flex;gap:10px;margin-top:26px;flex-wrap:wrap">
+          <span style="display:inline-flex;align-items:center;gap:8px;font-size:14px;color:#171512;border:1px solid #E0D9CB;background:#FBF8F2;padding:10px 15px;border-radius:11px"><i data-lucide="monitor" width="16" height="16" style="color:#5B4FE9"></i> Web app</span>
+          <span style="display:inline-flex;align-items:center;gap:8px;font-size:14px;color:#171512;border:1px solid #E0D9CB;background:#FBF8F2;padding:10px 15px;border-radius:11px"><i data-lucide="smartphone" width="16" height="16" style="color:#5B4FE9"></i> iOS</span>
+          <span style="display:inline-flex;align-items:center;gap:8px;font-size:14px;color:#171512;border:1px solid #E0D9CB;background:#FBF8F2;padding:10px 15px;border-radius:11px"><i data-lucide="tablet-smartphone" width="16" height="16" style="color:#5B4FE9"></i> Android</span>
+          <span style="display:inline-flex;align-items:center;gap:8px;font-size:14px;color:#0E8C7E;border:1px solid #BFE9E1;background:#E9F8F5;padding:10px 15px;border-radius:11px"><i data-lucide="refresh-cw" width="16" height="16"></i> Realtime sync</span>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:center;gap:18px;align-items:flex-end">
+        <div style="width:186px;height:378px;border-radius:30px;border:1px solid #E0D9CB;background:#F3EFE6;overflow:hidden;position:relative;box-shadow:0 26px 46px -30px rgba(23,21,18,0.6)">
+          <image-slot id="phone-a" shape="rect" placeholder="iOS today screen"></image-slot>
+        </div>
+        <div style="width:186px;height:320px;border-radius:30px;border:1px solid #E0D9CB;background:#F3EFE6;overflow:hidden;position:relative;box-shadow:0 26px 46px -30px rgba(23,21,18,0.6)">
+          <image-slot id="phone-b" shape="rect" placeholder="Android capture screen"></image-slot>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="max-width:1160px;margin:0 auto;padding:130px 28px 0">
+    <div style="display:flex;align-items:baseline;gap:14px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#9A9285">
+      <span style="width:26px;height:1px;background:#D8D0C0;display:block"></span> Who it is for
+    </div>
+    <h2 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:60px;line-height:1.03;letter-spacing:-0.02em;margin:18px 0 0">
+      Built for builders, <span style="font-style:italic">not bureaucrats.</span>
+    </h2>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:48px">
+      <div style="border-top:2px solid #171512;padding-top:22px">
+        <div style="display:flex;align-items:center;gap:10px;color:#5B4FE9"><i data-lucide="rocket" width="18" height="18"></i><h3 style="font-size:19px;font-weight:600;margin:0;color:#171512">Solo founders</h3></div>
+        <p style="font-size:15px;line-height:1.6;color:#6B6459;margin:12px 0 0">You are building the product, talking to users and doing payroll. You do not have time to organise tasks — the system should do that part.</p>
+      </div>
+      <div style="border-top:2px solid #171512;padding-top:22px">
+        <div style="display:flex;align-items:center;gap:10px;color:#5B4FE9"><i data-lucide="code-2" width="18" height="18"></i><h3 style="font-size:19px;font-weight:600;margin:0;color:#171512">Indie makers</h3></div>
+        <p style="font-size:15px;line-height:1.6;color:#6B6459;margin:12px 0 0">You ship weekly. You need capture that does not break flow and a timer that keeps you in deep work for fifty minutes straight.</p>
+      </div>
+      <div style="border-top:2px solid #171512;padding-top:22px">
+        <div style="display:flex;align-items:center;gap:10px;color:#5B4FE9"><i data-lucide="graduation-cap" width="18" height="18"></i><h3 style="font-size:19px;font-weight:600;margin:0;color:#171512">Early-career builders</h3></div>
+        <p style="font-size:15px;line-height:1.6;color:#6B6459;margin:12px 0 0">First time managing your own time and energy. FounderOS teaches the habits without making you learn a methodology first.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="pricing" style="max-width:1160px;margin:0 auto;padding:130px 28px 0">
+    <div style="display:flex;align-items:baseline;gap:14px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#9A9285">
+      <span style="width:26px;height:1px;background:#D8D0C0;display:block"></span> Price
+    </div>
+    <h2 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:60px;line-height:1.03;letter-spacing:-0.02em;margin:18px 0 0;max-width:780px">
+      Free for now. <span style="font-style:italic">Because I don't know what it's worth yet.</span>
+    </h2>
+    <p style="font-size:19px;line-height:1.55;color:#57514A;max-width:640px;margin:20px 0 0;text-wrap:pretty">
+      FounderOS is early. I'd rather have fifty founders using it hard and telling me what's broken than a pricing page with three tiers I invented from nothing. So it's free while we build — and when there's a price, you'll hear it from me first.
+    </p>
+
+    <div style="display:grid;grid-template-columns:1.15fr 1fr;gap:22px;margin-top:48px;align-items:start">
+      <div style="border:1px solid #E6DFD2;border-radius:22px;background:#FFFDF8;padding:38px 36px">
+        <div style="display:inline-flex;align-items:center;gap:9px;padding:7px 13px;border-radius:99px;background:#EFECFE;color:#4A3EDA;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase">
+          <span style="width:6px;height:6px;border-radius:99px;background:#5B4FE9;display:inline-block"></span> Open beta
+        </div>
+        <div style="display:flex;align-items:baseline;gap:12px;margin-top:22px">
+          <span style="font-family:'Instrument Serif',serif;font-size:76px;line-height:1;letter-spacing:-0.03em">Free</span>
+          <span style="font-size:16px;color:#8A8378">everything, no limits</span>
+        </div>
+        <p style="margin:18px 0 0;font-size:16px;line-height:1.6;color:#57514A;max-width:460px">Web, iOS and Android. Every feature on this page. No card, no trial countdown, no feature held hostage behind a tier that doesn't exist yet.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:26px">
+          <sc-for list="{{ included }}" as="i" hint-placeholder-count="6">
+            <div style="display:flex;align-items:flex-start;gap:10px;font-size:14.5px;line-height:1.45">
+              <span style="width:18px;height:18px;flex:none;border-radius:6px;background:#5B4FE9;color:#fff;display:flex;align-items:center;justify-content:center;margin-top:1px"><i data-lucide="check" width="11" height="11"></i></span>{{ i }}
+            </div>
+          </sc-for>
+        </div>
+        <a href="https://founder-note-all.vercel.app/signup" style="display:inline-flex;align-items:center;gap:9px;margin-top:30px;background:#5B4FE9;color:#fff;font-size:16px;font-weight:600;padding:15px 24px;border-radius:13px" style-hover="background:#4A3EDA;color:#fff">Join the beta <i data-lucide="arrow-right" width="17" height="17"></i></a>
+      </div>
+
+      <div style="border:1px solid #E6DFD2;border-radius:22px;background:#F1EDE3;padding:34px 32px">
+        <h3 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:30px;line-height:1.15;margin:0;letter-spacing:-0.015em">The deal, plainly</h3>
+        <div style="display:flex;flex-direction:column;gap:20px;margin-top:22px">
+          <sc-for list="{{ deal }}" as="d" hint-placeholder-count="4">
+            <div style="border-top:1px solid #DFD8C9;padding-top:15px">
+              <p style="margin:0;font-size:15px;font-weight:600">{{ d.title }}</p>
+              <p style="margin:6px 0 0;font-size:14px;line-height:1.6;color:#6B6459">{{ d.body }}</p>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="max-width:1160px;margin:0 auto;padding:130px 28px 110px">
+    <div style="background:#5B4FE9;border-radius:26px;padding:82px 56px;text-align:center;position:relative;overflow:hidden">
+      <div style="position:absolute;width:420px;height:420px;border-radius:99px;background:rgba(255,255,255,0.07);top:-180px;left:-90px"></div>
+      <div style="position:absolute;width:340px;height:340px;border-radius:99px;background:rgba(255,255,255,0.06);bottom:-170px;right:-70px"></div>
+      <div style="position:relative">
+        <h2 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:62px;line-height:1.02;letter-spacing:-0.02em;margin:0;color:#fff">Come break it with me. <span style="font-style:italic">It's free.</span></h2>
+        <p style="font-size:18px;line-height:1.55;color:rgba(255,255,255,0.8);max-width:520px;margin:20px auto 0">Type what is rattling around in your head. Four minutes later you will have one thing started and a number that finally moves the right direction.</p>
+        <a href="https://founder-note-all.vercel.app/signup" style="display:inline-flex;align-items:center;gap:9px;margin-top:32px;background:#FFFDF8;color:#171512;font-size:16px;font-weight:600;padding:16px 28px;border-radius:13px" style-hover="background:#171512;color:#fff">Join the free beta <i data-lucide="arrow-right" width="17" height="17"></i></a>
+      </div>
+    </div>
+  </section>
+
+  <footer style="border-top:1px solid #E6DFD2">
+    <div style="max-width:1160px;margin:0 auto;padding:34px 28px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:10px;font-size:14px;color:#6B6459">
+        <div style="width:22px;height:22px;border-radius:7px;background:#171512;display:flex;align-items:center;justify-content:center;color:#F6F3EC;font-family:'Instrument Serif',serif;font-size:14px;line-height:1">F</div>
+        FounderOS — the execution system for people who build things.
+      </div>
+      <div style="display:flex;gap:20px;font-size:14px">
+        <a href="https://founder-note-all.vercel.app/login">Log in</a>
+        <a href="https://founder-note-all.vercel.app/signup">Sign up</a>
+      </div>
+    </div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;animateHero&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;revealOnScroll&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;featureSet&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;All 9&quot;,&quot;Top 6&quot;],&quot;default&quot;:&quot;All 9&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+const ALL_FEATURES = [
+  { icon: "gauge", title: "Mind pressure", body: "One number — unresolved loops weighted by age, ambiguity and stakes. The only score in the app, and it is designed to go down." },
+  { icon: "battery-medium", title: "Capacity budget", body: "A day holds 3 deep, 4 medium, 8 admin units. Plan past it and the planner blocks you and says what to cut." },
+  { icon: "hourglass", title: "Loops expire", body: "Seven days turns amber. Fourteen forces one of four answers: do it, schedule it, hand it off, or drop it. Nothing sits there generating guilt." },
+  { icon: "shield-off", title: "The anti-list", body: "A visible list of what you are not doing this week, with reasons. Naming it is what stops it from following you around." },
+  { icon: "moon", title: "Shutdown ritual", body: "Two minutes that end the day: what shipped, what is parked, tomorrow's one thing. Nobody else builds the screen that lets you stop." },
+  { icon: "scissors", title: "First-move breakdown", body: "Every task carries a two-minute first move and an if-then trigger. “Launch the homepage” never appears as a checkbox." },
+  { icon: "user-plus", title: "Should this be yours?", body: "Loops that age get a delegation prompt with a drafted handoff. Founders drown in work that was never theirs." },
+  { icon: "activity", title: "Energy truth", body: "We log how blocks actually felt against what you planned, then tell you the real shape of your week. Mondays are not deep-work days." },
+  { icon: "receipt", title: "Evidence, not vibes", body: "Friday assembles what you shipped from real sessions. The antidote to “I did nothing this week.”" }
+];
+
+const DEMO = "call investor tomorrow 3pm urgent @Fundraising";
+const DEMO_CHIPS = [
+  { kind: "due", text: "Tomorrow 3:00 PM" },
+  { kind: "priority", text: "Urgent" },
+  { kind: "energy", text: "Deep" },
+  { kind: "project", text: "Fundraising" }
+];
+
+class Component extends DCLogic {
+  state = { n: 0, chipCount: 0 };
+
+  componentDidMount() {
+    this.icons();
+    if (this.props.animateHero ?? true) this.startDemo();
+    else this.setState({ n: DEMO.length, chipCount: DEMO_CHIPS.length });
+    if (this.props.revealOnScroll ?? true) this.startReveal();
+  }
+
+  componentDidUpdate() { this.icons(); }
+
+  componentWillUnmount() {
+    clearInterval(this._t);
+    clearTimeout(this._r);
+    if (this._io) this._io.disconnect();
+  }
+
+  icons() {
+    if (window.lucide) { try { window.lucide.createIcons(); } catch (e) {} }
+    else if (!this._iconWait) {
+      this._iconWait = setInterval(() => {
+        if (window.lucide) { clearInterval(this._iconWait); window.lucide.createIcons(); }
+      }, 200);
+    }
+  }
+
+  startDemo() {
+    clearInterval(this._t);
+    this.setState({ n: 0, chipCount: 0 });
+    this._t = setInterval(() => {
+      this.setState(s => {
+        if (s.n >= DEMO.length) {
+          if (s.chipCount >= DEMO_CHIPS.length) {
+            this._r = setTimeout(() => this.startDemo(), 2600);
+            clearInterval(this._t);
+            return s;
+          }
+          return { n: s.n, chipCount: s.chipCount + 1 };
+        }
+        return { n: s.n + 1, chipCount: 0 };
+      });
+    }, 55);
+  }
+
+  startReveal() {
+    const nodes = document.querySelectorAll("[data-reveal]");
+    nodes.forEach(el => {
+      el.style.opacity = "0";
+      el.style.transform = "translateY(22px)";
+      el.style.transition = "opacity .7s cubic-bezier(.2,.7,.3,1), transform .7s cubic-bezier(.2,.7,.3,1)";
+    });
+    this._io = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.style.opacity = "1";
+          e.target.style.transform = "translateY(0)";
+          this._io.unobserve(e.target);
+        }
+      });
+    }, { rootMargin: "-8% 0px -8% 0px" });
+    nodes.forEach(el => this._io.observe(el));
+  }
+
+  renderVals() {
+    const all = this.props.featureSet === "Top 6" ? ALL_FEATURES.slice(0, 6) : ALL_FEATURES;
+    return {
+      included: [
+        "Unlimited loops and captures",
+        "Morning plan + shutdown rituals",
+        "Focus sessions and energy logs",
+        "Weekly review and pulse",
+        "90-day goals and rituals",
+        "Web, iOS and Android, synced"
+      ],
+      deal: [
+        { title: "You get everything, free", body: "No tier games. If it is built, you have it — including whatever we ship next month." },
+        { title: "I get your honest reaction", body: "What you actually opened, what you ignored, and the thing that made you close the tab. Say it bluntly." },
+        { title: "Price comes later, with warning", body: "When there is a price, beta users hear it first and keep a permanent discount. Nothing switches off overnight." },
+        { title: "Your data stays yours", body: "One-click export, any time, whether you stay or not." }
+      ],
+      features: all,
+      typed: DEMO.slice(0, this.state.n),
+      chips: DEMO_CHIPS.slice(0, this.state.chipCount)
+    };
+  }
+}
+</script>
+</body>
+</html>

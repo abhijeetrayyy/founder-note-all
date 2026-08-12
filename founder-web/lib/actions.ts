@@ -7,28 +7,65 @@ import { parseSmartInput } from "@/lib/smart-input";
 import { todayKey } from "@/lib/utils";
 import type { EnergyLevelValue, PriorityValue, RecurrenceValue, Task, Note, Project, Goal, Habit, JournalEntry } from "@/lib/supabase/types";
 
+/**
+ * Where to send someone after they sign in.
+ *
+ * Only same-origin, in-app paths survive. A `next` of "//evil.com" or
+ * "https://evil.com" is a protocol-relative or absolute URL that the browser
+ * would happily follow off-site, which turns the login screen into an open
+ * redirect — so anything that is not a plain "/path" falls back to /today.
+ */
+function safeNext(raw: FormDataEntryValue | null): string {
+  const next = typeof raw === "string" ? raw.trim() : "";
+  if (!next.startsWith("/") || next.startsWith("//")) return "/today";
+  if (next === "/" || next.startsWith("/login") || next.startsWith("/signup")) return "/today";
+  return next;
+}
+
 export async function signUp(formData: FormData) {
   const supabase = await createClient();
   const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
   const name = String(formData.get("name") ?? "");
 
-  const { data, error } = await supabase.auth.signUp({ email, password });
-  if (error) return { error: error.message };
+  const displayName = name.trim() || email.split("@")[0];
 
-  if (data.user) {
-    const { error: profileErr } = await supabase.from("users_profile").insert([{
-      id: data.user.id,
-      display_name: name || email.split("@")[0],
-      energy_default: 1,
-      onboarding_completed: false,
-      preferences: {},
-    }]);
-    if (profileErr) {
-      await supabase.auth.signOut();
-      return { error: "Account created but profile setup failed. Please try signing up again." };
+  // display_name goes in the auth metadata because the `on_auth_user_created`
+  // trigger in schema.sql reads it from there when it creates the profile row.
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: { data: { display_name: displayName } },
+  });
+
+  if (error) {
+    const m = error.message.toLowerCase();
+    if (m.includes("already registered") || m.includes("already been registered")) {
+      return { error: "There is already an account on this email. Try signing in instead." };
     }
+    if (m.includes("password")) {
+      return { error: "Password needs to be at least 6 characters." };
+    }
+    return { error: error.message };
   }
+
+  // No session means the project has email confirmation switched on. There is
+  // nothing to set up yet — RLS would reject the write anyway — so tell them to
+  // go and confirm rather than bouncing them into a route they cannot reach.
+  if (!data.session) {
+    return { success: true, needsConfirmation: true, email };
+  }
+
+  // The trigger has already created this row, so upsert. The old code used a
+  // plain insert, hit a duplicate-key error, and responded by signing the new
+  // user straight back out.
+  const { error: profileErr } = await supabase
+    .from("users_profile")
+    .upsert(
+      { id: data.user!.id, display_name: displayName, energy_default: 1, onboarding_completed: false, preferences: {} },
+      { onConflict: "id" },
+    );
+  if (profileErr) return { error: profileErr.message };
 
   redirect("/onboarding");
 }
@@ -38,8 +75,19 @@ export async function signIn(formData: FormData) {
   const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
   const { error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) return { error: error.message };
-  redirect("/today");
+  if (error) {
+    // Supabase returns one deliberately vague message for both a wrong password
+    // and an unknown address, so that the form cannot be used to discover who
+    // has an account. Keep that property, but say something a human can act on.
+    if (error.message.toLowerCase().includes("invalid login credentials")) {
+      return { error: "That email and password do not match." };
+    }
+    if (error.message.toLowerCase().includes("email not confirmed")) {
+      return { error: "Confirm your email first — check your inbox for the link we sent." };
+    }
+    return { error: error.message };
+  }
+  redirect(safeNext(formData.get("next")));
 }
 
 export async function signOut() {
@@ -182,6 +230,251 @@ export async function updateTask(id: string, updates: { priority?: number; is_in
   revalidatePath("/inbox");
   revalidatePath("/plan");
   return { success: true };
+}
+
+// ============ LOOPS ============
+
+function revalidateLoops() {
+  revalidatePath("/today");
+  revalidatePath("/inbox");
+  revalidatePath("/tasks");
+  revalidatePath("/loops");
+}
+
+export type LoopAnswer = "do" | "schedule" | "handoff" | "drop";
+
+/**
+ * Give a loop one of the four answers.
+ *
+ * The important part is `answered_at`: once a loop has an answer it stops
+ * decaying and stops counting as pressure. That is what makes the list able to
+ * shrink without anything being deleted, and what keeps capture free — a raw
+ * loop costs nothing for its first week.
+ *
+ * "drop" releases rather than deletes. Nothing in this app removes a founder's
+ * thought on their behalf without a way back.
+ */
+export async function answerLoop(
+  id: string,
+  answer: LoopAnswer,
+  opts?: { dueDate?: string | null; owedTo?: string; reason?: string },
+) {
+  const supabase = await createClient();
+  const now = new Date().toISOString();
+
+  const updates: Record<string, unknown> = { answered_at: now, is_inbox: false, updated_at: now };
+
+  switch (answer) {
+    case "do":
+      updates.due_date = opts?.dueDate ?? todayKey();
+      break;
+    case "schedule":
+      if (!opts?.dueDate) return { error: "Pick a day to schedule this for." };
+      updates.due_date = opts.dueDate;
+      break;
+    case "handoff":
+      if (!opts?.owedTo?.trim()) return { error: "Name who is picking this up." };
+      updates.owed_to = opts.owedTo.trim();
+      updates.owed_direction = 1; // you are now waiting on them
+      break;
+    case "drop":
+      updates.released_at = now;
+      updates.release_reason = opts?.reason?.trim() || "dropped in triage";
+      break;
+  }
+
+  const { error } = await supabase.from("tasks").update(updates).eq("id", id);
+  if (error) return { error: error.message };
+  revalidateLoops();
+  return { success: true };
+}
+
+/** Attach a person to a loop, or clear one by passing an empty name. */
+export async function setOwed(id: string, name: string, direction: 0 | 1) {
+  const supabase = await createClient();
+  const clean = name.trim();
+  const { error } = await supabase
+    .from("tasks")
+    .update({
+      owed_to: clean,
+      owed_direction: clean ? direction : 0,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", id);
+  if (error) return { error: error.message };
+  revalidateLoops();
+  revalidatePath("/unblock");
+  return { success: true };
+}
+
+/** Put a loop on the anti-list — named on purpose, with the reason visible. */
+export async function setNotThisWeek(id: string, on: boolean, reason: string = "") {
+  const supabase = await createClient();
+  const now = new Date().toISOString();
+  const updates: Record<string, unknown> = {
+    not_this_week: on,
+    anti_reason: on ? reason.trim() : "",
+    updated_at: now,
+  };
+  // Naming something as "not this week" is itself an answer — it stops decaying.
+  // Taking it off the anti-list leaves that answer intact rather than
+  // resurrecting the loop as freshly rotting.
+  if (on) updates.answered_at = now;
+
+  const { error } = await supabase.from("tasks").update(updates).eq("id", id);
+  if (error) return { error: error.message };
+  revalidateLoops();
+  return { success: true };
+}
+
+/**
+ * Park an open loop for the night.
+ *
+ * The next move is the whole point: an unfinished thing with a written next
+ * step stops occupying the background, and one without it keeps rehearsing
+ * itself at 2am. Writing it is an answer, so the loop stops decaying too.
+ */
+export async function parkLoop(id: string, nextMove: string) {
+  const supabase = await createClient();
+  const now = new Date().toISOString();
+  const { error } = await supabase
+    .from("tasks")
+    .update({
+      first_step: nextMove.trim(),
+      answered_at: now,
+      is_inbox: false,
+      updated_at: now,
+    })
+    .eq("id", id);
+  if (error) return { error: error.message };
+  revalidateLoops();
+  revalidatePath("/shutdown");
+  return { success: true };
+}
+
+/**
+ * Hand tomorrow its one thing, chosen tonight while the context is still warm.
+ * Writes to tomorrow's plan so the morning opens on a decision already made.
+ */
+export async function setTomorrowOneThing(taskId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  const tomorrow = todayKey(new Date(Date.now() + 86400000));
+  const { data: existing } = await supabase.from("daily_plans").select("*").eq("id", tomorrow).single();
+  const current: string[] = existing?.mit_task_ids ?? [];
+  const next = current.includes(taskId) ? current : [taskId, ...current].slice(0, 3);
+
+  const { error } = await supabase.from("daily_plans").upsert({
+    id: tomorrow,
+    user_id: user.id,
+    intention_text: existing?.intention_text ?? "",
+    blocker_notes: existing?.blocker_notes ?? "",
+    reflection_text: existing?.reflection_text ?? "",
+    energy_level: existing?.energy_level ?? null,
+    mit_task_ids: next,
+    // Deliberately false: choosing tomorrow's one thing is not the same as
+    // having planned tomorrow, and the morning ritual should still run.
+    morning_done: false,
+    created_at: existing?.created_at ?? new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  });
+  if (error) return { error: error.message };
+
+  await supabase.from("tasks")
+    .update({ due_date: tomorrow, is_inbox: false, answered_at: new Date().toISOString() })
+    .eq("id", taskId);
+
+  revalidatePath("/today");
+  revalidatePath("/plan");
+  return { success: true };
+}
+
+/**
+ * Reshape a day that already broke.
+ *
+ * Never records what was missed. The old plan is rewritten in place rather than
+ * kept as evidence against anyone — an app that shows a founder their failed
+ * morning plan at 4pm is the reason planning tools get abandoned in week three.
+ */
+export async function replanDay(keepIds: string[], pushIds: string[]) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  const today = todayKey();
+  const tomorrow = todayKey(new Date(Date.now() + 86400000));
+
+  if (pushIds.length) {
+    const { error } = await supabase
+      .from("tasks")
+      .update({ due_date: tomorrow, updated_at: new Date().toISOString() })
+      .in("id", pushIds);
+    if (error) return { error: error.message };
+  }
+
+  const { data: existing } = await supabase.from("daily_plans").select("*").eq("id", today).single();
+  const { error } = await supabase.from("daily_plans").upsert({
+    id: today,
+    user_id: user.id,
+    intention_text: existing?.intention_text ?? "",
+    blocker_notes: existing?.blocker_notes ?? "",
+    reflection_text: existing?.reflection_text ?? "",
+    energy_level: existing?.energy_level ?? null,
+    mit_task_ids: keepIds.slice(0, 3),
+    morning_done: true,
+    created_at: existing?.created_at ?? new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  });
+  if (error) return { error: error.message };
+
+  revalidatePath("/today");
+  return { success: true };
+}
+
+/** Soft drop with a way back. */
+export async function releaseLoop(id: string, reason: string = "") {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("tasks")
+    .update({
+      released_at: new Date().toISOString(),
+      release_reason: reason.trim() || "released",
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", id);
+  if (error) return { error: error.message };
+  revalidateLoops();
+  return { success: true };
+}
+
+export async function restoreLoop(id: string) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("tasks")
+    .update({ released_at: null, release_reason: "", updated_at: new Date().toISOString() })
+    .eq("id", id);
+  if (error) return { error: error.message };
+  revalidateLoops();
+  return { success: true };
+}
+
+/**
+ * Friday amnesty. Releases every raw loop past the cutoff in one motion and
+ * returns what went, so the app can show a receipt instead of a silent delete.
+ */
+export async function runAmnesty(olderThanDays: number = 21) {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("release_stale_loops", {
+    p_older_than_days: olderThanDays,
+    p_reason: "amnesty",
+  });
+  if (error) return { error: error.message };
+  revalidateLoops();
+  revalidatePath("/review");
+  const rows = (data ?? []) as { loop_id: string; loop_title: string }[];
+  return { success: true, released: rows.map((r) => ({ id: r.loop_id, title: r.loop_title })) };
 }
 
 export async function deleteTask(id: string) {
@@ -580,20 +873,43 @@ export async function saveFocusSession(formData: FormData) {
     if (!user) return { error: "Not authenticated" };
 
     const taskId = String(formData.get("task_id") ?? "") || null;
-    const { error } = await supabase.from("focus_sessions").insert({
+    const feltRaw = formData.get("felt");
+    const felt = feltRaw === null || feltRaw === "" ? null : Number(feltRaw);
+
+    const { data, error } = await supabase.from("focus_sessions").insert({
       user_id: user.id,
       task_id: taskId,
       mode: String(formData.get("mode") ?? "pomodoro"),
       duration_minutes: Number(formData.get("duration_minutes") ?? 0),
       completed: String(formData.get("completed") ?? "true") === "true",
+      intention: String(formData.get("intention") ?? ""),
+      felt,
       ended_at: new Date().toISOString(),
-    });
-    if (error) return { error: "Table not yet created — run the migration" };
+    }).select("id").single();
+
+    if (error) return { error: error.message };
     revalidatePath("/focus");
-    return { success: true };
+    revalidatePath("/stats");
+    return { success: true, id: (data as { id: string } | null)?.id };
   } catch {
     return { error: "Focus sessions require the migration to be applied" };
   }
+}
+
+/**
+ * Record how a block actually felt, after the fact.
+ *
+ * Split from saveFocusSession on purpose: the session is written the moment the
+ * timer ends, so a founder who walks away still gets credit for the work. The
+ * feeling is an optional second write, never a gate on the first.
+ */
+export async function logSessionFeel(sessionId: string, felt: number) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("focus_sessions").update({ felt }).eq("id", sessionId);
+  if (error) return { error: error.message };
+  revalidatePath("/stats");
+  revalidatePath("/focus");
+  return { success: true };
 }
 
 export async function saveWeeklyReview(formData: FormData) {
