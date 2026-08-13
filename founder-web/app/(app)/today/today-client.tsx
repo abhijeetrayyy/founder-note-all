@@ -20,13 +20,14 @@ import { energyLabel, type Task, type Note, type Goal, type Habit, type HabitLog
 export function TodayClient({
   energy, plan, mits, restTasks, habits, habitLogs, notes: _notes, goals: _goals,
   name: _name, summary, pressure = EMPTY_PRESSURE, antiList = [], capacity: limit,
-  momentum = { run: 0, last7: 0, oldestClosed: 0 },
+  momentum = { run: 0, last7: 0, oldestClosed: 0 }, fires = [],
 }: {
   name: string | null; energy: number; plan: DailyPlan | null;
   mits: Task[]; restTasks: Task[]; habits: Habit[]; habitLogs: HabitLog[]; goals: Goal[]; notes: Note[];
   summary: { inbox_count: number; due_today_count: number; completed_today_count: number; habits_done_today: number };
   pressure?: Pressure; antiList?: Task[]; capacity?: CapacityShape;
   momentum?: { run: number; last7: number; oldestClosed: number };
+  fires?: { id: string; title: string; why: string }[];
 }) {
   const activeMits = mits.filter((t) => !t.completed);
   const openRest = restTasks.filter((t) => !t.completed);
@@ -49,6 +50,8 @@ export function TodayClient({
               refresh, and the *next* task inherits done=true — telling the
               founder something is closed when it is not. */}
           {one ? <OneThing key={one.id} task={one} energy={energy} /> : <NoPlanCard />}
+
+          <FiresCard fires={fires} hasPlan={mits.length > 0} />
 
           <CapacityCard fit={capacity} />
 
@@ -121,7 +124,7 @@ function OneThing({ task, energy }: { task: Task; energy: number }) {
 
   return (
     <section className="rounded-[8px] bg-[#F0F0EE] text-[#0B0B0D] p-6 relative overflow-hidden">
-      <p className="font-mono text-2xs tracking-[0.14em] uppercase text-[#0B0B0D]/55">
+      <p className="font-mono text-2xs tracking-[0.14em] uppercase text-[#0B0B0D]/65">
         The one thing · matched to {energyLabel(energy as 0 | 1 | 2)} energy
       </p>
 
@@ -142,12 +145,12 @@ function OneThing({ task, energy }: { task: Task; energy: number }) {
           <span className="text-xs text-[#8A4E12] border border-[#8A4E12]/30 bg-[#8A4E12]/[0.07] px-2.5 py-[5px] rounded-[6px]">High priority</span>
         )}
         {task.due_date && (
-          <span className="text-xs text-[#0B0B0D]/60 border border-[#0B0B0D]/20 px-2.5 py-[5px] rounded-[6px]">Due today</span>
+          <span className="text-xs text-[#0B0B0D]/65 border border-[#0B0B0D]/20 px-2.5 py-[5px] rounded-[6px]">Due today</span>
         )}
       </div>
 
       <div className="mt-5 p-4 rounded-[6px] bg-[#0B0B0D]/[0.055] border border-[#0B0B0D]/12">
-        <p className="font-mono text-2xs tracking-[0.12em] uppercase text-[#0B0B0D]/55">First micro-step</p>
+        <p className="font-mono text-2xs tracking-[0.12em] uppercase text-[#0B0B0D]/65">First micro-step</p>
         <p className="mt-2 text-base text-[#0B0B0D]">{move}</p>
       </div>
 
@@ -253,6 +256,47 @@ function UnblockPrompt({ count }: { count: number }) {
       </div>
       <span className="text-[#6E6E77] group-hover:text-[#F0F0EE] transition-colors">→</span>
     </Link>
+  );
+}
+
+/* ── What caught fire ──
+   The one card that keeps this screen honest after 9am.
+
+   Everything else on Today reports a decision the founder already made. This
+   reports the day disagreeing with it: something with a person waiting or a
+   date already passed that is not on the list. It does not reshuffle anything
+   by itself — a screen that silently rewrote your plan every time an email
+   arrived would be the inbox, which is the thing this product exists to get
+   you out of. It states the fact and puts the swap one click away. */
+function FiresCard({ fires, hasPlan }: { fires: { id: string; title: string; why: string }[]; hasPlan: boolean }) {
+  if (!fires.length) return null;
+  return (
+    <section className="rounded-[8px] border border-[#FF8A4C]/35 bg-[#1B1B1F] p-5">
+      <div className="flex items-center gap-2.5">
+        <span className="w-1.5 h-1.5 rounded-full bg-[#FF8A4C] flex-none" />
+        <h3 className="text-base font-semibold">
+          {fires.length === 1 ? "One thing is on fire and not on your list" : `${fires.length} things are on fire and not on your list`}
+        </h3>
+      </div>
+      <p className="mt-2 text-sm text-[#9C9CA4] leading-[1.5]">
+        {hasPlan
+          ? "Either it goes on the list in place of something, or you decide on purpose that it waits. Both are fine. Not deciding is not."
+          : "You have not chosen a day yet, and these are the ones that will bite if you do not."}
+      </p>
+      <div className="flex flex-col gap-2.5 mt-3.5">
+        {fires.map((f) => (
+          <Link key={f.id} href={`/tasks/${f.id}`}
+            className="px-3.5 py-3 rounded-[6px] bg-[#141417] border border-[#35353C] hover:border-[#FF8A4C] transition-colors focus-ring">
+            <p className="text-base leading-snug">{f.title}</p>
+            <p className="mt-0.5 text-xs text-[#FF8A4C]">{f.why}</p>
+          </Link>
+        ))}
+      </div>
+      <Link href="/plan"
+        className="mt-3.5 inline-flex rounded-[6px] bg-[#F0F0EE] hover:bg-[#FFFFFF] text-[#0B0B0D] text-sm font-medium px-[17px] py-[11px] transition-colors focus-ring">
+        {hasPlan ? "Redo the day" : "Choose the day"}
+      </Link>
+    </section>
   );
 }
 
@@ -419,25 +463,61 @@ function EnergyCard({ energy, plan }: { energy: number; plan: DailyPlan | null }
   );
 }
 
+/**
+ * What you committed to.
+ *
+ * This was three truncated lines of grey in a corner, which is why the picks
+ * felt like they had gone missing after planning — there was no surface in the
+ * app that showed the commitment as a commitment. It now shows the same
+ * numbered slots the board does, each with its first move and whether it has
+ * landed, so the two screens describe the same object in the same words.
+ */
 function MitsCard({ mits }: { mits: Task[] }) {
+  const done = mits.filter((t) => t.completed).length;
   return (
     <section className="rounded-[8px] border border-[#26262B] bg-[#141417] p-5">
-      <div className="flex items-center justify-between">
-        <h3 className="text-base font-semibold">Today&apos;s 3 MITs</h3>
-        <Link href="/plan" className="text-[#9C9CA4] hover:text-[#F0F0EE] transition-colors focus-ring rounded" aria-label="Edit plan">
-          <PencilIcon />
-        </Link>
+      <div className="flex items-baseline justify-between gap-3">
+        <h3 className="text-base font-semibold">What today is for</h3>
+        <span className="font-mono text-2xs text-[#9C9CA4]">
+          {mits.length ? `${done} of ${mits.length} closed` : "nothing chosen"}
+        </span>
       </div>
-      <div className="flex flex-col gap-2.5 mt-3.5">
-        {mits.length ? mits.slice(0, 3).map((t, i) => (
-          <Link key={t.id} href={`/tasks/${t.id}`} className="flex gap-2.5 items-start text-sm leading-[1.45] hover:text-[#F0F0EE] transition-colors">
-            <span className="font-mono text-2xs text-[#F0F0EE] mt-0.5">{String(i + 1).padStart(2, "0")}</span>
-            <span className={cn("flex-1", t.completed && "line-through text-[#9C9CA4]")}>{t.title}</span>
+
+      {mits.length ? (
+        <>
+          <ol className="flex flex-col gap-2.5 mt-3.5">
+            {mits.map((t, i) => (
+              <li key={t.id}>
+                <Link href={`/tasks/${t.id}`}
+                  className="flex gap-2.5 items-start rounded-[6px] px-2.5 py-2 -mx-2.5 hover:bg-[#1B1B1F] transition-colors focus-ring">
+                  <span className={cn("font-mono text-2xs mt-[3px] flex-none", t.completed ? "text-[#5EE0B0]" : "text-[#9C9CA4]")}>
+                    {t.completed ? "✓" : String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span className="flex-1 min-w-0">
+                    <span className={cn("block text-sm leading-[1.45]", t.completed && "line-through text-[#9C9CA4]")}>{t.title}</span>
+                    {!t.completed && t.first_step && (
+                      <span className="block mt-0.5 text-xs text-[#9C9CA4] leading-snug">{t.first_step}</span>
+                    )}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ol>
+          <Link href="/plan" className="mt-3.5 inline-block text-xs font-medium text-[#F0F0EE] hover:underline underline-offset-2">
+            Change what today is for →
           </Link>
-        )) : (
-          <Link href="/plan" className="text-sm text-[#F0F0EE] font-medium hover:underline">Pick your three →</Link>
-        )}
-      </div>
+        </>
+      ) : (
+        <>
+          <p className="mt-2 text-sm text-[#9C9CA4] leading-[1.5]">
+            Everything open is already sorted by what actually bites. Sixty seconds and three taps.
+          </p>
+          <Link href="/plan"
+            className="mt-3.5 inline-flex rounded-[6px] bg-[#F0F0EE] hover:bg-[#FFFFFF] text-[#0B0B0D] text-sm font-medium px-[17px] py-[11px] transition-colors focus-ring">
+            Choose the day
+          </Link>
+        </>
+      )}
     </section>
   );
 }
@@ -494,6 +574,5 @@ function RitualsCard({ habits, logs, done }: { habits: Habit[]; logs: HabitLog[]
 const ic = { fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
 function PlayIcon() { return <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4l14 8-14 8z"/></svg>; }
 function HourglassIcon() { return <svg width="16" height="16" viewBox="0 0 24 24" {...ic} style={{ color: "#FF8A4C" }}><path d="M5 22h14M5 2h14M17 22v-4.2a2 2 0 0 0-.6-1.4L12 12l-4.4 4.4a2 2 0 0 0-.6 1.4V22M7 2v4.2c0 .5.2 1 .6 1.4L12 12l4.4-4.4c.4-.4.6-.9.6-1.4V2"/></svg>; }
-function PencilIcon() { return <svg width="14" height="14" viewBox="0 0 24 24" {...ic}><path d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg>; }
 function ShieldOffIcon() { return <svg width="15" height="15" viewBox="0 0 24 24" {...ic} style={{ color: "#6E6E77" }}><path d="M20 13c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V5l8-3 8 3z"/><path d="M2 2l20 20"/></svg>; }
 function FlameSmall() { return <svg width="14" height="14" viewBox="0 0 24 24" {...ic}><path d="M12 22c3.9 0 6.5-2.6 6.5-6 0-4-3.5-5.5-3-9.5C13 8 12 10 12 10S10.5 8 9 6C7 8.5 5.5 10.5 5.5 16c0 3.4 2.6 6 6.5 6z"/></svg>; }

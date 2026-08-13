@@ -315,6 +315,202 @@ export function draftNextMove(task: Task): string {
 }
 
 // ---------------------------------------------------------------------------
+// Triage lanes — "what is on fire, and what actually matters"
+// ---------------------------------------------------------------------------
+
+/**
+ * The four lanes everything open falls into.
+ *
+ * A founder's real question in the morning is not "what is on my list" — they
+ * know, it is the thing that woke them at 4am. It is "which of these actually
+ * bites today, and which just feels loud". So the app answers it rather than
+ * asking. Every lane here is DERIVED from facts already in the row — a person
+ * attached, a date passed, a project it belongs to, the energy it costs.
+ * Nothing here reads a self-assigned "urgent" flag first, because that flag is
+ * the least reliable signal in the system: everything a founder types in feels
+ * urgent at the moment they type it.
+ *
+ * Order is deliberate. `fire` outranks everything. `needle` outranks `rot`,
+ * which is the non-obvious one: a deep-work loop captured three weeks ago and
+ * never scheduled is not rubbish to be swept out, it is the important thing
+ * being avoided, and filing it under "rot" would tell the founder to drop
+ * exactly what they should be protecting.
+ */
+export type Lane = "fire" | "needle" | "rot" | "noise";
+
+export const LANES: { key: Lane; label: string; blurb: string; tone: string }[] = [
+  { key: "fire",   label: "On fire",       tone: "#FF8A4C", blurb: "Someone gets hurt, or something breaks, if today ends without these." },
+  { key: "needle", label: "Moves the needle", tone: "#F0F0EE", blurb: "Nothing important moves unless you protect time for these." },
+  { key: "rot",    label: "Been sitting",  tone: "#E0A33E", blurb: "Old, and nothing about them is load-bearing. Answer or let go — do not schedule." },
+  { key: "noise",  label: "Noise",         tone: "#9C9CA4", blurb: "Feels urgent. Is not. Batch it into one admin block, or drop it." },
+];
+
+export interface LaneVerdict {
+  lane: Lane;
+  /** Why THIS row landed here, as a fact. Never the lane's name back at you. */
+  why: string;
+}
+
+function firstName(s: string) { return s.trim().split(/\s+/)[0]; }
+
+/**
+ * The local calendar day a stored value falls on, as YYYY-MM-DD.
+ *
+ * The two date columns in this schema are not the same shape: `due_date` is a
+ * `timestamptz` and comes back as "2026-08-12T00:00:00+00:00", while
+ * `decide_by` is a plain `date` and comes back as "2026-08-12". Comparing them
+ * the same way silently produced NaN for one of the two — overdue loops never
+ * reached the fire lane at all, which is the single worst thing this file could
+ * get wrong. Bare dates are passed through untouched rather than fed to
+ * `new Date`, which would read them as UTC midnight and land on the previous
+ * day for anyone west of Greenwich.
+ */
+export function dayKey(value: string | null | undefined): string | null {
+  const s = (value ?? "").trim();
+  if (!s) return null;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  const d = new Date(s);
+  if (Number.isNaN(d.getTime())) return null;
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${m}-${day}`;
+}
+
+/** Whole days from `today` to the stored date. Negative means it has passed. */
+function dayDelta(stored: string, today: string): number | null {
+  const key = dayKey(stored);
+  if (!key) return null;
+  const a = Date.parse(`${key}T00:00:00`);
+  const b = Date.parse(`${today}T00:00:00`);
+  if (Number.isNaN(a) || Number.isNaN(b)) return null;
+  return Math.round((a - b) / 86_400_000);
+}
+
+/**
+ * Which lane a loop is in, and the sentence that justifies it.
+ *
+ * `today` is passed in rather than read from the clock so the server and the
+ * browser cannot disagree about what day it is — they are routinely in
+ * different timezones, and a task silently changing lanes on hydration is the
+ * kind of bug that makes an app feel untrustworthy.
+ */
+export function laneOf(task: Task, today: string, now: Date = new Date()): LaneVerdict {
+  const owedDays = daysSince(task.updated_at || task.created_at, now);
+
+  // ── Fire. Something outside your head is already affected.
+  if (task.due_date) {
+    const d = dayDelta(task.due_date, today);
+    if (d !== null && d < 0) {
+      return { lane: "fire", why: `Was due ${-d === 1 ? "yesterday" : `${-d} days ago`}.` };
+    }
+  }
+  if (task.kind === 1 && task.decide_by) {
+    const d = dayDelta(task.decide_by, today);
+    if (d !== null && d <= 0) {
+      return { lane: "fire", why: d === 0 ? "The decision is due today." : `The decision was due ${-d} days ago.` };
+    }
+  }
+  if (isOwedByYou(task)) {
+    return owedDays >= 2
+      ? { lane: "fire", why: `${firstName(task.owed_to)} has been waiting ${owedDays} days.` }
+      : { lane: "fire", why: `${firstName(task.owed_to)} is waiting on you.` };
+  }
+
+  // ── Needle. Nothing breaks today, but nothing moves without it either.
+  if (task.kind === 1) {
+    return { lane: "needle", why: "An open decision. Everything downstream of it is stalled." };
+  }
+  if (task.energy_level === 2) {
+    return { lane: "needle", why: "Deep work. It only ever happens on a day you protect it." };
+  }
+  if (task.project_id) {
+    return { lane: "needle", why: "Attached to a project — this is how that project moves." };
+  }
+  if (task.priority === 2) {
+    return { lane: "needle", why: "You marked this high when you wrote it down." };
+  }
+
+  // ── Rot. Old and unattached. The honest read is: you are never doing this.
+  const age = loopAge(task, now);
+  if (age !== null && age >= ROT_DAYS) {
+    return { lane: "rot", why: `Raw for ${age} days, with nobody and nothing waiting on it.` };
+  }
+
+  // ── Noise.
+  if (isBlockedOnThem(task)) {
+    return { lane: "noise", why: `Sitting with ${firstName(task.owed_to)}. Nudge it, do not schedule it.` };
+  }
+  if (task.energy_level === 0) {
+    return { lane: "noise", why: "Admin. Worth ten minutes in a batch, not a slot in your day." };
+  }
+  return { lane: "noise", why: age && age >= GRACE_DAYS ? `Been around ${age} days without ever mattering.` : "Nothing is waiting on this." };
+}
+
+/** Group everything open into the four lanes, each already in triage order. */
+export function byLane(tasks: Task[], today: string, now: Date = new Date()): Record<Lane, { task: Task; why: string }[]> {
+  const out: Record<Lane, { task: Task; why: string }[]> = { fire: [], needle: [], rot: [], noise: [] };
+  for (const t of tasks) {
+    if (t.completed || t.released_at) continue;
+    const v = laneOf(t, today, now);
+    out[v.lane].push({ task: t, why: v.why });
+  }
+  for (const k of Object.keys(out) as Lane[]) {
+    out[k].sort((a, b) => triageOrder(a.task, b.task, now));
+  }
+  return out;
+}
+
+// ---------------------------------------------------------------------------
+// The picks
+// ---------------------------------------------------------------------------
+
+/** What you commit to. Three is the promise. */
+export const COMMITTED_PICKS = 3;
+/** A fourth is allowed, but it is explicitly a stretch, never a commitment. */
+export const MAX_PICKS = 4;
+
+/**
+ * What the app should say back about a set of picks.
+ *
+ * This is the part a list cannot do. A founder who picks three admin tasks has
+ * planned a day where the company does not move, and nothing on a checkbox list
+ * will ever tell them that. Returns null when the selection is genuinely fine —
+ * commentary on every plan is noise, and noise is how advice stops being read.
+ */
+export function planVerdict(
+  picks: Task[],
+  lanes: Lane[],
+  fireCount: number,
+): { text: string; tone: "warn" | "good" } | null {
+  if (picks.length === 0) return null;
+
+  const deep = picks.filter((t) => t.energy_level === 2).length;
+
+  // The expensive mistake: fires burning while the day is spent elsewhere.
+  const pickedFire = lanes.filter((l) => l === "fire").length;
+  if (fireCount > 0 && pickedFire === 0) {
+    return { tone: "warn", text: `${fireCount} ${fireCount === 1 ? "loop is" : "loops are"} on fire and you picked none of them. That is a choice — just make it on purpose.` };
+  }
+
+  // The quiet mistake: a full day that moves nothing.
+  if (picks.length >= 2 && lanes.every((l) => l === "noise")) {
+    return { tone: "warn", text: "Every pick is noise. You have planned a busy day in which the company does not move." };
+  }
+
+  if (deep >= 3) {
+    return { tone: "warn", text: `Three deep blocks is more than almost any day actually holds. Expect to finish two — pick which two now rather than at 6pm.` };
+  }
+
+  if (lanes.includes("needle") && picks.length <= COMMITTED_PICKS) {
+    return fireCount > 0
+      ? { tone: "good", text: "Every fire is on the list and something load-bearing is protected. That is what a good day looks like on paper." }
+      : { tone: "good", text: "Nothing is burning and you have protected something that matters. That is the whole game." };
+  }
+
+  return null;
+}
+
+// ---------------------------------------------------------------------------
 // Filters
 // ---------------------------------------------------------------------------
 

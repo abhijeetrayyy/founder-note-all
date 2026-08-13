@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { parseSmartInput } from "@/lib/smart-input";
 import { todayKey } from "@/lib/utils";
+import { MAX_PICKS, dayKey } from "@/lib/loops";
 import type { EnergyLevelValue, PriorityValue, RecurrenceValue, Task, Note, Project, Goal, Habit, JournalEntry } from "@/lib/supabase/types";
 
 /**
@@ -953,20 +954,17 @@ export async function updatePlanAction(formData: FormData) {
     blocker_notes: blockers,
     reflection_text: reflection,
     energy_level: existing?.energy_level ?? null,
-    mit_task_ids: mitIds,
+    mit_task_ids: existing?.mit_task_ids ?? [],
     morning_done: morningDone,
     created_at: existing?.created_at ?? new Date().toISOString(),
     updated_at: new Date().toISOString(),
   });
   if (error) return { error: error.message };
 
-  // For each MIT id, ensure the task's priority is bumped to high and is_inbox=false
-  if (mitIds.length > 0) {
-    await supabase
-      .from("tasks")
-      .update({ priority: 2, is_inbox: false })
-      .in("id", mitIds);
-  }
+  // Picks go through the one writer, so they get committed to today the same
+  // way here as they do from a single tap on the board.
+  const written = await writePicks(mitIds);
+  if ("error" in written && written.error) return written;
 
   revalidatePath("/plan");
   revalidatePath("/today");
@@ -974,17 +972,46 @@ export async function updatePlanAction(formData: FormData) {
   return { success: true };
 }
 
-export async function addMITAction(taskId: string) {
+/**
+ * Write the day's picks, in order, and commit each one to today.
+ *
+ * The commit half is the part that was missing, and it made the whole feature
+ * invisible: `daily_plans.mit_task_ids` was being written correctly, but Today
+ * derived its MITs from `getTasksDueToday()`, which filters on
+ * `due_date <= today`. Any pick without a due date — which is every captured
+ * loop, since capture deliberately leaves the date null — failed that filter
+ * and vanished. You could choose three things on /plan and land on /today to
+ * find none of them. So choosing is now a real state change on the row:
+ *
+ *  - `due_date` is pulled to today when it is null or later. Choosing something
+ *    IS committing to it today; leaving the date alone made the pick a private
+ *    note the rest of the app could not see. A date already in the past is left
+ *    alone, because that is an overdue fact and overwriting it would erase how
+ *    late the thing actually is.
+ *  - `answered_at` is stamped. Picking a loop is one of the four answers, so it
+ *    must stop the decay clock — otherwise the app puts a thing on your day and
+ *    then, in the sidebar, nags you that it has not been triaged.
+ *  - `not_this_week` is cleared. Choosing something you had parked is a
+ *    deliberate reversal, and the anti-list has to respect it or the task shows
+ *    up as both today's work and something you said you were not doing.
+ *  - `is_inbox` is cleared, so it leaves triage.
+ *
+ * Note what is NOT set: priority. The old version stamped `priority: 2` on
+ * every pick, which quietly destroyed the only ranking signal the founder
+ * controls — after a fortnight of planning, every task in the database is high
+ * priority and the field means nothing. Order lives in the array.
+ */
+type PickResult = { error?: string; success?: boolean; picks?: string[] };
+
+async function writePicks(ids: string[]): Promise<PickResult> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
 
   const date = todayKey();
+  const next = [...new Set(ids)].slice(0, MAX_PICKS);
+
   const { data: existing } = await supabase.from("daily_plans").select("*").eq("id", date).single();
-  const currentMits: string[] = existing?.mit_task_ids ?? [];
-  if (currentMits.includes(taskId)) return { success: true };
-  if (currentMits.length >= 3) return { error: "Already 3 MITs" };
-  const next = [...currentMits, taskId];
 
   const { error } = await supabase.from("daily_plans").upsert({
     id: date,
@@ -994,44 +1021,65 @@ export async function addMITAction(taskId: string) {
     reflection_text: existing?.reflection_text ?? "",
     energy_level: existing?.energy_level ?? null,
     mit_task_ids: next,
-    morning_done: true,
+    morning_done: existing?.morning_done || next.length > 0,
     created_at: existing?.created_at ?? new Date().toISOString(),
     updated_at: new Date().toISOString(),
   });
   if (error) return { error: error.message };
 
-  await supabase.from("tasks").update({ priority: 2, is_inbox: false }).eq("id", taskId);
+  if (next.length) {
+    const { data: rows } = await supabase.from("tasks").select("id,due_date").in("id", next);
+    // Anything already dated today or earlier keeps its date: a past date is a
+    // fact about how late the loop is and resetting it would launder that, and
+    // a task due today at 3pm should not be flattened to midnight.
+    //
+    // `due_date` is a timestamptz, so it must be reduced to a calendar day
+    // before being compared with one — comparing the raw strings looked right
+    // for most values and quietly did the wrong thing at the boundaries.
+    const toPull = ((rows ?? []) as { id: string; due_date: string | null }[])
+      .filter((r) => {
+        const key = dayKey(r.due_date);
+        return !key || key > date;
+      })
+      .map((r) => r.id);
+
+    if (toPull.length) {
+      await supabase.from("tasks").update({ due_date: date }).in("id", toPull);
+    }
+    await supabase
+      .from("tasks")
+      .update({ is_inbox: false, not_this_week: false, answered_at: new Date().toISOString() })
+      .in("id", next);
+  }
+
   revalidatePath("/plan");
   revalidatePath("/today");
-  return { success: true };
+  revalidatePath("/inbox");
+  revalidatePath("/loops");
+  return { success: true, picks: next };
 }
 
-export async function removeMITAction(taskId: string) {
+/** Set the whole selection at once, preserving the order given. */
+export async function setPicks(ids: string[]): Promise<PickResult> {
+  return writePicks(ids);
+}
+
+export async function addMITAction(taskId: string): Promise<PickResult> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: "Not authenticated" };
+  const { data: existing } = await supabase.from("daily_plans").select("mit_task_ids").eq("id", todayKey()).single();
+  const current: string[] = existing?.mit_task_ids ?? [];
+  if (current.includes(taskId)) return { success: true };
+  if (current.length >= MAX_PICKS) return { error: `That is already ${MAX_PICKS}. Drop one first.` };
+  return writePicks([...current, taskId]);
+}
 
-  const date = todayKey();
-  const { data: existing } = await supabase.from("daily_plans").select("*").eq("id", date).single();
-  const currentMits: string[] = existing?.mit_task_ids ?? [];
-  const next = currentMits.filter((id) => id !== taskId);
-
-  const { error } = await supabase.from("daily_plans").upsert({
-    id: date,
-    user_id: user.id,
-    intention_text: existing?.intention_text ?? "",
-    blocker_notes: existing?.blocker_notes ?? "",
-    reflection_text: existing?.reflection_text ?? "",
-    energy_level: existing?.energy_level ?? null,
-    mit_task_ids: next,
-    morning_done: existing?.morning_done ?? false,
-    created_at: existing?.created_at ?? new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  });
-  if (error) return { error: error.message };
-  revalidatePath("/plan");
-  revalidatePath("/today");
-  return { success: true };
+export async function removeMITAction(taskId: string): Promise<PickResult> {
+  const supabase = await createClient();
+  const { data: existing } = await supabase.from("daily_plans").select("mit_task_ids").eq("id", todayKey()).single();
+  const current: string[] = existing?.mit_task_ids ?? [];
+  // The task keeps its date and stays on today's list — dropping something from
+  // the top three is a demotion, not an undo of the decision to work on it.
+  return writePicks(current.filter((id) => id !== taskId));
 }
 
 export async function saveEnergyLevel(level: number, note: string = "") {
@@ -1255,11 +1303,29 @@ export async function updateHabit(formData: FormData) {
   return { success: true };
 }
 
-export async function deleteHabit(id: string) {
+/**
+ * Retire a ritual.
+ *
+ * Archives rather than deletes, and is therefore undoable. The row cascades to
+ * every log, so a hard delete behind a browser `confirm()` meant one mis-click
+ * silently destroyed months of evidence — on the page whose entire argument is
+ * that evidence beats memory.
+ */
+export async function retireHabit(id: string) {
   const supabase = await createClient();
-  const { error } = await supabase.from("habits").delete().eq("id", id);
+  const { error } = await supabase.from("habits").update({ archived: true }).eq("id", id);
   if (error) return { error: error.message };
   revalidatePath("/habits");
+  revalidatePath("/today");
+  return { success: true };
+}
+
+export async function restoreHabit(id: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("habits").update({ archived: false }).eq("id", id);
+  if (error) return { error: error.message };
+  revalidatePath("/habits");
+  revalidatePath("/today");
   return { success: true };
 }
 

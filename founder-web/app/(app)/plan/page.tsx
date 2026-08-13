@@ -1,66 +1,56 @@
-import { getDailyPlan, getTasksDueToday, getTasks, getProfile } from "@/lib/data";
-import { Card } from "@/components/ui/card";
-import { TaskItem } from "@/components/task-item";
-import { EnergyPicker } from "@/components/energy-picker";
-import { DailyPlanForm } from "@/components/daily-plan-form";
+import { getDailyPlan, getOpenLoops, getTasksByIds, getProfile, getEnergyLog, getGoals } from "@/lib/data";
+import { todayKey } from "@/lib/utils";
+import { readPrefs, byLane, type Lane } from "@/lib/loops";
+import { PlanBoard } from "./plan-board";
 
+/**
+ * Plan the day.
+ *
+ * This page used to be four settings cards and a scrolling list capped at
+ * twelve tasks, which is the opposite of what a founder needs at 9am. They do
+ * not want to browse their backlog; they want the whole of it in front of them
+ * once, sorted by what actually bites, so they can commit to three things and
+ * shut the rest up for the day.
+ *
+ * So: everything open, on one screen, in four computed lanes — on fire, moves
+ * the needle, been sitting, noise — with the reason each thing landed where it
+ * did. Picking is one tap. The nav badge says 60 seconds and this is now a
+ * screen where that is true.
+ */
 export default async function PlanPage() {
-  const [plan, dueTasks, allTasks, profile] = await Promise.all([
+  const today = todayKey();
+  const [plan, open, profile, energy, goals] = await Promise.all([
     getDailyPlan(),
-    getTasksDueToday(),
-    getTasks({ completed: false }),
+    getOpenLoops(),
     getProfile(),
+    getEnergyLog(),
+    getGoals(),
   ]);
-  const mitIds = plan?.mit_task_ids ?? [];
-  const dueNotMit = dueTasks.filter((t) => !mitIds.includes(t.id));
+
+  const pickIds = plan?.mit_task_ids ?? [];
+  const picks = await getTasksByIds(pickIds);
+
+  // Lanes are decided here, on the server, not in the board.
+  // `laneOf` reads the clock ("waiting 4 days", "due 2 days ago"), and a client
+  // that recomputed it would render different text than the HTML it hydrated
+  // into whenever the two machines disagree about the date — which, for a
+  // founder working late or travelling, is most of the time.
+  const grouped = byLane(open, today);
+  const laneById: Record<string, { lane: Lane; why: string }> = {};
+  for (const key of Object.keys(grouped) as Lane[]) {
+    for (const { task, why } of grouped[key]) laneById[task.id] = { lane: key, why };
+  }
 
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-8">
-      <header>
-        <p className="text-sm text-foreground-muted mt-1">A short ritual beats a long list. Set your intention, pick what matters, go.</p>
-      </header>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        <Card variant="ambient" className="p-5 space-y-4">
-          <p className="text-2xs uppercase tracking-[0.15em] text-foreground-muted font-bold">Energy level</p>
-          <EnergyPicker value={plan?.energy_level ?? profile?.energy_default} />
-          <p className="text-xs text-foreground-subtle">Match your work to how you feel — not the other way around.</p>
-        </Card>
-
-        <Card variant="ambient" className="p-5 space-y-4">
-          <p className="text-2xs uppercase tracking-[0.15em] text-foreground-muted font-bold">State</p>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-foreground-muted">Intention</span>
-              <span className="text-foreground font-semibold">{plan?.intention_text ? "Set" : "—"}</span>
-            </div>
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-foreground-muted">MITs</span>
-              <span className="text-foreground font-semibold">{mitIds.length}/3</span>
-            </div>
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-foreground-muted">Reflection</span>
-              <span className="text-foreground font-semibold">{plan?.reflection_text ? "Done" : "—"}</span>
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      <Card variant="ambient" className="p-5 space-y-4">
-        <p className="text-2xs uppercase tracking-[0.15em] text-foreground-muted font-bold">Today&apos;s plan</p>
-        <DailyPlanForm plan={plan} allTasks={allTasks} />
-      </Card>
-
-      {dueNotMit.length > 0 && (
-        <Card variant="ambient" className="p-5 space-y-4">
-          <p className="text-2xs uppercase tracking-[0.15em] text-foreground-muted font-bold mb-1">Also due today</p>
-          <div className="space-y-2">
-            {dueNotMit.map((task) => (
-              <TaskItem key={task.id} task={task} />
-            ))}
-          </div>
-        </Card>
-      )}
-    </div>
+    <PlanBoard
+      today={today}
+      lanes={(Object.keys(grouped) as Lane[]).map((k) => ({ key: k, items: grouped[k].map((i) => i.task) }))}
+      laneById={laneById}
+      picks={picks}
+      intention={plan?.intention_text ?? ""}
+      energy={energy?.level ?? profile?.energy_default ?? 1}
+      capacity={readPrefs(profile?.preferences).capacity}
+      goals={goals.map((g) => ({ id: g.id, title: g.title }))}
+    />
   );
 }

@@ -120,6 +120,43 @@ export const getTasksDueToday = cache(async (): Promise<Task[]> => {
   return data ?? [];
 });
 
+/**
+ * Specific tasks, returned in the order the ids were given.
+ *
+ * The day's picks are an ordered array, and every other read path in the app
+ * sorts by priority or date — so pulling them through a normal query silently
+ * reordered them and pick #1 was frequently not the one Today led with.
+ */
+export const getTasksByIds = cache(async (ids: string[]): Promise<Task[]> => {
+  if (!ids.length) return [];
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("tasks").select("*").in("id", ids);
+  if (error) throw error;
+  const byId = new Map((data ?? []).map((t) => [t.id, t]));
+  return ids.map((id) => byId.get(id)).filter((t): t is Task => Boolean(t));
+});
+
+/**
+ * Everything still open and not parked — the pool the plan board picks from.
+ *
+ * Deliberately not filtered by date: the whole point of the board is seeing
+ * all of it at once, including the things with no date, which is where the
+ * important work usually hides.
+ */
+export const getOpenLoops = cache(async (): Promise<Task[]> => {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("tasks")
+    .select("*")
+    .eq("completed", false)
+    .is("released_at", null)
+    .eq("not_this_week", false)
+    .order("created_at", { ascending: true })
+    .limit(300);
+  if (error) throw error;
+  return data ?? [];
+});
+
 export const getNotes = cache(async (): Promise<Note[]> => {
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -604,6 +641,68 @@ export const getStats = cache(async () => {
     energyThisWeek: (energyResult.data ?? []).map((e) => e.level),
     completionByDay,
   };
+});
+
+// ============ SYSTEM RITUALS ============
+
+export interface RitualDay { date: string; done: boolean }
+export interface RitualTrack {
+  key: "plan" | "focus" | "shutdown";
+  days: RitualDay[];
+  kept: number;
+  of: number;
+}
+
+/**
+ * The three rituals that hold the system up, measured from evidence.
+ *
+ * This is the answer to "why does a founder need habit tracking at all". They
+ * do not — self-reported streaks about water and meditation are the vanity
+ * layer of every productivity app, and the first thing to be abandoned. What
+ * actually decides whether the rest of this product works is whether the
+ * founder plans the morning, protects one block, and closes the day. So those
+ * three are tracked from what already happened rather than asked about:
+ *
+ *   plan     — a day with picks written to it
+ *   focus    — at least one completed focus session
+ *   shutdown — the day was closed out with a reflection
+ *
+ * A checkbox you tick yourself measures honesty. This measures the thing.
+ */
+export const getRitualEvidence = cache(async (days: number = 14): Promise<RitualTrack[]> => {
+  const supabase = await createClient();
+  const today = new Date();
+  const dates: string[] = [];
+  for (let i = days - 1; i >= 0; i--) {
+    dates.push(todayKey(new Date(today.getTime() - i * 86_400_000)));
+  }
+  const from = dates[0];
+
+  const [plansRes, sessionsRes] = await Promise.all([
+    supabase.from("daily_plans").select("id, mit_task_ids, reflection_text").gte("id", from),
+    supabase.from("focus_sessions").select("created_at, started_at, completed").gte("created_at", `${from}T00:00:00`).limit(500),
+  ]);
+
+  const plans = new Map(
+    ((plansRes.data ?? []) as { id: string; mit_task_ids: string[] | null; reflection_text: string | null }[])
+      .map((p) => [p.id, p]),
+  );
+
+  const focusDays = new Set<string>();
+  for (const s of (sessionsRes.data ?? []) as { created_at: string; started_at: string | null; completed: boolean }[]) {
+    if (s.completed) focusDays.add(todayKey(new Date(s.started_at ?? s.created_at)));
+  }
+
+  const build = (key: RitualTrack["key"], hit: (d: string) => boolean): RitualTrack => {
+    const list = dates.map((date) => ({ date, done: hit(date) }));
+    return { key, days: list, kept: list.filter((d) => d.done).length, of: list.length };
+  };
+
+  return [
+    build("plan", (d) => (plans.get(d)?.mit_task_ids?.length ?? 0) > 0),
+    build("focus", (d) => focusDays.has(d)),
+    build("shutdown", (d) => Boolean(plans.get(d)?.reflection_text?.trim())),
+  ];
 });
 
 // ============ FOCUS SESSIONS ============

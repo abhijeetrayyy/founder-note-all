@@ -31,7 +31,7 @@ type NavGroupDef = { label: string; items: NavItem[] };
 const NAV: NavGroupDef[] = [
   { label: "Every day", items: [
     { href: "/today", label: "Today", icon: SunIcon, hint: "Your one thing, and what else is on today" },
-    { href: "/plan", label: "Plan the day", icon: SunriseIcon, badge: "60s", hint: "Pick three things that matter, in under a minute" },
+    { href: "/plan", label: "Plan the day", icon: SunriseIcon, badge: "60s", hint: "Everything open, sorted by what actually bites — pick three" },
     { href: "/inbox", label: "Triage", icon: InboxIcon, hint: "Answer each captured thought: do, schedule, hand off, or drop" },
   ]},
   { label: "Your work", items: [
@@ -44,8 +44,8 @@ const NAV: NavGroupDef[] = [
   { label: "Doing & stopping", items: [
     { href: "/focus", label: "Focus session", icon: TimerIcon, hint: "One task, one timer, and a place to park distractions" },
     { href: "/shutdown", label: "End the day", icon: MoonIcon, badge: "7pm", hint: "See what shipped, park what is open, then stop" },
-    { href: "/habits", label: "Habits", icon: FlameIcon, hint: "Small daily rituals, tracked as evidence not pressure" },
-    { href: "/journal", label: "Journal", icon: NotebookIcon, hint: "Mood and freeform writing, tied to the day" },
+    { href: "/habits", label: "Rituals", icon: FlameIcon, hint: "The three habits that hold this system up, counted from evidence" },
+    { href: "/journal", label: "Decision log", icon: NotebookIcon, hint: "What you decided, what you knew, and what would change your mind" },
   ]},
   { label: "Looking back", items: [
     { href: "/review", label: "Weekly review", icon: CalendarCheckIcon, badge: "fri", hint: "Friday: the evidence, then one thing to change" },
