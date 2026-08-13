@@ -32,7 +32,7 @@ export default async function StatsPage() {
       </p>
 
       {/* ── Energy truth ── */}
-      <section className="rounded-[18px] border border-[#26262B] bg-[#141417] p-[22px]">
+      <section className="rounded-[8px] border border-[#26262B] bg-[#141417] p-5">
         <div className="flex items-baseline justify-between gap-3.5 flex-wrap">
           <h2 className="text-base font-semibold">Energy truth</h2>
           <span className="font-mono text-2xs text-[#9C9CA4]">
@@ -117,10 +117,10 @@ function Metric({ value, label, sub, href, cta, alert, good }: {
   value: number; label: string; sub: string; href: string; cta: string;
   alert?: boolean; good?: boolean;
 }) {
-  const tone = alert ? "#FF8A4C" : good ? "#5EE0B0" : "#141417";
+  const tone = alert ? "#FF8A4C" : good ? "#5EE0B0" : "#F0F0EE";
   return (
     <Link href={href}
-      className="group rounded-[18px] border border-[#26262B] bg-[#141417] p-5 flex flex-col hover:border-[#35353C] transition-colors focus-ring">
+      className="group rounded-[8px] border border-[#26262B] bg-[#141417] p-5 flex flex-col hover:border-[#35353C] transition-colors focus-ring">
       <span className="font-mono text-3xl leading-none tracking-[-0.02em]" style={{ color: tone }}>{value}</span>
       <span className="mt-2.5 text-sm font-semibold leading-snug">{label}</span>
       <span className="mt-1 text-xs text-[#9C9CA4] leading-snug">{sub}</span>

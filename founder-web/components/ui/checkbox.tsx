@@ -17,8 +17,7 @@ export function Checkbox({ checked, onChange, boxSize = "md", className, ...prop
       role="checkbox"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className={cn(
-        "shrink-0 rounded-md border-2 flex items-center justify-center transition-all duration-200 focus-ring",
+      className={cn( "shrink-0 rounded-md border-2 flex items-center justify-center transition-all duration-200 focus-ring",
         checked
           ? "bg-state-done border-state-done text-white"
           : "bg-base-surface border-base-border hover:border-accent/40",

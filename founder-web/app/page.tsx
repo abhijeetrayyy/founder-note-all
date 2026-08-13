@@ -71,13 +71,13 @@ export default function LandingPage() {
 
           <div className="flex flex-wrap items-center gap-3 mt-8">
             <Link href="/signup"
-              className="inline-flex items-center gap-2 bg-[#F0F0EE] hover:bg-[#FFFFFF] text-[#0B0B0D] text-lg font-medium px-6 py-3.5 rounded-[13px] transition-colors focus-ring"
+              className="inline-flex items-center gap-2 bg-[#F0F0EE] hover:bg-[#FFFFFF] text-[#0B0B0D] text-lg font-medium px-6 py-3.5 rounded-[6px] transition-colors focus-ring"
               style={{ boxShadow: "0 10px 24px -12px rgba(91,79,233,0.85)" }}>
               Join the free beta
               <span aria-hidden="true">→</span>
             </Link>
             <Link href="/login"
-              className="inline-flex items-center text-lg text-[#F0F0EE] px-5 py-3.5 rounded-[13px] border border-[#26262B] bg-[#141417] hover:border-[#26262B] transition-colors focus-ring">
+              className="inline-flex items-center text-lg text-[#F0F0EE] px-5 py-3.5 rounded-[6px] border border-[#26262B] bg-[#141417] hover:border-[#26262B] transition-colors focus-ring">
               I already have an account
             </Link>
             <span className="font-mono text-xs text-[#9C9CA4] sm:ml-1.5">
@@ -86,10 +86,9 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* Product frame. Rather than an empty screenshot slot, this is the real
-            "one thing" card the app renders — the most honest thing to show. */}
+        {/* Product frame. Rather than an empty screenshot slot, this is the real "one thing" card the app renders — the most honest thing to show. */}
         <div className="mt-16 relative">
-          <div className="rounded-[20px] border border-[#26262B] bg-[#141417] overflow-hidden"
+          <div className="rounded-[8px] border border-[#26262B] bg-[#141417] overflow-hidden"
             style={{ boxShadow: "0 40px 80px -50px rgba(23,21,18,0.45)" }}>
             <div className="flex items-center gap-2 px-4 py-3 border-b border-[#EDE7DB] bg-[#101013]">
               <span className="w-2.5 h-2.5 rounded-full bg-[#26262B]" />
@@ -99,24 +98,24 @@ export default function LandingPage() {
             </div>
 
             <div className="bg-[#0B0B0D] p-6 sm:p-10">
-              <div className="rounded-[20px] bg-[#141417] text-[#F0F0EE] p-6 sm:p-8 max-w-[620px]">
+              <div className="rounded-[8px] bg-[#141417] text-[#F0F0EE] p-6 sm:p-8 max-w-[620px]">
                 <p className="font-mono text-2xs tracking-[0.14em] uppercase text-[#6E6E77]">
                   The one thing · matched to Deep energy
                 </p>
                 <h2 className="font-display text-[clamp(26px,4vw,36px)] leading-[1.1] tracking-[-0.015em] mt-3.5">
                   Rewrite the pricing page hero copy
                 </h2>
-                <div className="mt-5 p-4 rounded-[13px] bg-[#1B1B1F] border border-[#26262B]">
+                <div className="mt-5 p-4 rounded-[6px] bg-[#1B1B1F] border border-[#26262B]">
                   <p className="font-mono text-2xs tracking-[0.12em] uppercase text-[#6E6E77]">First micro-step</p>
                   <p className="mt-2 text-base text-[#F0F0EE]">
                     Open the doc and write three bad headlines. Bad ones. Two minutes.
                   </p>
                 </div>
                 <div className="flex gap-2.5 mt-5 flex-wrap">
-                  <span className="rounded-[11px] bg-[#F0F0EE] text-[#0B0B0D] text-base font-semibold px-[18px] py-3">
+                  <span className="rounded-[6px] bg-[#F0F0EE] text-[#0B0B0D] text-base font-semibold px-[18px] py-3">
                     Start focus · 50m
                   </span>
-                  <span className="rounded-[11px] border border-[#35353C] text-[#F0F0EE] text-base px-4 py-3">
+                  <span className="rounded-[6px] border border-[#35353C] text-[#F0F0EE] text-base px-4 py-3">
                     Not now, show another
                   </span>
                 </div>
@@ -145,7 +144,7 @@ export default function LandingPage() {
             { n: "02", t: "Wrong direction", b: "Completion percentage rewards adding small tasks. It rises when you take on more, which is the opposite of relief." },
             { n: "03", t: "Wrong assumption", b: "A day has capacity, not slots. Burnout is an overcommit bug, so it gets fixed at the input." },
           ].map((c) => (
-            <div key={c.n} className="rounded-[18px] border border-[#26262B] bg-[#141417] p-6">
+            <div key={c.n} className="rounded-[8px] border border-[#26262B] bg-[#141417] p-6">
               <p className="font-mono text-2xs text-[#F0F0EE]">{c.n}</p>
               <h3 className="mt-3 text-lg font-semibold">{c.t}</h3>
               <p className="mt-2 text-base leading-[1.55] text-[#9C9CA4]">{c.b}</p>
@@ -163,7 +162,7 @@ export default function LandingPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-12">
           {MECHANICS.map((m) => (
-            <div key={m.title} className="rounded-[18px] border border-[#26262B] bg-[#141417] p-6">
+            <div key={m.title} className="rounded-[8px] border border-[#26262B] bg-[#141417] p-6">
               <h3 className="text-lg font-semibold">{m.title}</h3>
               <p className="mt-2 text-base leading-[1.55] text-[#9C9CA4]">{m.body}</p>
             </div>
@@ -173,7 +172,7 @@ export default function LandingPage() {
 
       {/* ── Free beta ── */}
       <section className="max-w-[1160px] mx-auto px-7 pt-40">
-        <div className="rounded-[24px] border border-[#26262B] bg-[#141417] p-8 sm:p-12">
+        <div className="rounded-[8px] border border-[#26262B] bg-[#141417] p-8 sm:p-12">
           <p className="font-mono text-2xs tracking-[0.14em] uppercase text-[#9C9CA4]">The deal</p>
           <h2 className="font-display font-normal mt-4 text-[clamp(30px,4.5vw,46px)] leading-[1.05] tracking-[-0.02em] max-w-[16ch] text-balance">
             Free while we build. <span className="text-[#FF8A4C]">Honestly</span> free.
@@ -190,7 +189,7 @@ export default function LandingPage() {
 
           <div className="flex flex-wrap items-center gap-3 mt-10">
             <Link href="/signup"
-              className="inline-flex items-center gap-2 bg-[#F0F0EE] hover:bg-[#FFFFFF] text-[#0B0B0D] text-lg font-medium px-6 py-3.5 rounded-[13px] transition-colors focus-ring">
+              className="inline-flex items-center gap-2 bg-[#F0F0EE] hover:bg-[#FFFFFF] text-[#0B0B0D] text-lg font-medium px-6 py-3.5 rounded-[6px] transition-colors focus-ring">
               Join the free beta
               <span aria-hidden="true">→</span>
             </Link>

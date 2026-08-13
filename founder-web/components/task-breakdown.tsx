@@ -91,9 +91,8 @@ export function TaskBreakdown({ task }: { task: Task }) {
                 type="button"
                 onClick={() => setReason(reason === r.key ? null : r.key)}
                 aria-pressed={reason === r.key}
-                className={cn(
-                  "h-9 px-3.5 rounded-full text-xs font-semibold transition-all focus-ring",
-                  reason === r.key ? "bg-accent-600 text-white" : "bg-base-raised text-foreground-muted hover:bg-base-overlay",
+                className={cn( "h-9 px-3.5 rounded-full text-xs font-semibold transition-all focus-ring",
+                  reason === r.key ? "bg-accent-600 text-[#0B0B0D]" : "bg-base-raised text-foreground-muted hover:bg-base-overlay",
                 )}
               >
                 {r.label}
@@ -107,7 +106,7 @@ export function TaskBreakdown({ task }: { task: Task }) {
                 <button
                   onClick={matchToToday}
                   disabled={saving === "energy"}
-                  className="h-9 px-4 rounded-xl bg-accent-600 text-white text-xs font-bold hover:shadow-glow transition-all focus-ring disabled:opacity-50"
+                  className="h-9 px-4 rounded-xl bg-accent-600 text-[#0B0B0D] text-xs font-bold hover:bg-white transition-all focus-ring disabled:opacity-50"
                 >
                   {saving === "energy" ? "Rescheduling…" : "Match to today's admin energy"}
                 </button>

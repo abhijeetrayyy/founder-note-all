@@ -52,7 +52,7 @@ export function TaskActions({ taskId, completed }: { taskId: string; completed: 
       <button
         onClick={onToggle}
         disabled={pending}
-        className="h-9 px-3.5 rounded-xl bg-gradient-to-br from-accent-600 to-accent-700 text-white text-sm font-bold hover:shadow-glow-strong transition-all focus-ring disabled:opacity-50"
+        className="h-9 px-3.5 rounded-xl bg-[#F0F0EE] text-[#0B0B0D] text-sm font-bold hover:bg-white transition-all focus-ring disabled:opacity-50"
       >
         {completed ? "Reopen" : "Complete"}
       </button>

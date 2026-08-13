@@ -31,15 +31,13 @@ export function HabitClient({ habit, log, streak }: { habit: Habit; log?: HabitL
       <button
         onClick={onToggle}
         aria-pressed={done}
-        className={cn(
-          "w-full flex items-center gap-4 p-4 rounded-2xl transition-all duration-300 text-left focus-ring",
+        className={cn( "w-full flex items-center gap-4 p-4 rounded-2xl transition-all duration-300 text-left focus-ring",
           done ? "bg-state-done-surface border border-state-done/20" : "glass-ambient hover:glass-active",
         )}
       >
         <div
-          className={cn(
-            "w-12 h-12 rounded-2xl flex items-center justify-center text-xl shrink-0 transition-all duration-300",
-            done ? "bg-state-done text-white" : "bg-base-raised",
+          className={cn( "w-12 h-12 rounded-2xl flex items-center justify-center text-xl shrink-0 transition-all duration-300",
+            done ? "bg-state-done text-[#0B0B0D]" : "bg-base-raised",
           )}
         >
           {done ? (

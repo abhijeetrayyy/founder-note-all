@@ -41,8 +41,7 @@ export function LoopRow({ task, showAnswers = true }: { task: Task; showAnswers?
 
   return (
     <div
-      className={cn(
-        "rounded-xl border p-3.5 transition-all duration-300",
+      className={cn( "rounded-xl border p-3.5 transition-all duration-300",
         gone && "animate-dissolve pointer-events-none",
         released && "opacity-60 border-base-border bg-base-overlay/40",
         !released && tone === "rotting" && "border-state-overdue/40 bg-state-overdue-surface",
@@ -54,8 +53,7 @@ export function LoopRow({ task, showAnswers = true }: { task: Task; showAnswers?
         {/* Decay is carried in form as well as words, so the shelf reads at a glance. */}
         <span
           aria-hidden="true"
-          className={cn(
-            "mt-1.5 w-1.5 h-1.5 rounded-full flex-none",
+          className={cn( "mt-1.5 w-1.5 h-1.5 rounded-full flex-none",
             tone === "rotting" ? "bg-state-overdue" : tone === "aging" ? "bg-state-attention" : "bg-foreground-faint",
           )}
         />
@@ -82,8 +80,7 @@ export function LoopRow({ task, showAnswers = true }: { task: Task; showAnswers?
             )}
             {age !== null && age > 0 && (
               <span
-                className={cn(
-                  "number-mono",
+                className={cn( "number-mono",
                   tone === "rotting" ? "text-state-overdue" : tone === "aging" ? "text-state-attention" : "text-foreground-subtle",
                 )}
               >
@@ -127,9 +124,8 @@ function Answer({ label, onClick, busy, tone }: { label: string; onClick: () => 
     <button
       onClick={onClick}
       disabled={busy}
-      className={cn(
-        "h-8 px-3 rounded-full text-xs font-semibold transition-colors focus-ring disabled:opacity-50",
-        tone === "accent" && "bg-accent-600 text-white hover:shadow-glow",
+      className={cn( "h-8 px-3 rounded-full text-xs font-semibold transition-colors focus-ring disabled:opacity-50",
+        tone === "accent" && "bg-accent-600 text-[#0B0B0D] hover:bg-white",
         tone === "danger" && "text-state-overdue hover:bg-state-overdue-surface",
         !tone && "bg-base-raised text-foreground-muted hover:bg-base-overlay",
       )}

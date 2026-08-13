@@ -112,9 +112,8 @@ function PersonCard({ who, items, displayName }: { who: string; items: Task[]; d
       <div className="flex items-center gap-2">
         <button
           onClick={copy}
-          className={cn(
-            "h-9 px-4 rounded-xl text-sm font-semibold transition-colors focus-ring",
-            copied ? "bg-state-done text-white" : "bg-accent-600 text-white hover:shadow-glow",
+          className={cn( "h-9 px-4 rounded-xl text-sm font-semibold transition-colors focus-ring",
+            copied ? "bg-state-done text-[#0B0B0D]" : "bg-accent-600 text-[#0B0B0D] hover:bg-white",
           )}
         >
           {copied ? "Copied" : "Copy message"}

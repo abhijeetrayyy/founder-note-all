@@ -66,8 +66,7 @@ export function Sheet({ open, onClose, title, children, className, size = "md" }
         aria-modal="true"
         aria-labelledby={title ? titleId : undefined}
         onClick={(e) => e.stopPropagation()}
-        className={cn(
-          "w-full glass-focused rounded-t-sheet sm:rounded-sheet shadow-focused max-h-[92vh] flex flex-col animate-slide-up",
+        className={cn( "w-full glass-focused rounded-t-sheet sm:rounded-sheet shadow-focused max-h-[92vh] flex flex-col animate-slide-up",
           sizes[size],
           className,
         )}

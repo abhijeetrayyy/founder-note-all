@@ -63,7 +63,7 @@ export function OwedControl({ task }: { task: Task }) {
         <button
           onClick={() => save(name, direction)}
           disabled={saving || !dirty}
-          className="h-9 px-4 rounded-xl bg-accent-600 text-white text-sm font-semibold hover:shadow-glow transition-all focus-ring disabled:opacity-40"
+          className="h-9 px-4 rounded-xl bg-accent-600 text-[#0B0B0D] text-sm font-semibold hover:bg-white transition-all focus-ring disabled:opacity-40"
         >
           {saving ? "Saving…" : "Save"}
         </button>
@@ -88,8 +88,7 @@ function DirButton({ on, onClick, children }: { on: boolean; onClick: () => void
       role="radio"
       aria-checked={on}
       onClick={onClick}
-      className={cn(
-        "flex-1 h-9 px-3 rounded-xl text-xs font-semibold transition-colors focus-ring",
+      className={cn( "flex-1 h-9 px-3 rounded-xl text-xs font-semibold transition-colors focus-ring",
         on ? "bg-accent-muted text-accent border border-accent/30" : "bg-base-raised text-foreground-muted border border-transparent hover:bg-base-overlay",
       )}
     >

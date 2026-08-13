@@ -92,8 +92,7 @@ export function InboxTriageItem({ task, focused, onFocus }: {
   return (
     <div
       onMouseEnter={onFocus}
-      className={cn(
-        "rounded-[18px] border bg-[#141417] p-[18px] transition-all duration-300",
+      className={cn( "rounded-[8px] border bg-[#141417] p-5 transition-all duration-300",
         focused ? "border-[#F0F0EE]" : "border-[#26262B]",
         gone && "animate-dissolve pointer-events-none",
       )}
@@ -140,8 +139,7 @@ function Btn({ label, onClick, busy, tone, k }: {
     <button
       onClick={onClick}
       disabled={busy}
-      className={cn(
-        "h-8 px-3 rounded-full text-xs font-semibold inline-flex items-center gap-1.5 transition-colors focus-ring disabled:opacity-50",
+      className={cn( "h-8 px-3 rounded-full text-xs font-semibold inline-flex items-center gap-1.5 transition-colors focus-ring disabled:opacity-50",
         tone === "accent" && "bg-[#F0F0EE] text-[#0B0B0D] hover:bg-[#FFFFFF]",
         tone === "danger" && "text-[#FF8A4C] hover:bg-[#1B1B1F]",
         !tone && "bg-[#1B1B1F] text-[#9C9CA4] hover:bg-[#26262B]",

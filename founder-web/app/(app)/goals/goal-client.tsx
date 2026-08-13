@@ -60,8 +60,7 @@ export function GoalClient({ goal, milestones }: { goal: Goal; milestones: GoalM
     const result = await killGoal(goal.id, "goal dropped");
     if (result.error) { toast.show(result.error, "error"); return; }
     toast.show(
-      result.released ? `Goal dropped · ${result.released} loops released` : "Goal dropped",
-      "success",
+      result.released ? `Goal dropped · ${result.released} loops released` : "Goal dropped", "success",
     );
     router.refresh();
   }
@@ -151,8 +150,7 @@ export function GoalClient({ goal, milestones }: { goal: Goal; milestones: GoalM
             <div key={m.id} className="flex items-center gap-2">
               <button
                 onClick={() => toggleMilestone(m.id, m.is_completed)}
-                className={cn(
-                  "w-5 h-5 rounded border-2 flex items-center justify-center transition-all focus-ring",
+                className={cn( "w-5 h-5 rounded border-2 flex items-center justify-center transition-all focus-ring",
                   m.is_completed ? "bg-state-done border-state-done text-white" : "border-base-border",
                 )}
               >

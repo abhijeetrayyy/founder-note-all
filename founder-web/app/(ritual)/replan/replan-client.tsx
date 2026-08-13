@@ -54,8 +54,7 @@ export function ReplanClient({ mits, hoursAway }: { mits: Task[]; hoursAway: num
           <ul className="space-y-2">
             {mits.map((t) => (
               <li key={t.id} className="flex items-center gap-3 rounded-xl border border-base-border bg-base-surface p-3.5">
-                <span className={cn(
-                  "w-1.5 h-1.5 rounded-full flex-none",
+                <span className={cn( "w-1.5 h-1.5 rounded-full flex-none",
                   t.energy_level === 2 ? "bg-energy-deep" : t.energy_level === 1 ? "bg-energy-medium" : "bg-energy-admin",
                 )} />
                 <span className="flex-1 text-sm text-foreground">{t.title}</span>

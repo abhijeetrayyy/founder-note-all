@@ -56,7 +56,7 @@ export function TodayClient({
 
           <UnblockPrompt count={pressure.blocked_count} />
 
-          <div className="rounded-[18px] border border-[#26262B] bg-[#141417] overflow-hidden">
+          <div className="rounded-[8px] border border-[#26262B] bg-[#141417] overflow-hidden">
             <div className="px-5 py-4 border-b border-[#26262B] flex items-center justify-between">
               <h3 className="text-base font-semibold">Today · {dayTasks.length} {dayTasks.length === 1 ? "task" : "tasks"}</h3>
               <span className="font-mono text-2xs text-[#9C9CA4]">{doneCount} done</span>
@@ -103,7 +103,7 @@ function OneThing({ task, energy }: { task: Task; energy: number }) {
   // The moment. Not a celebration — a receipt for something that was weighing.
   if (done) {
     return (
-      <section className="rounded-[20px] bg-[#141417] text-[#F0F0EE] p-[30px] animate-rise">
+      <section className="rounded-[8px] bg-[#141417] text-[#F0F0EE] p-6 animate-rise">
         <p className="font-mono text-2xs tracking-[0.14em] uppercase text-[#5EE0B0]">Closed</p>
         <h2 className="mt-3 font-display text-4xl leading-[1.1] line-through decoration-[#35353C] decoration-1">
           {task.title}
@@ -120,45 +120,48 @@ function OneThing({ task, energy }: { task: Task; energy: number }) {
   }
 
   return (
-    <section className="rounded-[20px] bg-[#141417] text-[#F0F0EE] p-[30px] relative overflow-hidden">
-      <p className="font-mono text-2xs tracking-[0.14em] uppercase text-[#6E6E77]">
+    <section className="rounded-[8px] bg-[#F0F0EE] text-[#0B0B0D] p-6 relative overflow-hidden">
+      <p className="font-mono text-2xs tracking-[0.14em] uppercase text-[#0B0B0D]/55">
         The one thing · matched to {energyLabel(energy as 0 | 1 | 2)} energy
       </p>
 
       <Link href={`/tasks/${task.id}`} className="block group">
-        <h2 className="font-display text-4xl leading-[1.1] tracking-[-0.015em] mt-3.5 group-hover:text-[#F0F0EE] transition-colors">
+        <h2 className="font-display text-4xl leading-[1.1] tracking-[-0.015em] mt-3.5 group-hover:text-[#3A3A41] transition-colors">
           {task.title}
         </h2>
       </Link>
 
       <div className="flex flex-wrap gap-2 mt-4">
-        <span className="text-xs text-[#F0F0EE] border border-[#35353C] px-2.5 py-[5px] rounded-lg">
+        {/* This card is the one lit surface in the app, so everything on it
+            takes void-side colours. Left on the dark palette it was white on
+            white. */}
+        <span className="text-xs text-[#0B0B0D] border border-[#0B0B0D]/25 px-2.5 py-[5px] rounded-[6px]">
           {energyLabel(task.energy_level as 0 | 1 | 2)}
         </span>
         {task.priority === 2 && (
-          <span className="text-xs text-[#E0A33E] border border-[#35353C] px-2.5 py-[5px] rounded-lg">High priority</span>
+          <span className="text-xs text-[#8A4E12] border border-[#8A4E12]/30 bg-[#8A4E12]/[0.07] px-2.5 py-[5px] rounded-[6px]">High priority</span>
         )}
         {task.due_date && (
-          <span className="text-xs text-[#9C9CA4] border border-[#26262B] px-2.5 py-[5px] rounded-lg">Due today</span>
+          <span className="text-xs text-[#0B0B0D]/60 border border-[#0B0B0D]/20 px-2.5 py-[5px] rounded-[6px]">Due today</span>
         )}
       </div>
 
-      <div className="mt-5 p-4 rounded-[13px] bg-[#1B1B1F] border border-[#26262B]">
-        <p className="font-mono text-2xs tracking-[0.12em] uppercase text-[#6E6E77]">First micro-step</p>
-        <p className="mt-2 text-base text-[#F0F0EE]">{move}</p>
+      <div className="mt-5 p-4 rounded-[6px] bg-[#0B0B0D]/[0.055] border border-[#0B0B0D]/12">
+        <p className="font-mono text-2xs tracking-[0.12em] uppercase text-[#0B0B0D]/55">First micro-step</p>
+        <p className="mt-2 text-base text-[#0B0B0D]">{move}</p>
       </div>
 
       <div className="flex gap-2.5 mt-5 flex-wrap">
         <Link href={`/focus?task=${task.id}`}
-          className="rounded-[11px] bg-[#F0F0EE] hover:bg-[#FFFFFF] text-[#0B0B0D] text-base font-semibold px-[18px] py-3 flex items-center gap-2 transition-colors focus-ring">
+          className="rounded-[6px] bg-[#0B0B0D] hover:bg-[#26262B] text-[#F0F0EE] text-base font-medium px-[18px] py-3 flex items-center gap-2 transition-colors focus-ring">
           <PlayIcon /> Start focus · {minutes}m
         </Link>
         <button onClick={complete}
-          className="rounded-[11px] border border-[#35353C] hover:border-[#6E6E77] text-[#F0F0EE] text-base px-4 py-3 transition-colors focus-ring">
+          className="rounded-[6px] border border-[#0B0B0D]/25 hover:border-[#0B0B0D]/55 text-[#0B0B0D] text-base px-4 py-3 transition-colors focus-ring">
           Mark done
         </button>
         <Link href="/loops"
-          className="rounded-[11px] border border-[#35353C] hover:border-[#6E6E77] text-[#F0F0EE] text-base px-4 py-3 transition-colors focus-ring">
+          className="rounded-[6px] border border-[#0B0B0D]/25 hover:border-[#0B0B0D]/55 text-[#0B0B0D] text-base px-4 py-3 transition-colors focus-ring">
           Not now, show another
         </Link>
       </div>
@@ -168,14 +171,14 @@ function OneThing({ task, energy }: { task: Task; energy: number }) {
 
 function NoPlanCard() {
   return (
-    <section className="rounded-[20px] bg-[#141417] text-[#F0F0EE] p-[30px]">
+    <section className="rounded-[8px] bg-[#141417] text-[#F0F0EE] p-6">
       <p className="font-mono text-2xs tracking-[0.14em] uppercase text-[#6E6E77]">The one thing</p>
       <h2 className="font-display text-4xl leading-[1.1] tracking-[-0.015em] mt-3.5">Nothing is chosen yet.</h2>
       <p className="mt-3 text-base text-[#9C9CA4] max-w-md">
         Sixty guided seconds replace twenty minutes of deciding.
       </p>
       <Link href="/plan"
-        className="mt-5 inline-flex rounded-[11px] bg-[#F0F0EE] hover:bg-[#FFFFFF] text-[#0B0B0D] text-base font-semibold px-[18px] py-3 items-center gap-2 transition-colors focus-ring">
+        className="mt-5 inline-flex rounded-[6px] bg-[#F0F0EE] hover:bg-[#FFFFFF] text-[#0B0B0D] text-base font-semibold px-[18px] py-3 items-center gap-2 transition-colors focus-ring">
         Plan the day · 60s
       </Link>
     </section>
@@ -238,7 +241,7 @@ function UnblockPrompt({ count }: { count: number }) {
   if (!show) return null;
   return (
     <Link href="/unblock"
-      className="group rounded-[18px] border border-[#26262B] bg-[#141417] p-[22px] flex items-center gap-4 hover:border-[#35353C] transition-colors focus-ring">
+      className="group rounded-[8px] border border-[#26262B] bg-[#141417] p-5 flex items-center gap-4 hover:border-[#35353C] transition-colors focus-ring">
       <div className="flex-1">
         <h3 className="text-base font-semibold">
           You are waiting on {count} {count === 1 ? "person" : "people"}
@@ -261,7 +264,7 @@ function CapacityCard({ fit }: { fit: ReturnType<typeof capacityFit> }) {
     { k: "admin" as const, label: "Admin", color: "#5EE0B0" },
   ];
   return (
-    <section className="rounded-[18px] border border-[#26262B] bg-[#141417] p-[22px]">
+    <section className="rounded-[8px] border border-[#26262B] bg-[#141417] p-5">
       <div className="flex items-baseline justify-between gap-3.5">
         <h3 className="text-base font-semibold">Today&apos;s capacity</h3>
         <span className="font-mono text-2xs text-[#9C9CA4]">
@@ -295,7 +298,7 @@ function CapacityCard({ fit }: { fit: ReturnType<typeof capacityFit> }) {
 /* ── Rotting ── */
 function RottingCard({ loops }: { loops: Task[] }) {
   return (
-    <section className="rounded-[18px] border border-[#35353C] bg-[#1B1B1F] p-[22px]">
+    <section className="rounded-[8px] border border-[#35353C] bg-[#1B1B1F] p-5">
       <div className="flex items-center gap-2.5">
         <HourglassIcon />
         <h3 className="text-base font-semibold">
@@ -321,7 +324,7 @@ function RottingCard({ loops }: { loops: Task[] }) {
         })}
       </div>
       <Link href="/loops?filter=rotting"
-        className="mt-3.5 inline-flex rounded-[11px] bg-[#141417] hover:bg-[#FF8A4C] text-[#F0F0EE] text-sm font-medium px-[17px] py-[11px] transition-colors focus-ring">
+        className="mt-3.5 inline-flex rounded-[6px] bg-[#141417] hover:bg-[#FF8A4C] text-[#F0F0EE] text-sm font-medium px-[17px] py-[11px] transition-colors focus-ring">
         Answer them now
       </Link>
     </section>
@@ -354,8 +357,7 @@ function TaskRow({ task }: { task: Task }) {
 
   return (
     <Link href={`/tasks/${task.id}`}
-      className={cn(
-        "flex items-center gap-[13px] px-5 py-3.5 border-b border-[#26262B] last:border-b-0 hover:bg-[#101013] transition-colors",
+      className={cn( "flex items-center gap-[13px] px-5 py-3.5 border-b border-[#26262B] last:border-b-0 hover:bg-[#101013] transition-colors",
         done && !task.completed && "animate-settle",
       )}>
       <button onClick={toggle} aria-label={done ? "Mark not done" : "Mark done"}
@@ -395,7 +397,7 @@ function EnergyCard({ energy, plan }: { energy: number; plan: DailyPlan | null }
   }
 
   return (
-    <section className="rounded-[18px] border border-[#26262B] bg-[#141417] p-5">
+    <section className="rounded-[8px] border border-[#26262B] bg-[#141417] p-5">
       <h3 className="text-base font-semibold">How is your energy?</h3>
       <p className="mt-1.5 text-sm text-[#9C9CA4] leading-[1.5]">
         {plan?.energy_level != null ? "We match tasks to this." : "Three taps. Everything reshapes around the answer."}
@@ -405,8 +407,8 @@ function EnergyCard({ energy, plan }: { energy: number; plan: DailyPlan | null }
           const on = value === l.v;
           return (
             <button key={l.v} onClick={() => pick(l.v)}
-              className={cn("py-3 px-1.5 rounded-[11px] text-xs border transition-colors focus-ring",
-                on ? "text-white font-semibold" : "bg-[#101013] text-[#9C9CA4] hover:text-[#F0F0EE]")}
+              className={cn("py-3 px-1.5 rounded-[6px] text-xs border transition-colors focus-ring",
+                on ? "text-[#0B0B0D] font-semibold" : "bg-[#101013] text-[#9C9CA4] hover:text-[#F0F0EE]")}
               style={on ? { background: l.border, borderColor: l.border } : { borderColor: "#26262B" }}>
               {l.label}
             </button>
@@ -419,7 +421,7 @@ function EnergyCard({ energy, plan }: { energy: number; plan: DailyPlan | null }
 
 function MitsCard({ mits }: { mits: Task[] }) {
   return (
-    <section className="rounded-[18px] border border-[#26262B] bg-[#141417] p-5">
+    <section className="rounded-[8px] border border-[#26262B] bg-[#141417] p-5">
       <div className="flex items-center justify-between">
         <h3 className="text-base font-semibold">Today&apos;s 3 MITs</h3>
         <Link href="/plan" className="text-[#9C9CA4] hover:text-[#F0F0EE] transition-colors focus-ring rounded" aria-label="Edit plan">
@@ -442,7 +444,7 @@ function MitsCard({ mits }: { mits: Task[] }) {
 
 function AntiListCard({ tasks }: { tasks: Task[] }) {
   return (
-    <section className="rounded-[18px] border border-[#26262B] bg-[#1B1B1F] p-5">
+    <section className="rounded-[8px] border border-[#26262B] bg-[#1B1B1F] p-5">
       <div className="flex items-center gap-2.5">
         <ShieldOffIcon />
         <h3 className="text-base font-semibold">Not doing this week</h3>
@@ -466,7 +468,7 @@ function AntiListCard({ tasks }: { tasks: Task[] }) {
 
 function RitualsCard({ habits, logs, done }: { habits: Habit[]; logs: HabitLog[]; done: number }) {
   return (
-    <section className="rounded-[18px] border border-[#26262B] bg-[#141417] p-5">
+    <section className="rounded-[8px] border border-[#26262B] bg-[#141417] p-5">
       <div className="flex items-center justify-between mb-3.5">
         <h3 className="text-base font-semibold">Rituals</h3>
         <span className="font-mono text-2xs text-[#9C9CA4]">{done}/{habits.length}</span>

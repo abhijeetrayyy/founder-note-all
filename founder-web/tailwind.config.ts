@@ -42,7 +42,7 @@ const config: Config = {
         foreground: {
           DEFAULT: "#F0F0EE",
           muted: "#9C9CA4",
-          subtle: "#6E6E77",
+          subtle: "#8A8A93",
           faint: "#3A3A41",
           "on-ink": "#0B0B0D",  // text on an inverted (ink-filled) surface
         },

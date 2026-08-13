@@ -128,7 +128,7 @@ export function FocusTimer({ tasks, initialTaskId = "" }: { tasks: Task[]; initi
         <div className="grid grid-cols-3 gap-2 mt-6">
           {MODES.map((m) => (
             <button key={m.key} onClick={() => { setMode(m); setSecondsLeft(m.minutes * 60); }}
-              className={cn("py-3 px-2 rounded-[11px] border text-xs transition-colors focus-ring",
+              className={cn("py-3 px-2 rounded-[6px] border text-xs transition-colors focus-ring",
                 mode.key === m.key ? "border-[#F0F0EE] bg-[#1B1B1F] text-[#FFFFFF] font-semibold" : "border-[#26262B] bg-[#101013] text-[#6E6E77] hover:border-[#35353C]")}>
               {m.label}
               <span className="block font-mono text-2xs mt-0.5 opacity-70">{m.minutes}m</span>
@@ -280,7 +280,7 @@ function ParkModal({ onClose }: { onClose: (resume: boolean) => void }) {
     <div className="fixed inset-0 z-[60] bg-black/50 flex items-center justify-center px-6"
       onClick={() => onClose(true)}>
       <form onSubmit={park} onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-md rounded-[18px] bg-[#1B1B1F] border border-[#26262B] p-6">
+        className="w-full max-w-md rounded-[8px] bg-[#1B1B1F] border border-[#26262B] p-6">
         <p className="font-mono text-2xs tracking-[0.14em] uppercase text-[#6E6E77]">Park it</p>
         <p className="mt-2 text-base text-[#F0F0EE]">Get it out of your head. The block keeps running.</p>
         <input ref={ref} value={text} onChange={(e) => setText(e.target.value)}

@@ -38,8 +38,7 @@ export function EnergyPicker({ value }: { value?: number | null }) {
             onClick={() => onSelect(opt.value)}
             disabled={pending}
             aria-pressed={active}
-            className={cn(
-              "flex-1 h-12 rounded-2xl border-2 text-sm font-bold transition-all duration-200 focus-ring",
+            className={cn( "flex-1 h-12 rounded-2xl border-2 text-sm font-bold transition-all duration-200 focus-ring",
               active ? "text-white border-transparent" : "bg-base-surface border-base-border text-foreground hover:border-current",
             )}
             style={active ? { backgroundColor: opt.color, borderColor: opt.color } : { color: opt.color }}

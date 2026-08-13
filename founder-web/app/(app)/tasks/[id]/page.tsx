@@ -71,7 +71,7 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
       {!task.completed && (
         <Link
           href={`/focus?task=${task.id}`}
-          className="flex items-center justify-center gap-2 h-12 rounded-xl text-white font-bold text-sm bg-gradient-to-br from-accent-600 to-accent-700 hover:shadow-glow-strong transition-all focus-ring"
+          className="flex items-center justify-center gap-2 h-12 rounded-xl text-[#0B0B0D] font-bold text-sm bg-[#F0F0EE] hover:bg-white transition-all focus-ring"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
           Start a focus session on this

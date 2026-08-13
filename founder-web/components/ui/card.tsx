@@ -19,8 +19,7 @@ export function Card({ variant = "ambient", interactive = false, className, ...p
   };
   return (
     <div
-      className={cn(
-        "rounded-card",
+      className={cn( "rounded-card",
         variants[variant],
         interactive && "transition-all duration-300 hover:shadow-active hover:-translate-y-0.5 cursor-pointer",
         className,

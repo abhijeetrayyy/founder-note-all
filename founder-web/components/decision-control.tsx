@@ -35,7 +35,7 @@ export function DecisionControl({ task }: { task: Task }) {
   }
 
   return (
-    <div className="rounded-[18px] border border-[#26262B] bg-[#141417] p-5 space-y-3">
+    <div className="rounded-[8px] border border-[#26262B] bg-[#141417] p-5 space-y-3">
       <div className="flex items-start justify-between gap-3">
         <div>
           <h3 className="text-base font-semibold">Is this a decision?</h3>
@@ -48,8 +48,7 @@ export function DecisionControl({ task }: { task: Task }) {
           disabled={saving}
           role="switch"
           aria-checked={isDecision}
-          className={cn(
-            "flex-none h-8 px-3.5 rounded-full text-xs font-semibold transition-colors focus-ring disabled:opacity-50",
+          className={cn( "flex-none h-8 px-3.5 rounded-full text-xs font-semibold transition-colors focus-ring disabled:opacity-50",
             isDecision ? "bg-[#F0F0EE] text-[#0B0B0D]" : "bg-[#1B1B1F] text-[#9C9CA4] hover:bg-[#26262B]",
           )}
         >

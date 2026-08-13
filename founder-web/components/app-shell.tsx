@@ -75,16 +75,10 @@ const NAV_TITLES: Record<string, string> = Object.fromEntries(
 );
 
 /** Sub-lines are per-route context, not a second name. */
-const METAS: Record<string, string> = {
-  "/plan": "60 seconds",
-  "/focus": "session",
-  "/shutdown": "2 minutes",
-  "/stats": "last 30 days",
+const METAS: Record<string, string> = { "/plan": "60 seconds", "/focus": "session", "/shutdown": "2 minutes", "/stats": "last 30 days",
 };
 
-const EXTRA_TITLES: Record<string, string> = {
-  "/tasks": "Tasks",
-  "/replan": "Replan",
+const EXTRA_TITLES: Record<string, string> = { "/tasks": "Tasks", "/replan": "Replan",
 };
 
 export function AppShell({ children, profile, pressure, energy = 1, onQuickAdd }: { children: React.ReactNode; profile: UserProfile | null; pressure?: Pressure; energy?: number; onQuickAdd: () => void }) {
@@ -152,7 +146,7 @@ export function AppShell({ children, profile, pressure, energy = 1, onQuickAdd }
           <div className="bg-[#141417] border border-[#26262B] rounded-2xl px-2 py-1 flex items-center justify-around shadow-active mx-auto max-w-sm">
             <MobileLink href="/today" label="Today" icon={SunIcon} pathname={pathname} />
             <MobileLink href="/inbox" label="Triage" icon={InboxIcon} pathname={pathname} />
-            <button onClick={onQuickAdd} className="flex items-center justify-center w-12 h-12 -mt-6 rounded-full bg-[#F0F0EE] shadow-glow-strong focus-ring" aria-label="Capture">
+            <button onClick={onQuickAdd} className="flex items-center justify-center w-12 h-12 -mt-6 rounded-full bg-[#F0F0EE]  focus-ring" aria-label="Capture">
               <PlusIcon className="w-5 h-5 text-white" />
             </button>
             <MobileLink href="/review" label="Review" icon={ActivityIcon} pathname={pathname} />
@@ -213,7 +207,7 @@ function PressureCard({ pressure }: { pressure: Pressure }) {
   }, [needsAnswer]);
 
   return (
-    <div className="mx-3.5 mb-3.5 p-3.5 rounded-[13px] bg-[#1B1B1F] border border-[#26262B]">
+    <div className="mx-3.5 mb-3.5 p-3.5 rounded-[6px] bg-[#1B1B1F] border border-[#26262B]">
       <div className="flex items-baseline justify-between gap-2.5">
         <p className="font-mono text-2xs tracking-[0.14em] uppercase text-[#9C9CA4]">Needs an answer</p>
         {dropped > 0
@@ -246,8 +240,7 @@ function NavGroup({ group, pathname, onClick }: { group: NavGroupDef; pathname: 
         return (
           <Link key={it.href} href={it.href} onClick={onClick} aria-current={active ? "page" : undefined}
             title={it.hint}
-            className={cn(
-              "w-full flex items-center gap-[11px] px-2.5 py-[9px] rounded-[10px] text-sm transition-colors focus-ring",
+            className={cn( "w-full flex items-center gap-[11px] px-2.5 py-[9px] rounded-[6px] text-sm transition-colors focus-ring",
               active ? "bg-[#1B1B1F] text-[#FFFFFF] font-semibold" : "text-[#9C9CA4] font-medium hover:bg-[#1B1B1F]",
             )}>
             <it.icon className="w-[17px] h-[17px] flex-none" />
@@ -294,7 +287,7 @@ function EnergyChip({ energy }: { energy: number }) {
   ];
   const e = map[energy] ?? map[1];
   return (
-    <div className="hidden sm:flex items-center gap-[7px] h-[34px] px-3 rounded-[10px] text-xs font-medium flex-none"
+    <div className="hidden sm:flex items-center gap-[7px] h-[34px] px-3 rounded-[6px] text-xs font-medium flex-none"
       style={{ background: e.bg, color: e.fg }}>
       <BatteryIcon className="w-[15px] h-[15px]" />
       {e.label}

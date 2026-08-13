@@ -50,7 +50,7 @@ export default function OnboardingPage() {
     <main className="min-h-screen flex flex-col items-center justify-center px-6 py-12">
       <div className="w-full max-w-md animate-slide-up">
         <div className="flex items-center justify-center gap-2 mb-6">
-          <span className="w-8 h-8 rounded-xl bg-gradient-to-br from-accent-600 to-accent-700 text-white flex items-center justify-center text-sm font-extrabold font-display">F</span>
+          <span className="w-8 h-8 rounded-xl bg-[#F0F0EE] text-[#0B0B0D] flex items-center justify-center text-sm font-extrabold font-display">F</span>
           <span className="font-bold text-lg tracking-tight text-foreground font-display">Founder<span className="text-gradient">OS</span></span>
         </div>
 
@@ -63,7 +63,7 @@ export default function OnboardingPage() {
 
           {step === 0 && (
             <div className="space-y-5 text-center animate-fade-in">
-              <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-accent-600 to-accent-700 text-white flex items-center justify-center text-2xl font-extrabold font-display">F</div>
+              <div className="w-16 h-16 mx-auto rounded-2xl bg-[#F0F0EE] text-[#0B0B0D] flex items-center justify-center text-2xl font-extrabold font-display">F</div>
               <div>
                 <h1 className="text-2xl font-bold text-foreground font-display">You don&apos;t need a bigger list.</h1>
                 <p className="mt-2.5 text-sm text-foreground-muted leading-relaxed">

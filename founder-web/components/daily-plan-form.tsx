@@ -90,7 +90,7 @@ export function DailyPlanForm({ plan, allTasks }: { plan: DailyPlan | null; allT
           <div className="space-y-2 mb-3">
             {selectedMits.map((t, i) => (
               <div key={t.id} className="flex items-center gap-3 p-3 rounded-xl bg-accent-muted border border-accent-muted-strong">
-                <span className="w-6 h-6 rounded-lg bg-gradient-to-br from-accent-600 to-accent-700 text-white flex items-center justify-center text-xs font-bold shrink-0">{i + 1}</span>
+                <span className="w-6 h-6 rounded-lg bg-[#F0F0EE] text-[#0B0B0D] flex items-center justify-center text-xs font-bold shrink-0">{i + 1}</span>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-sm text-foreground truncate">{t.title}</p>
                   {t.estimated_minutes ? <p className="text-xs text-foreground-subtle">{t.estimated_minutes} min</p> : null}

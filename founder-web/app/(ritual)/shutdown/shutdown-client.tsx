@@ -42,8 +42,7 @@ export function ShutdownClient({
               aria-current={i === step ? "step" : undefined}
               aria-label={`Step ${i + 1}: ${label}`}
               title={label}
-              className={cn(
-                "h-1.5 w-10 rounded-full transition-colors focus-ring",
+              className={cn( "h-1.5 w-10 rounded-full transition-colors focus-ring",
                 i === step ? "bg-[#F0F0EE]" : i < step ? "bg-[#F0F0EE]/60 hover:bg-[#F0F0EE]" : "bg-[#26262B] hover:bg-[#35353C]",
               )}
             />

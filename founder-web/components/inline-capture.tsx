@@ -66,7 +66,7 @@ export function InlineCapture() {
         <button
           onClick={submit}
           disabled={!text.trim() || busy}
-          className="absolute right-2 top-2 h-10 w-10 rounded-xl bg-accent-600 text-white flex items-center justify-center disabled:opacity-30 transition-all hover:bg-accent-500 focus-ring"
+          className="absolute right-2 top-2 h-10 w-10 rounded-xl bg-accent-600 text-[#0B0B0D] flex items-center justify-center disabled:opacity-30 transition-all hover:bg-accent-500 focus-ring"
           aria-label="Capture"
         >
           {busy ? (

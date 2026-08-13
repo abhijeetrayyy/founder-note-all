@@ -40,7 +40,7 @@ export function CaptureDemo() {
   return (
     <div
       aria-label="Quick capture demonstration"
-      className="absolute -right-2 sm:-right-4 -bottom-10 w-[360px] max-w-[82vw] rounded-2xl border border-[#26262B] bg-[#141417] p-[18px]"
+      className="absolute -right-2 sm:-right-4 -bottom-10 w-[360px] max-w-[82vw] rounded-2xl border border-[#26262B] bg-[#141417] p-5"
       style={{ boxShadow: "0 28px 50px -28px rgba(23,21,18,0.5)" }}
     >
       <div className="flex items-center gap-2 font-mono text-2xs tracking-[0.1em] uppercase text-[#9C9CA4]">
@@ -48,7 +48,7 @@ export function CaptureDemo() {
         Quick capture · ⌘K
       </div>
 
-      <div className="mt-3 rounded-[11px] border border-[#26262B] bg-[#101013] px-3 py-3 text-base leading-[1.4] min-h-[62px] text-[#F0F0EE]">
+      <div className="mt-3 rounded-[6px] border border-[#26262B] bg-[#101013] px-3 py-3 text-base leading-[1.4] min-h-[62px] text-[#F0F0EE]">
         {DEMO.slice(0, n)}
         <span className="inline-block w-0.5 h-4 -mb-0.5 bg-[#F0F0EE] animate-[caret_1s_steps(1)_infinite]" />
       </div>

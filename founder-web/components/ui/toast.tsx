@@ -77,8 +77,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             className="pointer-events-auto min-w-[240px] max-w-sm px-4 py-3 rounded-2xl glass-focused shadow-focused text-sm font-semibold text-foreground flex items-center gap-2.5 animate-slide-up"
           >
             <span
-              className={cn(
-                "w-2 h-2 rounded-full shrink-0",
+              className={cn( "w-2 h-2 rounded-full shrink-0",
                 t.type === "success" && "bg-state-done",
                 t.type === "error" && "bg-state-overdue",
                 t.type === "info" && "bg-accent",

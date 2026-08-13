@@ -70,7 +70,7 @@ function ProjectRow({ h }: { h: Awaited<ReturnType<typeof getProjectHealth>>[num
 
   return (
     <Link href={`/projects/${project.id}`}
-      className="group flex items-center gap-4 rounded-[18px] border border-[#26262B] bg-[#141417] p-[18px] hover:border-[#35353C] transition-colors focus-ring">
+      className="group flex items-center gap-4 rounded-[8px] border border-[#26262B] bg-[#141417] p-5 hover:border-[#35353C] transition-colors focus-ring">
       <span className="w-10 h-10 rounded-xl flex items-center justify-center text-base font-semibold text-white shrink-0"
         style={{ backgroundColor: PROJECT_COLORS[project.color % PROJECT_COLORS.length] }}>
         {project.name[0]?.toUpperCase()}

@@ -49,15 +49,14 @@ export default async function LoopsPage({
               key={f.key}
               href={f.key === "all" ? "/loops" : `/loops?filter=${f.key}`}
               aria-current={on ? "page" : undefined}
-              className={cn(
-                "h-8 px-3 rounded-full text-xs font-semibold inline-flex items-center gap-1.5 transition-colors focus-ring",
-                on ? "bg-accent-600 text-white" : "bg-base-raised text-foreground-muted hover:bg-base-overlay",
+              className={cn( "h-8 px-3 rounded-full text-xs font-semibold inline-flex items-center gap-1.5 transition-colors focus-ring",
+                on ? "bg-accent-600 text-[#0B0B0D]" : "bg-base-raised text-foreground-muted hover:bg-base-overlay",
               )}
             >
               {f.label}
               {/* Counts only where a number above zero means something to act on. */}
               {typeof n === "number" && n > 0 && (
-                <span className={cn("number-mono", on ? "text-white/80" : "text-foreground-subtle")}>{n}</span>
+                <span className={cn("number-mono", on ? "text-[#0B0B0D]/70" : "text-foreground-subtle")}>{n}</span>
               )}
             </Link>
           );
