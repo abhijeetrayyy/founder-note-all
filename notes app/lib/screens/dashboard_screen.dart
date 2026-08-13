@@ -70,7 +70,15 @@ class DashboardScreen extends StatelessWidget {
         .take(3)
         .toList();
 
-    final fit = capacityFit([...picks, ...dayList.where((t) => !pickIds.contains(t.id))]);
+    // Everything else committed to today. The one thing is excluded because it
+    // is already the lit card above — when no plan exists it is drawn from this
+    // very list, and showing it twice makes the screen look like it is padding
+    // itself out.
+    final rest = dayList
+        .where((t) => !pickIds.contains(t.id) && t.id != one?.id)
+        .toList();
+
+    final fit = capacityFit([...picks, ...rest, if (one != null && !pickIds.contains(one.id)) one]);
     final inboxCount = tasks.tasks.where((t) => !t.completed && t.isInbox).length;
 
     return Scaffold(
@@ -140,9 +148,9 @@ class DashboardScreen extends StatelessWidget {
                 const SizedBox(height: 14),
                 _Capture(inboxCount: inboxCount),
 
-                if (dayList.where((t) => !pickIds.contains(t.id)).isNotEmpty) ...[
+                if (rest.isNotEmpty) ...[
                   const SizedBox(height: 14),
-                  _RestOfDay(tasks: dayList.where((t) => !pickIds.contains(t.id)).toList()),
+                  _RestOfDay(tasks: rest),
                 ],
 
                 const SizedBox(height: 14),
