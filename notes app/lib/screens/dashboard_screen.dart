@@ -43,41 +43,55 @@ class DashboardScreen extends StatelessWidget {
         child: CustomScrollView(
           physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
           slivers: [
+            // A constant-height bar built from `title`, not `expandedHeight` +
+            // `flexibleSpace`.
+            //
+            // The old header overflowed, and the reason is worth writing down.
+            // With `floating: true, snap: true` and an `expandedHeight` of 80,
+            // the bar COLLAPSES to the default 56pt toolbar as soon as you
+            // scroll — but `flexibleSpace` keeps rendering the same content
+            // into that smaller box, so the striped overflow warning only
+            // appeared once the list had been scrolled, which is why a check at
+            // rest looked clean. On top of that, the `SafeArea` inside
+            // `flexibleSpace` subtracted the status bar inset a second time,
+            // leaving barely any room on a device with a notch.
+            //
+            // Handing the content to `title` fixes both: SliverAppBar applies
+            // the status bar inset itself (no double count), and with no
+            // `expandedHeight` there is no collapsed state whose height differs
+            // from the one the content was sized for.
             SliverAppBar(
               floating: true, snap: true,
               backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               automaticallyImplyLeading: false,
-              expandedHeight: 80,
-              flexibleSpace: SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 8, 12, 4),
-                  child: Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
-                    Expanded(
-                      // The name lives on the small line; the headline is a
-                      // fixed short phrase. It used to read "What's on your
-                      // mind, $firstName?" at 22px inside an 80px app bar, so
-                      // any name long enough to wrap overflowed the header by
-                      // 18px and clipped itself behind a striped warning bar —
-                      // on the first screen of the app, for every user who had
-                      // filled in a name. Both lines are clamped so no name can
-                      // do it again.
-                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.center, children: [
-                        Text(firstName.isEmpty ? _greeting(firstName) : '${_greeting(firstName)}, $firstName',
-                            maxLines: 1, overflow: TextOverflow.ellipsis,
-                            style: TextStyle(fontSize: 12, fontFamily: 'Inter', fontWeight: FontWeight.w600, color: isDark ? AppTheme.darkTextMuted : AppTheme.lightTextMuted, letterSpacing: 0.3)),
-                        const SizedBox(height: 2),
-                        Text("What's on your mind?",
-                            maxLines: 1, overflow: TextOverflow.ellipsis,
-                            style: TextStyle(fontSize: 22, fontFamily: 'Inter', fontWeight: FontWeight.w800, color: isDark ? AppTheme.darkText : AppTheme.lightText, letterSpacing: -0.5)),
-                      ]),
-                    ),
-                    IconButton(
-                      icon: Icon(isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded, color: isDark ? AppTheme.darkTextMuted : AppTheme.lightTextMuted),
-                      onPressed: () => app.toggleDarkMode(),
-                    ),
-                  ]),
-                ),
+              toolbarHeight: 68,
+              titleSpacing: 20,
+              title: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // The name sits on the small line so the headline can be a
+                  // fixed, short phrase. Previously the headline was "What's on
+                  // your mind, $firstName?" at 22px, which wrapped to two lines
+                  // for most names and made the header taller still. Both lines
+                  // are clamped so no name can grow the header again.
+                  Text(firstName.isEmpty ? _greeting(firstName) : '${_greeting(firstName)}, $firstName',
+                      maxLines: 1, overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 12, fontFamily: 'Inter', fontWeight: FontWeight.w600, color: isDark ? AppTheme.darkTextMuted : AppTheme.lightTextMuted, letterSpacing: 0.3)),
+                  const SizedBox(height: 2),
+                  Text("What's on your mind?",
+                      maxLines: 1, overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 22, fontFamily: 'Inter', fontWeight: FontWeight.w800, color: isDark ? AppTheme.darkText : AppTheme.lightText, letterSpacing: -0.5)),
+                ],
               ),
+              actions: [
+                IconButton(
+                  icon: Icon(isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded, color: isDark ? AppTheme.darkTextMuted : AppTheme.lightTextMuted),
+                  onPressed: () => app.toggleDarkMode(),
+                ),
+                const SizedBox(width: 4),
+              ],
             ),
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
