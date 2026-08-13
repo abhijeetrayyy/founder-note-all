@@ -181,7 +181,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
                                   child: Container(
                                     width: 36, height: 36,
                                     decoration: BoxDecoration(color: AppTheme.primary, borderRadius: BorderRadius.circular(10)),
-                                    child: const Icon(Icons.add_rounded, color: Colors.white, size: 20),
+                                    child: const Icon(Icons.add_rounded, color: AppTheme.onInk, size: 20),
                                   ),
                                 ),
                               ]),

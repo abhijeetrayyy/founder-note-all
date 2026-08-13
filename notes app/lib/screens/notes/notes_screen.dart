@@ -175,7 +175,7 @@ class _ListNote extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 20),
         margin: const EdgeInsets.only(bottom: 6),
         decoration: BoxDecoration(color: AppTheme.energyMedium, borderRadius: BorderRadius.circular(14)),
-        child: const Row(mainAxisAlignment: MainAxisAlignment.end, children: [Icon(Icons.archive_rounded, color: Colors.white), SizedBox(width: 8), Text('Archive', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700))]),
+        child: const Row(mainAxisAlignment: MainAxisAlignment.end, children: [Icon(Icons.archive_rounded, color: AppTheme.onInk), SizedBox(width: 8), Text('Archive', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700))]),
       ),
       onDismissed: (_) => onArchive(),
       child: Material(

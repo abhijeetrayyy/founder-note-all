@@ -351,7 +351,7 @@ class _MITPickerTile extends StatelessWidget {
                 color: selected ? AppTheme.primary : Colors.transparent,
                 border: Border.all(color: selected ? AppTheme.primary : Colors.grey.shade400, width: 1.5),
               ),
-              child: selected ? const Icon(Icons.check, size: 14, color: Colors.white) : null,
+              child: selected ? const Icon(Icons.check, size: 14, color: AppTheme.onInk) : null,
             ),
             const SizedBox(width: 12),
             Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

@@ -74,17 +74,17 @@ class _InboxScreenState extends State<InboxScreen> {
               child: Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(colors: [AppTheme.primary, AppTheme.primaryDeep]),
+                  color: AppTheme.ink,
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Row(children: [
-                  const Icon(Icons.inbox_rounded, color: Colors.white, size: 22),
+                  const Icon(Icons.inbox_rounded, color: AppTheme.onInk, size: 22),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Text('$total ${total == 1 ? "item" : "items"} waiting', style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w800)),
+                      Text('$total ${total == 1 ? "item" : "items"} waiting', style: const TextStyle(color: AppTheme.onInk, fontSize: 14, fontWeight: FontWeight.w800)),
                       const SizedBox(height: 2),
-                      Text('Swipe right to put it on today, left to schedule.', style: TextStyle(color: Colors.white.withValues(alpha: 0.85), fontSize: 12)),
+                      Text('Swipe right to put it on today, left to schedule.', style: TextStyle(color: AppTheme.onInk.withValues(alpha: 0.65), fontSize: 12)),
                     ]),
                   ),
                 ]),
@@ -239,7 +239,7 @@ class _InboxTaskRow extends StatelessWidget {
                 child: Container(
                   width: 22, height: 22,
                   decoration: BoxDecoration(shape: BoxShape.circle, color: task.completed ? AppTheme.success : Colors.transparent, border: Border.all(color: task.completed ? AppTheme.success : Theme.of(context).dividerColor, width: 2)),
-                  child: task.completed ? const Icon(Icons.check_rounded, color: Colors.white, size: 14) : null,
+                  child: task.completed ? const Icon(Icons.check_rounded, color: AppTheme.onInk, size: 14) : null,
                 ),
               ),
               const SizedBox(width: 12),
@@ -316,7 +316,7 @@ class _SwipeBg extends StatelessWidget {
     padding: const EdgeInsets.symmetric(horizontal: 20),
     alignment: align,
     decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(12)),
-    child: Row(mainAxisSize: MainAxisSize.min, children: [Icon(icon, color: Colors.white, size: 18), const SizedBox(width: 6), Text(label, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700))]),
+    child: Row(mainAxisSize: MainAxisSize.min, children: [Icon(icon, color: AppTheme.onInk, size: 18), const SizedBox(width: 6), Text(label, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700))]),
   );
 }
 

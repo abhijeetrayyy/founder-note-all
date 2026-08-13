@@ -179,7 +179,7 @@ class _TaskRow extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 20),
         margin: const EdgeInsets.only(bottom: 6),
         decoration: BoxDecoration(color: AppTheme.danger, borderRadius: BorderRadius.circular(14)),
-        child: const Row(mainAxisAlignment: MainAxisAlignment.end, children: [Icon(Icons.delete_rounded, color: Colors.white), SizedBox(width: 8), Text('Delete', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700))]),
+        child: const Row(mainAxisAlignment: MainAxisAlignment.end, children: [Icon(Icons.delete_rounded, color: AppTheme.onInk), SizedBox(width: 8), Text('Delete', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700))]),
       ),
       onDismissed: (_) {
         onDelete();
@@ -208,7 +208,7 @@ class _TaskRow extends StatelessWidget {
                     color: task.completed ? AppTheme.success : Colors.transparent,
                     border: Border.all(color: task.completed ? AppTheme.success : Theme.of(context).dividerColor, width: 2),
                   ),
-                  child: task.completed ? const Icon(Icons.check_rounded, color: Colors.white, size: 14) : null,
+                  child: task.completed ? const Icon(Icons.check_rounded, color: AppTheme.onInk, size: 14) : null,
                 ),
               ),
               const SizedBox(width: 12),

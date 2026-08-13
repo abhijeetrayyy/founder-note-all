@@ -69,7 +69,7 @@ class _FocusTimerScreenState extends State<FocusTimerScreen> {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Row(children: const [
-          Icon(Icons.check_circle_rounded, color: Colors.white, size: 18),
+          Icon(Icons.check_circle_rounded, color: AppTheme.onInk, size: 18),
           SizedBox(width: 10),
           Expanded(child: Text('Focus session complete!', style: TextStyle(fontWeight: FontWeight.w600))),
         ]),

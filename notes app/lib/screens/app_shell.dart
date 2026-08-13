@@ -195,8 +195,8 @@ class _BottomNav extends StatelessWidget {
                 child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
                   Container(
                     width: 44, height: 44,
-                    decoration: BoxDecoration(gradient: const LinearGradient(colors: [AppTheme.primary, AppTheme.primaryDeep], begin: Alignment.topLeft, end: Alignment.bottomRight), borderRadius: BorderRadius.circular(14), boxShadow: [BoxShadow(color: AppTheme.primary.withValues(alpha: 0.4), blurRadius: 12, offset: const Offset(0, 4))]),
-                    child: const Icon(Icons.add_rounded, color: Colors.white, size: 26),
+                    decoration: BoxDecoration(color: AppTheme.ink, borderRadius: BorderRadius.circular(AppTheme.controlRadius)),
+                    child: const Icon(Icons.add_rounded, color: AppTheme.onInk, size: 24),
                   ),
                   const SizedBox(height: 4),
                   Text('Capture', style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.w800, color: Theme.of(context).brightness == Brightness.dark ? AppTheme.darkText : AppTheme.lightText)),
@@ -236,7 +236,7 @@ class _Item extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
                 decoration: BoxDecoration(color: AppTheme.primary, borderRadius: BorderRadius.circular(8)),
-                child: Text(badge!, style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w800)),
+                child: Text(badge!, style: const TextStyle(color: AppTheme.onInk, fontSize: 9, fontWeight: FontWeight.w600)),
               ),
             ),
           if (dot)
@@ -272,7 +272,7 @@ class _MoreMenu extends StatelessWidget {
           Container(
             padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
             child: Row(children: [
-              Container(width: 40, height: 40, decoration: BoxDecoration(gradient: const LinearGradient(colors: [AppTheme.primary, AppTheme.primaryDeep]), borderRadius: BorderRadius.circular(12)), child: const Icon(Icons.rocket_launch_rounded, color: Colors.white, size: 22)),
+              Container(width: 40, height: 40, decoration: BoxDecoration(color: AppTheme.ink, borderRadius: BorderRadius.circular(AppTheme.controlRadius)), child: const Icon(Icons.rocket_launch_rounded, color: AppTheme.onInk, size: 22)),
               const SizedBox(width: 12),
               const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
                 Text('Founder', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, letterSpacing: -0.3)),
@@ -285,15 +285,15 @@ class _MoreMenu extends StatelessWidget {
           Container(
             margin: const EdgeInsets.fromLTRB(20, 0, 20, 16),
             padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(gradient: const LinearGradient(colors: [AppTheme.primary, AppTheme.primaryDeep]), borderRadius: BorderRadius.circular(14)),
+            decoration: BoxDecoration(color: AppTheme.ink, borderRadius: BorderRadius.circular(14)),
             child: Row(children: [
-              const Icon(Icons.local_fire_department_rounded, color: Colors.white, size: 22),
+              const Icon(Icons.check_rounded, color: AppTheme.onInk, size: 20),
               const SizedBox(width: 10),
               Expanded(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text('${plan.planningStreak} day planning streak', style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w800)),
+                  Text(plan.planningStreak == 1 ? 'Chose your day today' : 'Chose your day ${plan.planningStreak} days running', style: const TextStyle(color: AppTheme.onInk, fontSize: 14, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 2),
-                  Text(plan.planningStreak == 0 ? 'Start your first morning ritual' : 'Keep the chain alive', style: TextStyle(color: Colors.white.withValues(alpha: 0.85), fontSize: 12)),
+                  Text(plan.planningStreak == 0 ? 'Sixty seconds decides the whole day' : 'The mornings you skip, your inbox writes your priorities', style: TextStyle(color: AppTheme.onInk.withValues(alpha: 0.65), fontSize: 12)),
                 ]),
               ),
             ]),

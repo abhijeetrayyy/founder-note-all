@@ -248,7 +248,7 @@ class _DayPill extends StatelessWidget {
           color: color,
           borderRadius: BorderRadius.circular(6),
         ),
-        child: Center(child: Text(picks.isEmpty ? '—' : '$done/${picks.length}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 11))),
+        child: Center(child: Text(picks.isEmpty ? '—' : '$done/${picks.length}', style: const TextStyle(color: AppTheme.onInk, fontWeight: FontWeight.w700, fontSize: 11))),
       ),
       ),
       const SizedBox(height: 4),
