@@ -1,26 +1,19 @@
 import type { Metadata, Viewport } from "next";
-import { Instrument_Sans, Instrument_Serif, JetBrains_Mono } from "next/font/google";
-import Script from "next/script";
+import { IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { ToastProvider } from "@/components/ui/toast";
 
-// The handoff's actual type system. Instrument Serif carries headlines (italic
-// for the emphasis word), Instrument Sans the body, JetBrains Mono every
-// micro-label, timer and metric.
-const sans = Instrument_Sans({
+// No serif. The serif headline was the most recognisable thing about the old
+// system and also the thing that made it read as an article. IBM Plex was drawn
+// for interfaces and instrumentation, and its mono is a true sibling — so
+// numbers and labels sit in the same voice as everything else.
+const sans = IBM_Plex_Sans({
   subsets: ["latin"],
   variable: "--font-sans",
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "500", "600"],
   display: "swap",
 });
-const serif = Instrument_Serif({
-  subsets: ["latin"],
-  variable: "--font-display",
-  weight: ["400"],
-  style: ["normal", "italic"],
-  display: "swap",
-});
-const mono = JetBrains_Mono({
+const mono = IBM_Plex_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
   weight: ["400", "500"],
@@ -38,7 +31,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   viewportFit: "cover",
-  themeColor: "#F6F3EC",
+  themeColor: "#0B0B0D",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -46,11 +39,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="apple-touch-icon" href="/icons/icon-192.svg" />
-        <Script id="time-mode" strategy="beforeInteractive">
-          {`(() => { const h = new Date().getHours(); const c = document.documentElement.classList; if (h >= 17 && h < 22) c.add('evening'); if (h >= 22 || h < 5) c.add('night'); })()`}
-        </Script>
       </head>
-      <body className={`${sans.variable} ${serif.variable} ${mono.variable} font-sans antialiased bg-paper text-foreground`}>
+      <body className={`${sans.variable} ${mono.variable} font-sans antialiased bg-void text-foreground`}>
         <ToastProvider>{children}</ToastProvider>
       </body>
     </html>

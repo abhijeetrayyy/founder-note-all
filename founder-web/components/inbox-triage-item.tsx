@@ -93,17 +93,17 @@ export function InboxTriageItem({ task, focused, onFocus }: {
     <div
       onMouseEnter={onFocus}
       className={cn(
-        "rounded-[18px] border bg-[#FFFDF8] p-[18px] transition-all duration-300",
-        focused ? "border-[#5B4FE9]" : "border-[#E6DFD2]",
+        "rounded-[18px] border bg-[#141417] p-[18px] transition-all duration-300",
+        focused ? "border-[#F0F0EE]" : "border-[#26262B]",
         gone && "animate-dissolve pointer-events-none",
       )}
     >
       <Link href={`/tasks/${task.id}`} className="block mb-3 group">
-        <p className="text-base font-semibold leading-snug group-hover:text-[#5B4FE9] transition-colors">
+        <p className="text-base font-semibold leading-snug group-hover:text-[#F0F0EE] transition-colors">
           {task.title}
         </p>
         {task.description && (
-          <p className="mt-1 text-xs text-[#605A50] line-clamp-2">{task.description}</p>
+          <p className="mt-1 text-xs text-[#9C9CA4] line-clamp-2">{task.description}</p>
         )}
       </Link>
 
@@ -115,7 +115,7 @@ export function InboxTriageItem({ task, focused, onFocus }: {
             onChange={(e) => setWho(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") doHandoff(); if (e.key === "Escape") setHandoff(false); }}
             placeholder="Who is picking this up?"
-            className="flex-1 min-w-[12rem] h-8 px-3 rounded-full border border-[#E0D9CB] bg-[#FBF8F2] text-xs focus-ring"
+            className="flex-1 min-w-[12rem] h-8 px-3 rounded-full border border-[#26262B] bg-[#101013] text-xs focus-ring"
           />
           <Btn label="Hand off" onClick={doHandoff} busy={pending === "handoff"} tone="accent" />
           <Btn label="Cancel" onClick={() => setHandoff(false)} busy={false} />
@@ -142,9 +142,9 @@ function Btn({ label, onClick, busy, tone, k }: {
       disabled={busy}
       className={cn(
         "h-8 px-3 rounded-full text-xs font-semibold inline-flex items-center gap-1.5 transition-colors focus-ring disabled:opacity-50",
-        tone === "accent" && "bg-[#5B4FE9] text-white hover:bg-[#4A3EDA]",
-        tone === "danger" && "text-[#D9552F] hover:bg-[#FBF0EA]",
-        !tone && "bg-[#F1EDE3] text-[#6B6459] hover:bg-[#E7E0D2]",
+        tone === "accent" && "bg-[#F0F0EE] text-[#0B0B0D] hover:bg-[#FFFFFF]",
+        tone === "danger" && "text-[#FF8A4C] hover:bg-[#1B1B1F]",
+        !tone && "bg-[#1B1B1F] text-[#9C9CA4] hover:bg-[#26262B]",
       )}
     >
       {label}

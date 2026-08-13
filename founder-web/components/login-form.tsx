@@ -24,8 +24,7 @@ export function LoginForm() {
   return (
     <div className="w-full max-w-md animate-slide-up">
       <div className="flex items-center justify-center gap-2 mb-8">
-        <span className="w-9 h-9 rounded-xl bg-gradient-to-br from-accent-600 to-accent-700 text-white flex items-center justify-center text-sm font-extrabold font-display">F</span>
-        <span className="font-bold text-xl tracking-tight text-foreground font-display">Founder<span className="text-gradient">OS</span></span>
+        <span className="font-bold text-xl tracking-tight text-foreground font-display">Founder<span className="text-[#FF8A4C]">OS</span></span>
       </div>
       <Card variant="focused" className="p-8">
         <h1 className="text-2xl font-bold text-center text-foreground font-display">Welcome back</h1>
@@ -44,7 +43,7 @@ export function LoginForm() {
       </Card>
       <p className="mt-6 text-sm text-center text-foreground-muted">
         New here?{" "}
-        <Link href={`/signup${search?.get("next") ? `?next=${encodeURIComponent(search.get("next")!)}` : ""}`} className="text-accent-600 font-semibold hover:underline">
+        <Link href={`/signup${search?.get("next") ? `?next=${encodeURIComponent(search.get("next")!)}` : ""}`} className="text-[#F0F0EE] font-medium underline underline-offset-4 decoration-[#35353C] hover:decoration-[#F0F0EE]">
           Create an account
         </Link>
       </p>

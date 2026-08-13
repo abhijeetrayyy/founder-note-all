@@ -21,7 +21,7 @@ export default async function ProjectsPage() {
   return (
     <div className="max-w-[1180px] mx-auto px-5 sm:px-7 pt-7 pb-16 space-y-5">
       <header className="flex items-start justify-between gap-4 flex-wrap">
-        <p className="text-base text-[#6B6459] max-w-[560px]">
+        <p className="text-base text-[#9C9CA4] max-w-[560px]">
           {health.length === 0
             ? "Outcomes, not folders."
             : stuck.length === 0
@@ -66,11 +66,11 @@ function ProjectRow({ h }: { h: Awaited<ReturnType<typeof getProjectHealth>>[num
     ? `Nothing has moved for ${idleDays} days`
     : "Moving";
 
-  const tone = owedByYou > 0 || rotting ? "#D9552F" : aging || (idleDays ?? 0) >= 7 ? "#B07C15" : "#8A8378";
+  const tone = owedByYou > 0 || rotting ? "#FF8A4C" : aging || (idleDays ?? 0) >= 7 ? "#E0A33E" : "#6E6E77";
 
   return (
     <Link href={`/projects/${project.id}`}
-      className="group flex items-center gap-4 rounded-[18px] border border-[#E6DFD2] bg-[#FFFDF8] p-[18px] hover:border-[#C9C0B0] transition-colors focus-ring">
+      className="group flex items-center gap-4 rounded-[18px] border border-[#26262B] bg-[#141417] p-[18px] hover:border-[#35353C] transition-colors focus-ring">
       <span className="w-10 h-10 rounded-xl flex items-center justify-center text-base font-semibold text-white shrink-0"
         style={{ backgroundColor: PROJECT_COLORS[project.color % PROJECT_COLORS.length] }}>
         {project.name[0]?.toUpperCase()}
@@ -82,15 +82,15 @@ function ProjectRow({ h }: { h: Awaited<ReturnType<typeof getProjectHealth>>[num
       </div>
 
       <div className="hidden sm:flex flex-col items-end gap-1 flex-none">
-        <span className="font-mono text-xs text-[#6B6459]">{open} open</span>
+        <span className="font-mono text-xs text-[#9C9CA4]">{open} open</span>
         {idleDays !== null && (
-          <span className="font-mono text-2xs text-[#6B6459]">
+          <span className="font-mono text-2xs text-[#9C9CA4]">
             {idleDays === 0 ? "touched today" : `${idleDays}d since a change`}
           </span>
         )}
       </div>
 
-      <span className="text-[#8A8378] group-hover:text-[#5B4FE9] transition-colors flex-none">→</span>
+      <span className="text-[#6E6E77] group-hover:text-[#F0F0EE] transition-colors flex-none">→</span>
     </Link>
   );
 }

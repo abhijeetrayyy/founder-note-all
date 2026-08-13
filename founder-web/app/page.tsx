@@ -36,13 +36,13 @@ export default function LandingPage() {
       {/* ── Nav ── */}
       <header className="max-w-[1160px] mx-auto px-7 h-[72px] flex items-center justify-between">
         <span className="font-display text-2xl tracking-[-0.015em]">
-          Founder<span className="italic text-[#5B4FE9]">OS</span>
+          Founder<span className="text-[#FF8A4C]">OS</span>
         </span>
         <nav className="flex items-center gap-2">
           <Link href="/login" className="px-4 py-2 rounded-xl text-sm text-foreground hover:bg-base-overlay transition-colors focus-ring">
             Sign in
           </Link>
-          <Link href="/signup" className="px-4 py-2 rounded-xl text-sm font-medium bg-[#5B4FE9] text-white hover:bg-[#4A3EDA] transition-colors focus-ring">
+          <Link href="/signup" className="px-4 py-2 rounded-xl text-sm font-medium bg-[#F0F0EE] text-[#0B0B0D] hover:bg-[#FFFFFF] transition-colors focus-ring">
             Join the beta
           </Link>
         </nav>
@@ -51,36 +51,36 @@ export default function LandingPage() {
       {/* ── Hero ── */}
       <section className="max-w-[1160px] mx-auto px-7 pt-16 sm:pt-20 relative">
         <div className="max-w-[880px]">
-          <div className="inline-flex items-center gap-2.5 px-3 py-1.5 border border-[#DCD5C7] rounded-full bg-[#FFFDF8] font-mono text-2xs tracking-[0.12em] uppercase text-[#6B6459]">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#14B8A6]" />
+          <div className="inline-flex items-center gap-2.5 px-3 py-1.5 border border-[#26262B] rounded-full bg-[#141417] font-mono text-2xs tracking-[0.12em] uppercase text-[#9C9CA4]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#5EE0B0]" />
             The execution system for founders
           </div>
 
           <h1 className="font-display font-normal mt-6 text-[clamp(44px,8vw,88px)] leading-[0.96] tracking-[-0.025em] text-balance">
             Your list is not the problem.
             <br />
-            <span className="italic text-[#5B4FE9]">It never shrinking</span> is.
+            <span className="text-[#FF8A4C]">It never shrinking</span> is.
           </h1>
 
-          <p className="mt-6 text-lg sm:text-xl leading-[1.5] text-[#57514A] max-w-[610px]">
+          <p className="mt-6 text-lg sm:text-xl leading-[1.5] text-[#9C9CA4] max-w-[610px]">
             Every other tool measures how much you completed — a number that goes up when you add
             more work, so it can never make you feel better. FounderOS measures the{" "}
-            <strong className="font-semibold text-[#171512]">pressure in your head</strong>, and
+            <strong className="font-semibold text-[#F0F0EE]">pressure in your head</strong>, and
             every screen is built to bring it down.
           </p>
 
           <div className="flex flex-wrap items-center gap-3 mt-8">
             <Link href="/signup"
-              className="inline-flex items-center gap-2 bg-[#5B4FE9] hover:bg-[#4A3EDA] text-white text-lg font-medium px-6 py-3.5 rounded-[13px] transition-colors focus-ring"
+              className="inline-flex items-center gap-2 bg-[#F0F0EE] hover:bg-[#FFFFFF] text-[#0B0B0D] text-lg font-medium px-6 py-3.5 rounded-[13px] transition-colors focus-ring"
               style={{ boxShadow: "0 10px 24px -12px rgba(91,79,233,0.85)" }}>
               Join the free beta
               <span aria-hidden="true">→</span>
             </Link>
             <Link href="/login"
-              className="inline-flex items-center text-lg text-[#171512] px-5 py-3.5 rounded-[13px] border border-[#DCD5C7] bg-[#FFFDF8] hover:border-[#171512] transition-colors focus-ring">
+              className="inline-flex items-center text-lg text-[#F0F0EE] px-5 py-3.5 rounded-[13px] border border-[#26262B] bg-[#141417] hover:border-[#26262B] transition-colors focus-ring">
               I already have an account
             </Link>
-            <span className="font-mono text-xs text-[#605A50] sm:ml-1.5">
+            <span className="font-mono text-xs text-[#9C9CA4] sm:ml-1.5">
               free while we build · no card, no trial clock
             </span>
           </div>
@@ -89,34 +89,34 @@ export default function LandingPage() {
         {/* Product frame. Rather than an empty screenshot slot, this is the real
             "one thing" card the app renders — the most honest thing to show. */}
         <div className="mt-16 relative">
-          <div className="rounded-[20px] border border-[#E0D9CB] bg-[#FFFDF8] overflow-hidden"
+          <div className="rounded-[20px] border border-[#26262B] bg-[#141417] overflow-hidden"
             style={{ boxShadow: "0 40px 80px -50px rgba(23,21,18,0.45)" }}>
-            <div className="flex items-center gap-2 px-4 py-3 border-b border-[#EDE7DB] bg-[#FBF8F2]">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#E7E0D2]" />
-              <span className="w-2.5 h-2.5 rounded-full bg-[#E7E0D2]" />
-              <span className="w-2.5 h-2.5 rounded-full bg-[#E7E0D2]" />
-              <span className="ml-3 font-mono text-2xs text-[#6B6459]">founderos.app/today</span>
+            <div className="flex items-center gap-2 px-4 py-3 border-b border-[#EDE7DB] bg-[#101013]">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#26262B]" />
+              <span className="w-2.5 h-2.5 rounded-full bg-[#26262B]" />
+              <span className="w-2.5 h-2.5 rounded-full bg-[#26262B]" />
+              <span className="ml-3 font-mono text-2xs text-[#9C9CA4]">founderos.app/today</span>
             </div>
 
-            <div className="bg-[#F3EFE6] p-6 sm:p-10">
-              <div className="rounded-[20px] bg-[#171512] text-[#FBF8F2] p-6 sm:p-8 max-w-[620px]">
-                <p className="font-mono text-2xs tracking-[0.14em] uppercase text-[#9C9384]">
+            <div className="bg-[#0B0B0D] p-6 sm:p-10">
+              <div className="rounded-[20px] bg-[#141417] text-[#F0F0EE] p-6 sm:p-8 max-w-[620px]">
+                <p className="font-mono text-2xs tracking-[0.14em] uppercase text-[#6E6E77]">
                   The one thing · matched to Deep energy
                 </p>
                 <h2 className="font-display text-[clamp(26px,4vw,36px)] leading-[1.1] tracking-[-0.015em] mt-3.5">
                   Rewrite the pricing page hero copy
                 </h2>
-                <div className="mt-5 p-4 rounded-[13px] bg-[#201D18] border border-[#302C25]">
-                  <p className="font-mono text-2xs tracking-[0.12em] uppercase text-[#9C9384]">First micro-step</p>
-                  <p className="mt-2 text-base text-[#E7E1D6]">
+                <div className="mt-5 p-4 rounded-[13px] bg-[#1B1B1F] border border-[#26262B]">
+                  <p className="font-mono text-2xs tracking-[0.12em] uppercase text-[#6E6E77]">First micro-step</p>
+                  <p className="mt-2 text-base text-[#F0F0EE]">
                     Open the doc and write three bad headlines. Bad ones. Two minutes.
                   </p>
                 </div>
                 <div className="flex gap-2.5 mt-5 flex-wrap">
-                  <span className="rounded-[11px] bg-[#5B4FE9] text-white text-base font-semibold px-[18px] py-3">
+                  <span className="rounded-[11px] bg-[#F0F0EE] text-[#0B0B0D] text-base font-semibold px-[18px] py-3">
                     Start focus · 50m
                   </span>
-                  <span className="rounded-[11px] border border-[#3A362F] text-[#E7E1D6] text-base px-4 py-3">
+                  <span className="rounded-[11px] border border-[#35353C] text-[#F0F0EE] text-base px-4 py-3">
                     Not now, show another
                   </span>
                 </div>
@@ -130,11 +130,11 @@ export default function LandingPage() {
 
       {/* ── The problem ── */}
       <section className="max-w-[1160px] mx-auto px-7 pt-40 sm:pt-48">
-        <p className="font-mono text-2xs tracking-[0.14em] uppercase text-[#6B6459]">The problem</p>
+        <p className="font-mono text-2xs tracking-[0.14em] uppercase text-[#9C9CA4]">The problem</p>
         <h2 className="font-display font-normal mt-4 text-[clamp(32px,5vw,52px)] leading-[1.05] tracking-[-0.02em] max-w-[18ch] text-balance">
-          A founder does not have a <span className="italic text-[#5B4FE9]">task</span> problem.
+          A founder does not have a <span className="text-[#FF8A4C]">task</span> problem.
         </h2>
-        <p className="mt-5 text-lg leading-[1.55] text-[#57514A] max-w-[620px]">
+        <p className="mt-5 text-lg leading-[1.55] text-[#9C9CA4] max-w-[620px]">
           They have an open-loop problem. A worry, a decision they keep deferring, a person they owe
           a reply, a number they have not looked at. Tasks are only the loops that already got named.
         </p>
@@ -145,10 +145,10 @@ export default function LandingPage() {
             { n: "02", t: "Wrong direction", b: "Completion percentage rewards adding small tasks. It rises when you take on more, which is the opposite of relief." },
             { n: "03", t: "Wrong assumption", b: "A day has capacity, not slots. Burnout is an overcommit bug, so it gets fixed at the input." },
           ].map((c) => (
-            <div key={c.n} className="rounded-[18px] border border-[#E6DFD2] bg-[#FFFDF8] p-6">
-              <p className="font-mono text-2xs text-[#5B4FE9]">{c.n}</p>
+            <div key={c.n} className="rounded-[18px] border border-[#26262B] bg-[#141417] p-6">
+              <p className="font-mono text-2xs text-[#F0F0EE]">{c.n}</p>
               <h3 className="mt-3 text-lg font-semibold">{c.t}</h3>
-              <p className="mt-2 text-base leading-[1.55] text-[#605A50]">{c.b}</p>
+              <p className="mt-2 text-base leading-[1.55] text-[#9C9CA4]">{c.b}</p>
             </div>
           ))}
         </div>
@@ -156,16 +156,16 @@ export default function LandingPage() {
 
       {/* ── Mechanics ── */}
       <section className="max-w-[1160px] mx-auto px-7 pt-40">
-        <p className="font-mono text-2xs tracking-[0.14em] uppercase text-[#6B6459]">What is actually in it</p>
+        <p className="font-mono text-2xs tracking-[0.14em] uppercase text-[#9C9CA4]">What is actually in it</p>
         <h2 className="font-display font-normal mt-4 text-[clamp(32px,5vw,52px)] leading-[1.05] tracking-[-0.02em] max-w-[20ch] text-balance">
-          Strip these out and it is a <span className="italic text-[#5B4FE9]">to-do app</span>.
+          Strip these out and it is a <span className="text-[#FF8A4C]">to-do app</span>.
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-12">
           {MECHANICS.map((m) => (
-            <div key={m.title} className="rounded-[18px] border border-[#E6DFD2] bg-[#FFFDF8] p-6">
+            <div key={m.title} className="rounded-[18px] border border-[#26262B] bg-[#141417] p-6">
               <h3 className="text-lg font-semibold">{m.title}</h3>
-              <p className="mt-2 text-base leading-[1.55] text-[#605A50]">{m.body}</p>
+              <p className="mt-2 text-base leading-[1.55] text-[#9C9CA4]">{m.body}</p>
             </div>
           ))}
         </div>
@@ -173,44 +173,44 @@ export default function LandingPage() {
 
       {/* ── Free beta ── */}
       <section className="max-w-[1160px] mx-auto px-7 pt-40">
-        <div className="rounded-[24px] border border-[#E0D9CB] bg-[#FFFDF8] p-8 sm:p-12">
-          <p className="font-mono text-2xs tracking-[0.14em] uppercase text-[#6B6459]">The deal</p>
+        <div className="rounded-[24px] border border-[#26262B] bg-[#141417] p-8 sm:p-12">
+          <p className="font-mono text-2xs tracking-[0.14em] uppercase text-[#9C9CA4]">The deal</p>
           <h2 className="font-display font-normal mt-4 text-[clamp(30px,4.5vw,46px)] leading-[1.05] tracking-[-0.02em] max-w-[16ch] text-balance">
-            Free while we build. <span className="italic text-[#5B4FE9]">Honestly</span> free.
+            Free while we build. <span className="text-[#FF8A4C]">Honestly</span> free.
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-7 mt-10">
             {DEAL.map((d) => (
               <div key={d.title}>
                 <h3 className="text-lg font-semibold">{d.title}</h3>
-                <p className="mt-1.5 text-base leading-[1.55] text-[#605A50]">{d.body}</p>
+                <p className="mt-1.5 text-base leading-[1.55] text-[#9C9CA4]">{d.body}</p>
               </div>
             ))}
           </div>
 
           <div className="flex flex-wrap items-center gap-3 mt-10">
             <Link href="/signup"
-              className="inline-flex items-center gap-2 bg-[#5B4FE9] hover:bg-[#4A3EDA] text-white text-lg font-medium px-6 py-3.5 rounded-[13px] transition-colors focus-ring">
+              className="inline-flex items-center gap-2 bg-[#F0F0EE] hover:bg-[#FFFFFF] text-[#0B0B0D] text-lg font-medium px-6 py-3.5 rounded-[13px] transition-colors focus-ring">
               Join the free beta
               <span aria-hidden="true">→</span>
             </Link>
-            <span className="font-mono text-xs text-[#605A50]">web, iOS and Android · synced</span>
+            <span className="font-mono text-xs text-[#9C9CA4]">web, iOS and Android · synced</span>
           </div>
         </div>
       </section>
 
       {/* ── Footer ── */}
       <footer className="max-w-[1160px] mx-auto px-7 pt-24 pb-16">
-        <div className="pt-8 border-t border-[#E6DFD2] flex flex-wrap items-center justify-between gap-4">
+        <div className="pt-8 border-t border-[#26262B] flex flex-wrap items-center justify-between gap-4">
           <span className="font-display text-lg">
-            Founder<span className="italic text-[#5B4FE9]">OS</span>
+            Founder<span className="text-[#FF8A4C]">OS</span>
           </span>
-          <p className="text-sm text-[#605A50] max-w-[46ch]">
+          <p className="text-sm text-[#9C9CA4] max-w-[46ch]">
             Built to end the day with less in your head than it started.
           </p>
           <div className="flex items-center gap-4 text-sm">
-            <Link href="/login" className="text-[#605A50] hover:text-[#171512] transition-colors">Sign in</Link>
-            <Link href="/signup" className="text-[#605A50] hover:text-[#171512] transition-colors">Join the beta</Link>
+            <Link href="/login" className="text-[#9C9CA4] hover:text-[#F0F0EE] transition-colors">Sign in</Link>
+            <Link href="/signup" className="text-[#9C9CA4] hover:text-[#F0F0EE] transition-colors">Join the beta</Link>
           </div>
         </div>
       </footer>

@@ -40,23 +40,23 @@ export function CaptureDemo() {
   return (
     <div
       aria-label="Quick capture demonstration"
-      className="absolute -right-2 sm:-right-4 -bottom-10 w-[360px] max-w-[82vw] rounded-2xl border border-[#E0D9CB] bg-[#FFFDF8] p-[18px]"
+      className="absolute -right-2 sm:-right-4 -bottom-10 w-[360px] max-w-[82vw] rounded-2xl border border-[#26262B] bg-[#141417] p-[18px]"
       style={{ boxShadow: "0 28px 50px -28px rgba(23,21,18,0.5)" }}
     >
-      <div className="flex items-center gap-2 font-mono text-2xs tracking-[0.1em] uppercase text-[#6B6459]">
-        <span className="w-1.5 h-1.5 rounded-full bg-[#5B4FE9]" />
+      <div className="flex items-center gap-2 font-mono text-2xs tracking-[0.1em] uppercase text-[#9C9CA4]">
+        <span className="w-1.5 h-1.5 rounded-full bg-[#F0F0EE]" />
         Quick capture · ⌘K
       </div>
 
-      <div className="mt-3 rounded-[11px] border border-[#E6DFD2] bg-[#FBF8F2] px-3 py-3 text-base leading-[1.4] min-h-[62px] text-[#171512]">
+      <div className="mt-3 rounded-[11px] border border-[#26262B] bg-[#101013] px-3 py-3 text-base leading-[1.4] min-h-[62px] text-[#F0F0EE]">
         {DEMO.slice(0, n)}
-        <span className="inline-block w-0.5 h-4 -mb-0.5 bg-[#5B4FE9] animate-[caret_1s_steps(1)_infinite]" />
+        <span className="inline-block w-0.5 h-4 -mb-0.5 bg-[#F0F0EE] animate-[caret_1s_steps(1)_infinite]" />
       </div>
 
       <div className="flex flex-wrap gap-1.5 mt-3 min-h-[26px]">
         {CHIPS.slice(0, chips).map((c) => (
           <span key={c.kind}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-[#EFECFE] text-[#4A3EDA] animate-rise">
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-[#1B1B1F] text-[#FFFFFF] animate-rise">
             <span className="font-mono text-2xs opacity-70">{c.kind}</span>
             {c.text}
           </span>

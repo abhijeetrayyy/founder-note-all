@@ -32,7 +32,7 @@ export function ShutdownClient({
   const [rows] = React.useState(() => open);
 
   return (
-    <div className="min-h-screen bg-[#171512] text-[#FBF8F2] flex flex-col">
+    <div className="min-h-screen bg-[#141417] text-[#F0F0EE] flex flex-col">
       <header className="flex items-center justify-between px-6 py-5 gap-4">
         <nav className="flex items-center gap-2" aria-label="Shutdown steps">
           {STEPS.map((label, i) => (
@@ -44,11 +44,11 @@ export function ShutdownClient({
               title={label}
               className={cn(
                 "h-1.5 w-10 rounded-full transition-colors focus-ring",
-                i === step ? "bg-[#A79DFF]" : i < step ? "bg-[#5B4FE9]/60 hover:bg-[#A79DFF]" : "bg-[#302C25] hover:bg-[#3B352C]",
+                i === step ? "bg-[#F0F0EE]" : i < step ? "bg-[#F0F0EE]/60 hover:bg-[#F0F0EE]" : "bg-[#26262B] hover:bg-[#35353C]",
               )}
             />
           ))}
-          <span className="ml-2 font-mono text-2xs text-[#8B8272]">
+          <span className="ml-2 font-mono text-2xs text-[#6E6E77]">
             {/* Step 3 is the closing screen, which sits outside the count —
                 without this it read "4 of 3". */}
             {step < STEPS.length ? `${step + 1} of ${STEPS.length} · ${STEPS[step]}` : "Day closed"}
@@ -58,11 +58,11 @@ export function ShutdownClient({
         <div className="flex items-center gap-3">
           {step > 0 && step < 3 && (
             <button onClick={() => setStep((s) => s - 1)}
-              className="text-xs text-[#A79488] hover:text-[#FBF8F2] transition-colors focus-ring rounded">
+              className="text-xs text-[#9C9CA4] hover:text-[#F0F0EE] transition-colors focus-ring rounded">
               ← Back
             </button>
           )}
-          <Link href="/today" className="text-xs text-[#A79488] hover:text-[#FBF8F2] transition-colors">
+          <Link href="/today" className="text-xs text-[#9C9CA4] hover:text-[#F0F0EE] transition-colors">
             Leave — nothing is lost
           </Link>
         </div>
@@ -87,13 +87,13 @@ function Shipped({ shipped, name, hasOpen, onNext }: {
   return (
     <div className="space-y-7 animate-fade-in">
       <div>
-        <p className="font-mono text-2xs tracking-[0.2em] uppercase text-[#8B8272]">Step 1 · nothing to fill in</p>
+        <p className="font-mono text-2xs tracking-[0.2em] uppercase text-[#6E6E77]">Step 1 · nothing to fill in</p>
         <h1 className="mt-3 font-display text-4xl leading-[1.1]">
           {shipped.length === 0
             ? `Nothing shipped today, ${name}.`
             : `You did ${shipped.length} ${shipped.length === 1 ? "thing" : "things"} today.`}
         </h1>
-        <p className="mt-2 text-base text-[#A79488]">
+        <p className="mt-2 text-base text-[#9C9CA4]">
           {shipped.length === 0
             ? "Some days hold the line instead. That still counts as a day worked."
             : "Assembled from what you actually closed — often more than you remember."}
@@ -104,15 +104,15 @@ function Shipped({ shipped, name, hasOpen, onNext }: {
         <ul className="space-y-2">
           {shipped.map((t) => (
             <li key={t.id} className="flex items-start gap-3 text-base">
-              <span aria-hidden="true" className="mt-1.5 w-1.5 h-1.5 rounded-full bg-[#4FCBB6] flex-none" />
-              <span className="text-[#E8E2D8]">{t.title}</span>
+              <span aria-hidden="true" className="mt-1.5 w-1.5 h-1.5 rounded-full bg-[#5EE0B0] flex-none" />
+              <span className="text-[#F0F0EE]">{t.title}</span>
             </li>
           ))}
         </ul>
       )}
 
       <button onClick={onNext}
-        className="h-12 px-6 rounded-xl bg-[#FBF8F2] text-[#171512] font-semibold text-sm hover:opacity-90 transition-opacity focus-ring">
+        className="h-12 px-6 rounded-xl bg-[#F0F0EE] text-[#0B0B0D] font-semibold text-sm hover:opacity-90 transition-opacity focus-ring">
         {hasOpen ? "Next — park what is open" : "Next"}
       </button>
     </div>
@@ -125,12 +125,12 @@ function Park({ rows, onNext }: { rows: Task[]; onNext: () => void }) {
     return (
       <div className="space-y-7 animate-fade-in">
         <div>
-          <p className="font-mono text-2xs tracking-[0.2em] uppercase text-[#8B8272]">Step 2</p>
+          <p className="font-mono text-2xs tracking-[0.2em] uppercase text-[#6E6E77]">Step 2</p>
           <h1 className="mt-3 font-display text-4xl leading-[1.1]">Nothing is left open.</h1>
-          <p className="mt-2 text-base text-[#A79488]">There is nothing to put down, because you already did.</p>
+          <p className="mt-2 text-base text-[#9C9CA4]">There is nothing to put down, because you already did.</p>
         </div>
         <button onClick={onNext}
-          className="h-12 px-6 rounded-xl bg-[#FBF8F2] text-[#171512] font-semibold text-sm hover:opacity-90 transition-opacity focus-ring">
+          className="h-12 px-6 rounded-xl bg-[#F0F0EE] text-[#0B0B0D] font-semibold text-sm hover:opacity-90 transition-opacity focus-ring">
           Next — tomorrow&apos;s one thing
         </button>
       </div>
@@ -140,9 +140,9 @@ function Park({ rows, onNext }: { rows: Task[]; onNext: () => void }) {
   return (
     <div className="space-y-7 animate-fade-in">
       <div>
-        <p className="font-mono text-2xs tracking-[0.2em] uppercase text-[#8B8272]">Step 2 · optional</p>
+        <p className="font-mono text-2xs tracking-[0.2em] uppercase text-[#6E6E77]">Step 2 · optional</p>
         <h1 className="mt-3 font-display text-4xl leading-[1.1]">{rows.length} still open.</h1>
-        <p className="mt-2 text-base text-[#A79488]">
+        <p className="mt-2 text-base text-[#9C9CA4]">
           Giving each one its next move is what lets your head put it down. Tap to accept — you can undo any of them.
         </p>
       </div>
@@ -152,7 +152,7 @@ function Park({ rows, onNext }: { rows: Task[]; onNext: () => void }) {
       </div>
 
       <button onClick={onNext}
-        className="h-12 px-6 rounded-xl bg-[#FBF8F2] text-[#171512] font-semibold text-sm hover:opacity-90 transition-opacity focus-ring">
+        className="h-12 px-6 rounded-xl bg-[#F0F0EE] text-[#0B0B0D] font-semibold text-sm hover:opacity-90 transition-opacity focus-ring">
         Next — tomorrow&apos;s one thing
       </button>
     </div>
@@ -182,39 +182,39 @@ function ParkRow({ task }: { task: Task }) {
 
   return (
     <div className={cn("rounded-xl border p-3.5 transition-colors",
-      state === "saved" ? "border-[#2C4A44] bg-[#14302C]" : "border-[#302C25] bg-[#201D18]")}>
-      <p className="text-sm font-semibold text-[#FBF8F2]">{task.title}</p>
+      state === "saved" ? "border-[#35353C] bg-[#1B1B1F]" : "border-[#26262B] bg-[#1B1B1F]")}>
+      <p className="text-sm font-semibold text-[#F0F0EE]">{task.title}</p>
 
       {state === "editing" ? (
         <div className="mt-2.5 flex gap-2">
           <input value={move} onChange={(e) => setMove(e.target.value)} autoFocus
             onKeyDown={(e) => { if (e.key === "Enter") accept(); if (e.key === "Escape") setState("idle"); }}
-            className="flex-1 h-9 px-3 rounded-lg bg-[#171512] border border-[#3B352C] text-sm text-[#FBF8F2] focus-ring" />
+            className="flex-1 h-9 px-3 rounded-lg bg-[#141417] border border-[#35353C] text-sm text-[#F0F0EE] focus-ring" />
           <button onClick={accept} disabled={busy}
-            className="h-9 px-3 rounded-lg bg-[#A79DFF] text-[#171512] text-xs font-bold focus-ring disabled:opacity-50">Save</button>
+            className="h-9 px-3 rounded-lg bg-[#F0F0EE] text-[#0B0B0D] text-xs font-bold focus-ring disabled:opacity-50">Save</button>
           <button onClick={() => setState("idle")}
-            className="h-9 px-2 rounded-lg text-[#8B8272] text-xs hover:text-[#FBF8F2] focus-ring">Cancel</button>
+            className="h-9 px-2 rounded-lg text-[#6E6E77] text-xs hover:text-[#F0F0EE] focus-ring">Cancel</button>
         </div>
       ) : (
         <div className="mt-2 flex items-center gap-2 flex-wrap">
-          <span className="font-mono text-2xs uppercase tracking-wider text-[#8B8272]">Next</span>
+          <span className="font-mono text-2xs uppercase tracking-wider text-[#6E6E77]">Next</span>
           <span className="text-sm text-[#C9C0B3] flex-1 min-w-[8rem]">{move}</span>
           {state === "saved" ? (
             <>
-              <span className="text-2xs font-mono uppercase tracking-wider text-[#4FCBB6]">parked</span>
+              <span className="text-2xs font-mono uppercase tracking-wider text-[#5EE0B0]">parked</span>
               <button onClick={undo} disabled={busy}
-                className="h-8 px-2.5 rounded-lg text-[#8B8272] text-xs font-semibold hover:text-[#FBF8F2] transition-colors focus-ring disabled:opacity-50">
+                className="h-8 px-2.5 rounded-lg text-[#6E6E77] text-xs font-semibold hover:text-[#F0F0EE] transition-colors focus-ring disabled:opacity-50">
                 Undo
               </button>
             </>
           ) : (
             <>
               <button onClick={accept} disabled={busy}
-                className="h-8 px-3 rounded-lg bg-[#302C25] text-[#FBF8F2] text-xs font-semibold hover:bg-[#3B352C] transition-colors focus-ring disabled:opacity-50">
+                className="h-8 px-3 rounded-lg bg-[#26262B] text-[#F0F0EE] text-xs font-semibold hover:bg-[#35353C] transition-colors focus-ring disabled:opacity-50">
                 Yes
               </button>
               <button onClick={() => setState("editing")}
-                className="h-8 px-2.5 rounded-lg text-[#8B8272] text-xs font-semibold hover:text-[#FBF8F2] transition-colors focus-ring">
+                className="h-8 px-2.5 rounded-lg text-[#6E6E77] text-xs font-semibold hover:text-[#F0F0EE] transition-colors focus-ring">
                 Change
               </button>
             </>
@@ -248,9 +248,9 @@ function Tomorrow({ rows, onDone }: { rows: Task[]; onDone: () => void }) {
   return (
     <div className="space-y-7 animate-fade-in">
       <div>
-        <p className="font-mono text-2xs tracking-[0.2em] uppercase text-[#8B8272]">Step 3 · optional</p>
+        <p className="font-mono text-2xs tracking-[0.2em] uppercase text-[#6E6E77]">Step 3 · optional</p>
         <h1 className="mt-3 font-display text-4xl leading-[1.1]">Tomorrow&apos;s one thing.</h1>
-        <p className="mt-2 text-base text-[#A79488]">
+        <p className="mt-2 text-base text-[#9C9CA4]">
           Pick it now, while you have the context, so the morning is not a decision. Tap again to unpick.
         </p>
       </div>
@@ -261,18 +261,18 @@ function Tomorrow({ rows, onDone }: { rows: Task[]; onDone: () => void }) {
             <button key={t.id} onClick={() => choose(t.id)} disabled={busy}
               aria-pressed={picked === t.id}
               className={cn("w-full text-left rounded-xl border p-3.5 text-sm transition-colors focus-ring disabled:opacity-60 flex items-center gap-3",
-                picked === t.id ? "border-[#A79DFF] bg-[#241F3D] text-[#FBF8F2]" : "border-[#302C25] bg-[#201D18] text-[#C9C0B3] hover:border-[#3B352C]")}>
+                picked === t.id ? "border-[#F0F0EE] bg-[#1B1B1F] text-[#F0F0EE]" : "border-[#26262B] bg-[#1B1B1F] text-[#C9C0B3] hover:border-[#35353C]")}>
               <span className="flex-1">{t.title}</span>
-              {picked === t.id && <span className="font-mono text-2xs uppercase tracking-wider text-[#A79DFF]">chosen · tap to undo</span>}
+              {picked === t.id && <span className="font-mono text-2xs uppercase tracking-wider text-[#F0F0EE]">chosen · tap to undo</span>}
             </button>
           ))}
         </div>
       ) : (
-        <p className="text-sm text-[#A79488]">Nothing open to carry forward. Tomorrow starts clean.</p>
+        <p className="text-sm text-[#9C9CA4]">Nothing open to carry forward. Tomorrow starts clean.</p>
       )}
 
       <button onClick={onDone}
-        className="h-12 px-6 rounded-xl bg-[#FBF8F2] text-[#171512] font-semibold text-sm hover:opacity-90 transition-opacity focus-ring">
+        className="h-12 px-6 rounded-xl bg-[#F0F0EE] text-[#0B0B0D] font-semibold text-sm hover:opacity-90 transition-opacity focus-ring">
         {picked ? "Done — close the day" : "Skip — close the day"}
       </button>
     </div>
@@ -286,18 +286,18 @@ function Closed({ name, onBack }: { name: string; onBack: () => void }) {
   return (
     <div className="text-center animate-fade-in">
       <h1 className="font-display text-4xl leading-[1.1]">That is the day, {name}.</h1>
-      <p className="mt-4 text-base text-[#A79488]">
+      <p className="mt-4 text-base text-[#9C9CA4]">
         Everything open has a next move. Tomorrow has its one thing.
       </p>
-      <p className="mt-10 text-sm text-[#6E675C]">Close the laptop.</p>
+      <p className="mt-10 text-sm text-[#6E6E77]">Close the laptop.</p>
 
       <div className="mt-12 flex items-center justify-center gap-5">
         <button onClick={onBack}
-          className="text-xs text-[#5C554A] hover:text-[#A79488] transition-colors focus-ring rounded">
+          className="text-xs text-[#6E6E77] hover:text-[#9C9CA4] transition-colors focus-ring rounded">
           ← Not finished yet
         </button>
         <Link href="/today"
-          className="text-xs text-[#5C554A] hover:text-[#A79488] transition-colors">
+          className="text-xs text-[#6E6E77] hover:text-[#9C9CA4] transition-colors">
           Back to today
         </Link>
       </div>

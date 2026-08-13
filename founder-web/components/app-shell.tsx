@@ -10,12 +10,11 @@ import { EMPTY_PRESSURE, type Pressure } from "@/lib/loops";
 import type { UserProfile } from "@/lib/supabase/types";
 
 /**
- * The app shell, built to the handoff.
+ * The app shell.
  *
- * 252px rail on #FBF8F2 against a #F6F3EC ground, nav grouped by loop stage,
- * a 60px sticky header carrying the screen title and the energy chip. Measures,
- * radii and type sizes are taken from `FounderOS App v2.dc.html` rather than
- * approximated.
+ * A recessed rail against the ground, hairline separated, with the screen
+ * title and its purpose line in a sticky header. Nothing here is tinted —
+ * the active item is a raised surface, not a coloured one.
  */
 
 type NavItem = { href: string; label: string; icon: React.FC<IconProps>; badge?: string; hint: string };
@@ -102,14 +101,14 @@ export function AppShell({ children, profile, pressure, energy = 1, onQuickAdd }
   const hint = key ? ROUTE_HINTS[key] ?? "" : "";
 
   return (
-    <div className="flex min-h-screen bg-[#F6F3EC] text-[#171512]">
-      <aside className="hidden lg:flex w-[252px] flex-none border-r border-[#E6DFD2] bg-[#FBF8F2] h-screen sticky top-0 flex-col">
+    <div className="flex min-h-screen bg-[#0B0B0D] text-[#F0F0EE]">
+      <aside className="hidden lg:flex w-[252px] flex-none border-r border-[#26262B] bg-[#101013] h-screen sticky top-0 flex-col">
         {/* The wordmark is the mark. A lone "F" in a coloured tile is a
             placeholder pretending to be a logo — it says nothing the word next
             to it does not already say. */}
         <Link href="/today" className="h-[60px] flex items-center px-[18px] focus-ring">
-          <span className="font-display text-2xl tracking-[-0.015em] text-[#171512]">
-            Founder<span className="italic text-[#5B4FE9]">OS</span>
+          <span className="font-display text-2xl tracking-[-0.015em] text-[#F0F0EE]">
+            Founder<span className="text-[#FF8A4C]">OS</span>
           </span>
         </Link>
 
@@ -123,10 +122,10 @@ export function AppShell({ children, profile, pressure, energy = 1, onQuickAdd }
           {NAV.map((g) => <NavGroup key={g.label} group={g} pathname={pathname} />)}
         </nav>
 
-        <div className="p-3.5 border-t border-[#E6DFD2] flex items-center gap-2.5">
+        <div className="p-3.5 border-t border-[#26262B] flex items-center gap-2.5">
           <UserBadge profile={profile} />
           <form action={signOut} className="flex">
-            <button type="submit" aria-label="Sign out" className="text-[#6B6459] hover:text-[#171512] transition-colors focus-ring rounded">
+            <button type="submit" aria-label="Sign out" className="text-[#9C9CA4] hover:text-[#F0F0EE] transition-colors focus-ring rounded">
               <LogOutIcon className="w-[15px] h-[15px]" />
             </button>
           </form>
@@ -134,15 +133,15 @@ export function AppShell({ children, profile, pressure, energy = 1, onQuickAdd }
       </aside>
 
       <main className="flex-1 min-w-0 flex flex-col">
-        <header className="h-[60px] flex-none border-b border-[#E6DFD2] bg-[#F6F3EC]/[0.86] backdrop-blur-[10px] sticky top-0 z-20 flex items-center justify-between px-5 sm:px-7 gap-5">
+        <header className="h-[60px] flex-none border-b border-[#26262B] bg-[#0B0B0D]/[0.86] backdrop-blur-[10px] sticky top-0 z-20 flex items-center justify-between px-5 sm:px-7 gap-5">
           <div className="flex items-baseline gap-3 min-w-0">
-            <button onClick={() => setMenuOpen(true)} className="lg:hidden -ml-1 mr-1 text-[#6B6459] focus-ring rounded" aria-label="Menu">
+            <button onClick={() => setMenuOpen(true)} className="lg:hidden -ml-1 mr-1 text-[#9C9CA4] focus-ring rounded" aria-label="Menu">
               <MenuIcon className="w-5 h-5" />
             </button>
             <h1 className="font-display text-2xl leading-none truncate">{title}</h1>
             {/* What this screen is for, in one line, always visible. */}
-            {hint && <span className="hidden md:block text-xs text-[#605A50] truncate">{hint}</span>}
-            {meta && <span className="hidden sm:block font-mono text-2xs text-[#6B6459] truncate">{meta}</span>}
+            {hint && <span className="hidden md:block text-xs text-[#9C9CA4] truncate">{hint}</span>}
+            {meta && <span className="hidden sm:block font-mono text-2xs text-[#9C9CA4] truncate">{meta}</span>}
           </div>
           <EnergyChip energy={energy} />
         </header>
@@ -150,14 +149,14 @@ export function AppShell({ children, profile, pressure, energy = 1, onQuickAdd }
         <div className="flex-1 overflow-y-auto pb-24 lg:pb-0">{children}</div>
 
         <nav className="lg:hidden fixed bottom-4 left-4 right-4 z-40 safe-bottom">
-          <div className="bg-[#FFFDF8] border border-[#E0D9CB] rounded-2xl px-2 py-1 flex items-center justify-around shadow-active mx-auto max-w-sm">
+          <div className="bg-[#141417] border border-[#26262B] rounded-2xl px-2 py-1 flex items-center justify-around shadow-active mx-auto max-w-sm">
             <MobileLink href="/today" label="Today" icon={SunIcon} pathname={pathname} />
             <MobileLink href="/inbox" label="Triage" icon={InboxIcon} pathname={pathname} />
-            <button onClick={onQuickAdd} className="flex items-center justify-center w-12 h-12 -mt-6 rounded-full bg-[#5B4FE9] shadow-glow-strong focus-ring" aria-label="Capture">
+            <button onClick={onQuickAdd} className="flex items-center justify-center w-12 h-12 -mt-6 rounded-full bg-[#F0F0EE] shadow-glow-strong focus-ring" aria-label="Capture">
               <PlusIcon className="w-5 h-5 text-white" />
             </button>
             <MobileLink href="/review" label="Review" icon={ActivityIcon} pathname={pathname} />
-            <button onClick={() => setMenuOpen(true)} className="flex items-center justify-center w-12 h-12 focus-ring rounded-xl text-[#6B6459]" aria-label="More">
+            <button onClick={() => setMenuOpen(true)} className="flex items-center justify-center w-12 h-12 focus-ring rounded-xl text-[#9C9CA4]" aria-label="More">
               <MenuIcon className="w-5 h-5" />
             </button>
           </div>
@@ -177,7 +176,7 @@ export function AppShell({ children, profile, pressure, energy = 1, onQuickAdd }
 function CaptureButton({ onClick }: { onClick: () => void }) {
   return (
     <button onClick={onClick}
-      className="w-full h-[42px] rounded-xl bg-[#5B4FE9] hover:bg-[#4A3EDA] text-white text-base font-semibold flex items-center justify-center gap-2 transition-colors focus-ring"
+      className="w-full h-[42px] rounded-xl bg-[#F0F0EE] hover:bg-[#FFFFFF] text-[#0B0B0D] text-base font-semibold flex items-center justify-center gap-2 transition-colors focus-ring"
       style={{ boxShadow: "0 8px 18px -10px rgba(91,79,233,0.9)" }}>
       <PlusIcon className="w-[17px] h-[17px]" />
       Capture
@@ -214,22 +213,22 @@ function PressureCard({ pressure }: { pressure: Pressure }) {
   }, [needsAnswer]);
 
   return (
-    <div className="mx-3.5 mb-3.5 p-3.5 rounded-[13px] bg-[#F1EDE3] border border-[#E6DFD2]">
+    <div className="mx-3.5 mb-3.5 p-3.5 rounded-[13px] bg-[#1B1B1F] border border-[#26262B]">
       <div className="flex items-baseline justify-between gap-2.5">
-        <p className="font-mono text-2xs tracking-[0.14em] uppercase text-[#6B6459]">Needs an answer</p>
+        <p className="font-mono text-2xs tracking-[0.14em] uppercase text-[#9C9CA4]">Needs an answer</p>
         {dropped > 0
-          ? <p className="font-mono text-2xs text-[#0E8C7E] animate-relieve">−{dropped}</p>
-          : owed > 0 && <p className="font-mono text-2xs text-[#D9552F]">{owed} owed</p>}
+          ? <p className="font-mono text-2xs text-[#5EE0B0] animate-relieve">−{dropped}</p>
+          : owed > 0 && <p className="font-mono text-2xs text-[#FF8A4C]">{owed} owed</p>}
       </div>
       <p key={needsAnswer}
         className={cn("mt-1.5 font-mono text-3xl leading-none tracking-[-0.02em]",
-          dropped > 0 ? "text-[#0E8C7E] animate-relieve" : "text-[#171512]")}>
+          dropped > 0 ? "text-[#5EE0B0] animate-relieve" : "text-[#F0F0EE]")}>
         {needsAnswer}
       </p>
-      <div className="h-[5px] rounded-full bg-[#E1DACB] mt-[11px] overflow-hidden">
-        <div className="h-[5px] rounded-full bg-[#5B4FE9] transition-all duration-700 ease-out" style={{ width: `${pct}%` }} />
+      <div className="h-[5px] rounded-full bg-[#26262B] mt-[11px] overflow-hidden">
+        <div className="h-[5px] rounded-full bg-[#F0F0EE] transition-all duration-700 ease-out" style={{ width: `${pct}%` }} />
       </div>
-      <p className="mt-[9px] text-2xs leading-[1.45] text-[#605A50]">
+      <p className="mt-[9px] text-2xs leading-[1.45] text-[#9C9CA4]">
         {needsAnswer === 0
           ? "Nothing is waiting on you."
           : `${pressure.rotting_count} rotting · ${pressure.aging_count} aging · ${pressure.unclear_count} with no next move`}
@@ -241,7 +240,7 @@ function PressureCard({ pressure }: { pressure: Pressure }) {
 function NavGroup({ group, pathname, onClick }: { group: NavGroupDef; pathname: string; onClick?: () => void }) {
   return (
     <div className="flex flex-col gap-0.5">
-      <p className="mb-[5px] px-2.5 font-mono text-2xs tracking-[0.16em] uppercase text-[#6B6459]">{group.label}</p>
+      <p className="mb-[5px] px-2.5 font-mono text-2xs tracking-[0.16em] uppercase text-[#9C9CA4]">{group.label}</p>
       {group.items.map((it) => {
         const active = pathname === it.href || pathname.startsWith(`${it.href}/`);
         return (
@@ -249,11 +248,11 @@ function NavGroup({ group, pathname, onClick }: { group: NavGroupDef; pathname: 
             title={it.hint}
             className={cn(
               "w-full flex items-center gap-[11px] px-2.5 py-[9px] rounded-[10px] text-sm transition-colors focus-ring",
-              active ? "bg-[#EFECFE] text-[#4A3EDA] font-semibold" : "text-[#6B6459] font-medium hover:bg-[#F1EDE3]",
+              active ? "bg-[#1B1B1F] text-[#FFFFFF] font-semibold" : "text-[#9C9CA4] font-medium hover:bg-[#1B1B1F]",
             )}>
             <it.icon className="w-[17px] h-[17px] flex-none" />
             <span className="truncate">{it.label}</span>
-            {it.badge && <span className="ml-auto font-mono text-2xs text-[#6B6459]">{it.badge}</span>}
+            {it.badge && <span className="ml-auto font-mono text-2xs text-[#9C9CA4]">{it.badge}</span>}
           </Link>
         );
       })}
@@ -265,7 +264,7 @@ function MobileLink({ href, label, icon: Icon, pathname }: { href: string; label
   const active = pathname === href || pathname.startsWith(`${href}/`);
   return (
     <Link href={href} aria-label={label}
-      className={cn("flex items-center justify-center w-12 h-12 rounded-xl transition-colors focus-ring", active ? "text-[#5B4FE9]" : "text-[#6B6459]")}>
+      className={cn("flex items-center justify-center w-12 h-12 rounded-xl transition-colors focus-ring", active ? "text-[#F0F0EE]" : "text-[#9C9CA4]")}>
       <Icon className="w-5 h-5" />
     </Link>
   );
@@ -276,10 +275,10 @@ function UserBadge({ profile }: { profile: UserProfile | null }) {
   const initials = name.split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase()).join("") || "F";
   return (
     <>
-      <span className="w-8 h-8 rounded-full bg-[#DCD8FC] text-[#4A3EDA] flex items-center justify-center text-sm font-semibold flex-none">{initials}</span>
+      <span className="w-8 h-8 rounded-full bg-[#26262B] text-[#FFFFFF] flex items-center justify-center text-sm font-semibold flex-none">{initials}</span>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold truncate">{name}</p>
-        <p className="mt-px text-2xs text-[#605A50]">Free plan</p>
+        <p className="mt-px text-2xs text-[#9C9CA4]">Free plan</p>
       </div>
     </>
   );
@@ -289,9 +288,9 @@ function UserBadge({ profile }: { profile: UserProfile | null }) {
  *  which contradicted the picker on Today two panels away. */
 function EnergyChip({ energy }: { energy: number }) {
   const map = [
-    { label: "Admin energy", bg: "#E4F6F2", fg: "#0E8C7E" },
-    { label: "Medium energy", bg: "#E8EFFB", fg: "#2E6BD0" },
-    { label: "Deep energy", bg: "#EFECFE", fg: "#4A3EDA" },
+    { label: "Admin energy", bg: "#1B1B1F", fg: "#5EE0B0" },
+    { label: "Medium energy", bg: "#1B1B1F", fg: "#7FA6D9" },
+    { label: "Deep energy", bg: "#1B1B1F", fg: "#FFFFFF" },
   ];
   const e = map[energy] ?? map[1];
   return (

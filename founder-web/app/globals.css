@@ -7,85 +7,87 @@
 html {
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
-  text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  color-scheme: dark;
 }
 
 body {
-  font-family: var(--font-sans), "Instrument Sans", system-ui, sans-serif;
-  background: #F6F3EC;
-  color: #171512;
+  font-family: var(--font-sans), "IBM Plex Sans", system-ui, sans-serif;
+  background: #0B0B0D;
+  color: #F0F0EE;
   min-height: 100dvh;
-  /* Tighter than prose. This is a tool being scanned, not an article being read. */
   line-height: 1.45;
+  font-size: 13px;
 }
 
-/* Headlines are the serif, and the emphasis word is its italic. That pairing is
-   the single most recognisable thing in the visual system — it is what stops
-   this reading like every other productivity dashboard. */
-.font-display { letter-spacing: -0.02em; }
-h1, h2, h3 { text-wrap: balance; }
+/* Headings are the same grotesk, just tighter and heavier. The old system used
+   a serif here, which is what made every screen read as an article rather than
+   a panel. */
+h1, h2, h3 { letter-spacing: -0.022em; font-weight: 500; text-wrap: balance; }
 
-::selection { background: rgba(91,79,233,0.14); color: #171512; }
+::selection { background: rgba(255,138,76,0.22); color: #FFFFFF; }
 
-::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar { width: 11px; height: 11px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #E0D9CB; border-radius: 99px; border: 3px solid #F6F3EC; }
-::-webkit-scrollbar-thumb:hover { background: #D0C7B5; }
+::-webkit-scrollbar-thumb { background: #26262B; border-radius: 99px; border: 3px solid #0B0B0D; }
+::-webkit-scrollbar-thumb:hover { background: #35353C; }
 
 @layer base {
   * { @apply border-base-border; }
-  body { @apply bg-paper text-foreground; }
+  body { @apply bg-void text-foreground; }
 }
 
 @layer components {
-  /* These kept their names from the old glass theme so every component that
-     already uses them re-skins for free. There is no glass any more: paper has
-     edges, and a real 1px border reads as a considered boundary where a blur
-     reads as an unfinished one. */
-  .glass-ambient {
-    background: #FFFDF8;
-    border: 1px solid #E6DFD2;
-  }
-  .glass-active {
-    background: #FFFDF8;
-    border: 1px solid #DCD3C2;
-    box-shadow: 0 2px 10px rgba(23,21,18,0.05);
-  }
-  .glass-focused {
-    background: #FFFDF8;
-    border: 1px solid #E0D9CB;
-    box-shadow: 0 8px 30px rgba(23,21,18,0.07);
-  }
-  .glass-surface {
-    background: #FBF8F2;
-    border: 1px solid #E6DFD2;
-  }
+  /* Surfaces. These kept their old glass-* names so every component that
+     already uses them re-skins for free — but there is no glass and no paper
+     now, just machined panels separated by hairlines. Depth comes from the
+     border, never from a shadow. */
+  .glass-ambient { background: #141417; border: 1px solid #26262B; }
+  .glass-active  { background: #17171B; border: 1px solid #35353C; }
+  .glass-focused { background: #141417; border: 1px solid #35353C; }
+  .glass-surface { background: #101013; border: 1px solid #26262B; }
 
   .focus-ring {
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-paper;
+    @apply focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-signal focus-visible:ring-offset-2 focus-visible:ring-offset-void;
   }
 
-  /* The all-caps mono micro-label used for every section heading and data tag.
-     The handoff's #A69E90 measures 2.5:1 on paper — well under the 4.5 AA
-     threshold, and worse at 10.5px with letter-spacing. Darkened until it
-     actually reads; it still recedes, it just no longer disappears. */
+  /* Every label and every number is mono. In an instrument, data and its
+     labels share a voice — that is what makes a readout read as a readout. */
   .label-mono {
-    font-family: var(--font-mono), "JetBrains Mono", ui-monospace, monospace;
-    font-size: 10.5px;
+    font-family: var(--font-mono), "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 10px;
     font-weight: 500;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.13em;
     text-transform: uppercase;
-    color: #6B6459;
+    color: #6E6E77;
   }
 
-  /* Dark surfaces, for the moments that are deliberately not paper: focus
-     sessions and shutdown. */
-  .ink-panel {
-    background: #201D18;
-    border: 1px solid #302C25;
-    color: #FBF8F2;
+  /* Inverted fill — the primary action. Ink on ground, no brand colour. */
+  .btn-ink {
+    background: #F0F0EE; color: #0B0B0D;
+    font-weight: 500; border-radius: 6px;
+    transition: background 120ms ease;
+  }
+  .btn-ink:hover { background: #FFFFFF; }
+
+  /* Outlined — everything secondary. */
+  .btn-line {
+    background: transparent; color: #F0F0EE;
+    border: 1px solid #35353C; border-radius: 6px;
+    transition: border-color 120ms ease, background 120ms ease;
+  }
+  .btn-line:hover { border-color: #4A4A53; background: #17171B; }
+
+  .ink-panel { background: #141417; border: 1px solid #26262B; color: #F0F0EE; }
+
+  /* A hairline rule that carries a label — the divider used between sections. */
+  .rule {
+    display: flex; align-items: center; gap: 12px;
+    color: #6E6E77;
+  }
+  .rule::after {
+    content: ""; flex: 1; height: 1px; background: #26262B;
   }
 }
 
@@ -95,69 +97,41 @@ h1, h2, h3 { text-wrap: balance; }
   .safe-bottom { padding-bottom: max(env(safe-area-inset-bottom), 1rem); }
   .safe-top { padding-top: max(env(safe-area-inset-top), 0.5rem); }
   .shimmer-bg {
-    background: linear-gradient(90deg, #F1EDE3 25%, #E6DFD2 50%, #F1EDE3 75%);
+    background: linear-gradient(90deg, #141417 25%, #1B1B1F 50%, #141417 75%);
     background-size: 200% 100%;
     animation: shimmer 2s linear infinite;
   }
-  /* Was a three-stop violet-to-green gradient. A wordmark that changes hue
-     mid-word is decoration; the accent alone is the brand. */
-  .text-gradient { color: #5B4FE9; }
+  .text-gradient { color: #F0F0EE; }
   .number-mono {
-    font-family: var(--font-mono), "JetBrains Mono", ui-monospace, monospace;
-    font-feature-settings: "tnum";
+    font-family: var(--font-mono), "IBM Plex Mono", ui-monospace, monospace;
+    font-feature-settings: "tnum" 1, "zero" 1;
     font-variant-numeric: tabular-nums;
   }
 }
 
-/* ── Feel ──────────────────────────────────────────────────────────────────
-   Small physical responses so the app answers back when it is touched.
-   The rule throughout: acknowledge, never celebrate. A founder closing the
-   thing that has been weighing on them for nine days does not want confetti —
-   they want to watch it actually leave. */
+/* ── Feel ──
+   Acknowledge, never celebrate. Movement is short and mechanical: this is a
+   panel responding, not an interface performing. */
 
-/* Everything clickable gives slightly under the finger. */
-button:not(:disabled), a[href], [role="button"] { transition: transform 120ms cubic-bezier(0.2, 0, 0.2, 1); }
-button:not(:disabled):active, a[href]:active, [role="button"]:active { transform: scale(0.975); }
+button:not(:disabled), a[href], [role="button"] { transition: transform 90ms cubic-bezier(0.2,0,0.2,1), border-color 120ms ease, background 120ms ease, color 120ms ease; }
+button:not(:disabled):active, a[href]:active, [role="button"]:active { transform: scale(0.985); }
 
-/* The tick. Draws itself rather than appearing, which is the difference
-   between a state change and a small moment. */
-@keyframes check-draw {
-  from { stroke-dashoffset: 24; }
-  to   { stroke-dashoffset: 0; }
-}
-.check-draw path {
-  stroke-dasharray: 24;
-  animation: check-draw 260ms cubic-bezier(0.65, 0, 0.35, 1) forwards;
-}
+@keyframes check-draw { from { stroke-dashoffset: 24; } to { stroke-dashoffset: 0; } }
+.check-draw path { stroke-dasharray: 24; animation: check-draw 200ms cubic-bezier(0.65,0,0.35,1) forwards; }
 
-/* A closed loop settles and leaves, instead of blinking out of existence. */
-@keyframes settle {
-  0%   { opacity: 1; transform: translateY(0) scale(1); }
-  35%  { opacity: 1; transform: translateY(-2px) scale(1.004); }
-  100% { opacity: 0; transform: translateY(4px) scale(0.995); }
-}
-.animate-settle { animation: settle 620ms cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+@keyframes settle { 0% { opacity: 1; } 100% { opacity: 0; transform: translateY(2px); } }
+.animate-settle { animation: settle 420ms cubic-bezier(0.4,0,0.2,1) forwards; }
 
-/* A count that has just gone down. Brief, once, then still. */
-@keyframes relieve {
-  0%   { transform: translateY(-3px); opacity: 0; }
-  100% { transform: translateY(0); opacity: 1; }
-}
-.animate-relieve { animation: relieve 380ms cubic-bezier(0.16, 1, 0.3, 1); }
+@keyframes relieve { from { opacity: 0; transform: translateY(-2px); } to { opacity: 1; transform: translateY(0); } }
+.animate-relieve { animation: relieve 300ms cubic-bezier(0.16,1,0.3,1); }
 
-/* Something arriving that the founder did not ask for — used sparingly, and
-   never for anything that demands action. */
-@keyframes rise {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.animate-rise { animation: rise 420ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+@keyframes rise { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+.animate-rise { animation: rise 320ms cubic-bezier(0.16,1,0.3,1) both; }
+.delay-1 { animation-delay: 50ms; }
+.delay-2 { animation-delay: 110ms; }
+.delay-3 { animation-delay: 170ms; }
 
-/* Blinking caret for the landing page's capture demo. */
 @keyframes caret { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
-.delay-1 { animation-delay: 60ms; }
-.delay-2 { animation-delay: 130ms; }
-.delay-3 { animation-delay: 210ms; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

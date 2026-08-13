@@ -103,8 +103,8 @@ export default function OnboardingPage() {
               </div>
               <div className="grid grid-cols-3 gap-2">
                 {[
-                  { value: 0, label: "Admin", color: "#14B8A6", desc: "Quick, low-focus" },
-                  { value: 1, label: "Medium", color: "#3B82F6", desc: "Balanced focus" },
+                  { value: 0, label: "Admin", color: "#5EE0B0", desc: "Quick, low-focus" },
+                  { value: 1, label: "Medium", color: "#7FA6D9", desc: "Balanced focus" },
                   { value: 2, label: "Deep", color: "#8B5CF6", desc: "High-focus" },
                 ].map((opt) => (
                   <button

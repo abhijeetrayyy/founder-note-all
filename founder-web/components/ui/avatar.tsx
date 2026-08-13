@@ -8,7 +8,7 @@ export function Avatar({ name, color, size = 40, className }: { name: string; co
   return (
     <div
       className={cn("rounded-full flex items-center justify-center text-white font-extrabold shrink-0", className)}
-      style={{ width: size, height: size, backgroundColor: color ?? "#5B4FE9", fontSize: size * 0.45 }}
+      style={{ width: size, height: size, backgroundColor: color ?? "#F0F0EE", fontSize: size * 0.45 }}
       aria-label={name}
     >
       {initial}

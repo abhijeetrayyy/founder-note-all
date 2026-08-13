@@ -48,19 +48,19 @@ export function ExtractLoop({ noteTitle }: { noteTitle: string }) {
 
   return (
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-slide-up">
-      <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-[#171512] text-[#FBF8F2] shadow-focused max-w-[min(90vw,32rem)]">
-        <span className="text-sm text-[#B3AB9C] truncate flex-1" title={selection}>
+      <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-[#141417] text-[#F0F0EE] shadow-focused max-w-[min(90vw,32rem)]">
+        <span className="text-sm text-[#9C9CA4] truncate flex-1" title={selection}>
           “{selection}”
         </span>
         <button
           onClick={extract}
           disabled={busy}
-          className="flex-none h-8 px-3.5 rounded-lg bg-[#5B4FE9] hover:bg-[#6E63FF] text-white text-xs font-semibold transition-colors focus-ring disabled:opacity-50"
+          className="flex-none h-8 px-3.5 rounded-lg bg-[#F0F0EE] hover:bg-[#FFFFFF] text-[#0B0B0D] text-xs font-semibold transition-colors focus-ring disabled:opacity-50"
         >
           {busy ? "Capturing…" : "Make it a loop"}
         </button>
       </div>
-      <p className="mt-1.5 text-center font-mono text-2xs text-[#A69E90]">
+      <p className="mt-1.5 text-center font-mono text-2xs text-[#6E6E77]">
         from “{noteTitle || "Untitled"}”
       </p>
     </div>

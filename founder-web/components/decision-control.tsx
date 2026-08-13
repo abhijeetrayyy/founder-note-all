@@ -35,11 +35,11 @@ export function DecisionControl({ task }: { task: Task }) {
   }
 
   return (
-    <div className="rounded-[18px] border border-[#E6DFD2] bg-[#FFFDF8] p-5 space-y-3">
+    <div className="rounded-[18px] border border-[#26262B] bg-[#141417] p-5 space-y-3">
       <div className="flex items-start justify-between gap-3">
         <div>
           <h3 className="text-base font-semibold">Is this a decision?</h3>
-          <p className="mt-0.5 text-xs text-[#605A50] leading-[1.5]">
+          <p className="mt-0.5 text-xs text-[#9C9CA4] leading-[1.5]">
             Decisions are not doable in a focus block, so they survive every triage pass.
           </p>
         </div>
@@ -50,7 +50,7 @@ export function DecisionControl({ task }: { task: Task }) {
           aria-checked={isDecision}
           className={cn(
             "flex-none h-8 px-3.5 rounded-full text-xs font-semibold transition-colors focus-ring disabled:opacity-50",
-            isDecision ? "bg-[#5B4FE9] text-white" : "bg-[#F1EDE3] text-[#6B6459] hover:bg-[#E7E0D2]",
+            isDecision ? "bg-[#F0F0EE] text-[#0B0B0D]" : "bg-[#1B1B1F] text-[#9C9CA4] hover:bg-[#26262B]",
           )}
         >
           {isDecision ? "Decision" : "Task"}
@@ -60,33 +60,33 @@ export function DecisionControl({ task }: { task: Task }) {
       {isDecision && (
         <div className="space-y-3 pt-1">
           <label className="block">
-            <span className="font-mono text-2xs tracking-[0.12em] uppercase text-[#6B6459]">
+            <span className="font-mono text-2xs tracking-[0.12em] uppercase text-[#9C9CA4]">
               When will you know enough?
             </span>
             <input
               type="date"
               value={decideBy}
               onChange={(e) => setDecideBy(e.target.value)}
-              className="mt-1.5 w-full h-10 px-3 rounded-xl border border-[#E0D9CB] bg-[#FBF8F2] text-sm focus-ring"
+              className="mt-1.5 w-full h-10 px-3 rounded-xl border border-[#26262B] bg-[#101013] text-sm focus-ring"
             />
           </label>
 
           <label className="block">
-            <span className="font-mono text-2xs tracking-[0.12em] uppercase text-[#6B6459]">
+            <span className="font-mono text-2xs tracking-[0.12em] uppercase text-[#9C9CA4]">
               What would make this obvious?
             </span>
             <input
               value={unlock}
               onChange={(e) => setUnlock(e.target.value)}
               placeholder="Usually one number or one conversation"
-              className="mt-1.5 w-full h-10 px-3 rounded-xl border border-[#E0D9CB] bg-[#FBF8F2] text-sm focus-ring"
+              className="mt-1.5 w-full h-10 px-3 rounded-xl border border-[#26262B] bg-[#101013] text-sm focus-ring"
             />
           </label>
 
           <button
             onClick={() => save(1)}
             disabled={saving}
-            className="h-9 px-4 rounded-xl bg-[#171512] text-[#FBF8F2] text-sm font-semibold hover:opacity-90 transition-opacity focus-ring disabled:opacity-50"
+            className="h-9 px-4 rounded-xl bg-[#141417] text-[#F0F0EE] text-sm font-semibold hover:opacity-90 transition-opacity focus-ring disabled:opacity-50"
           >
             {saving ? "Saving…" : "Save decision"}
           </button>
