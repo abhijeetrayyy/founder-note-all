@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../models/daily_plan.dart';
 import '../../models/journal_entry.dart';
 import '../../providers/tasks_provider.dart';
 import '../../providers/notes_provider.dart';
@@ -26,7 +27,7 @@ class StatsScreen extends StatelessWidget {
     final today = tasks.todayTasks.length;
     final habitDone = habits.todayStatus.values.where((v) => v).length;
 
-    // MIT completion rate: how many MITs in the last 7 plans are completed
+    // Follow-through: of everything picked in the last 7 plans, how much landed
     final recentPlans = plans.recentPlans.take(7).toList();
     int mitPlanned = 0;
     int mitDone = 0;
@@ -82,7 +83,7 @@ class StatsScreen extends StatelessWidget {
         ]),
 
         const SizedBox(height: 28),
-        // MIT Execution (the headline metric)
+        // Follow-through (the headline metric)
         Container(
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
@@ -94,7 +95,7 @@ class StatsScreen extends StatelessWidget {
             Row(children: [
               const Icon(Icons.wb_sunny_rounded, size: 18, color: AppTheme.primary),
               const SizedBox(width: 6),
-              Text('MIT EXECUTION', style: TextStyle(fontSize: 11, color: AppTheme.primary, fontWeight: FontWeight.w800, letterSpacing: 1.4)),
+              Text('FOLLOW-THROUGH', style: TextStyle(fontSize: 11, color: AppTheme.primary, fontWeight: FontWeight.w800, letterSpacing: 1.4)),
               const Spacer(),
               Text('Last ${recentPlans.length} day${recentPlans.length == 1 ? "" : "s"}', style: TextStyle(fontSize: 11, color: Colors.grey.shade500, fontWeight: FontWeight.w600)),
             ]),
@@ -102,7 +103,7 @@ class StatsScreen extends StatelessWidget {
             Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
               Text('$mitRate%', style: TextStyle(fontSize: 42, fontWeight: FontWeight.w800, height: 1, color: isDark ? Colors.white : const Color(0xFF1A1A2E))),
               const SizedBox(width: 6),
-              Padding(padding: const EdgeInsets.only(bottom: 8), child: Text('MITs completed', style: TextStyle(fontSize: 13, color: Colors.grey.shade600, fontWeight: FontWeight.w600))),
+              Padding(padding: const EdgeInsets.only(bottom: 8), child: Text('picks completed', style: TextStyle(fontSize: 13, color: Colors.grey.shade600, fontWeight: FontWeight.w600))),
             ]),
             const SizedBox(height: 10),
             ClipRRect(
@@ -115,7 +116,7 @@ class StatsScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
-            Text('$mitDone of $mitPlanned MITs across the last ${recentPlans.length} planned days.',
+            Text('$mitDone of $mitPlanned picks across the last ${recentPlans.length} planned days.',
                 style: TextStyle(fontSize: 12, color: Colors.grey.shade500)),
             const SizedBox(height: 16),
             // Per-day mini visualization
@@ -188,7 +189,7 @@ class StatsScreen extends StatelessWidget {
 }
 
 class _MITDayStrip extends StatelessWidget {
-  final List plans;
+  final List<DailyPlan> plans;
   final bool isDark;
   const _MITDayStrip({required this.plans, required this.isDark});
 
@@ -213,25 +214,42 @@ class _MITDayStrip extends StatelessWidget {
   }
 }
 
+/// One day in the strip: how much of what you picked actually landed.
+///
+/// This used to read `done = plan.mitTaskIds.length` — the number of things
+/// CHOSEN — and then paint the day green whenever that was above zero. So a
+/// day where you picked three things and finished none of them looked
+/// identical to a day where you finished all three, and the strip quietly
+/// congratulated you for planning. On the one screen whose job is telling the
+/// truth about follow-through, it measured intent and called it execution.
 class _DayPill extends StatelessWidget {
-  final dynamic plan;
+  final DailyPlan plan;
   final bool isDark;
   const _DayPill({required this.plan, required this.isDark});
 
   @override
   Widget build(BuildContext context) {
-    final done = plan.mitTaskIds.length;
-    final allDone = done > 0;
-    final color = allDone ? Colors.green : (done == 0 ? Colors.grey.shade300 : AppTheme.primary);
+    final picks = plan.mitTaskIds;
+    final tasks = context.watch<TasksProvider>();
+    final done = picks.where((id) => tasks.taskById(id)?.completed ?? false).length;
+    final allDone = picks.isNotEmpty && done == picks.length;
+    final color = allDone
+        ? Colors.green
+        : (done == 0 ? Colors.grey.shade300 : AppTheme.primary);
     final dayLabel = plan.id.toString().substring(8, 10);
     return Column(children: [
-      Container(
+      Tooltip(
+        message: picks.isEmpty
+            ? 'Nothing picked'
+            : '$done of ${picks.length} picks finished',
+        child: Container(
         height: 36,
         decoration: BoxDecoration(
           color: color,
           borderRadius: BorderRadius.circular(6),
         ),
-        child: Center(child: Text('$done', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 12))),
+        child: Center(child: Text(picks.isEmpty ? '—' : '$done/${picks.length}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 11))),
+      ),
       ),
       const SizedBox(height: 4),
       Text(dayLabel, style: TextStyle(fontSize: 10, color: Colors.grey.shade500, fontWeight: FontWeight.w600)),

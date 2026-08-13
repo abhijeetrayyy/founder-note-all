@@ -81,7 +81,7 @@ export function InlineCapture() {
         <div className="mt-3 p-4 rounded-2xl glass-ambient border border-base-border animate-scale-in">
           <div className="flex items-center gap-2 mb-2">
             <span className="text-2xs uppercase tracking-wider text-foreground-subtle font-bold">{parsed.isTask ? "TASK" : "NOTE"}</span>
-            {parsed.isMIT && <span className="text-2xs font-bold text-accent bg-accent-muted px-2 py-0.5 rounded-full">MIT</span>}
+            {parsed.isMIT && <span className="text-2xs font-bold text-accent bg-accent-muted px-2 py-0.5 rounded-full">FOR TODAY</span>}
           </div>
           <p className="text-sm font-semibold text-foreground mb-2">{parsed.cleanedTitle || "..."}</p>
           {chips.length > 0 && (

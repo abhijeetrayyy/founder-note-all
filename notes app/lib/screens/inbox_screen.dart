@@ -84,7 +84,7 @@ class _InboxScreenState extends State<InboxScreen> {
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                       Text('$total ${total == 1 ? "item" : "items"} waiting', style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w800)),
                       const SizedBox(height: 2),
-                      Text('Swipe right to MIT, left to schedule.', style: TextStyle(color: Colors.white.withValues(alpha: 0.85), fontSize: 12)),
+                      Text('Swipe right to put it on today, left to schedule.', style: TextStyle(color: Colors.white.withValues(alpha: 0.85), fontSize: 12)),
                     ]),
                   ),
                 ]),
@@ -157,14 +157,14 @@ class _InboxScreenState extends State<InboxScreen> {
     } else {
       final ids = List<String>.from(plan.todayPlan!.mitTaskIds);
       if (ids.length >= 3) {
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Already 3 MITs. Replace one in the plan view.')));
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Today already has three. Swap one out when you plan.")));
         return;
       }
       if (!ids.contains(t.id)) ids.add(t.id);
       await plan.updateMITs(ids);
     }
-    await context.read<TasksProvider>().setInbox(t.id, false);
-    if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('"${t.title}" added as MIT')));
+    await context.read<TasksProvider>().commitToToday([t.id]);
+    if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('"${t.title}" is on today\'s list')));
   }
 
   Future<void> _scheduleTask(Task t) async {
@@ -216,7 +216,7 @@ class _InboxTaskRow extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Dismissible(
       key: ValueKey('inbox_task_${task.id}'),
-      background: _SwipeBg(color: AppTheme.primary, icon: Icons.star_rounded, label: 'MIT', align: Alignment.centerLeft),
+      background: _SwipeBg(color: AppTheme.primary, icon: Icons.star_rounded, label: 'TODAY', align: Alignment.centerLeft),
       secondaryBackground: _SwipeBg(color: AppTheme.warning, icon: Icons.calendar_today_rounded, label: 'Schedule', align: Alignment.centerRight),
       confirmDismiss: (dir) async {
         if (dir == DismissDirection.startToEnd) { onMIT(); return false; }

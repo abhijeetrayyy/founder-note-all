@@ -103,7 +103,7 @@ class SettingsScreen extends StatelessWidget {
               const SizedBox(height: 16),
               _Section(label: 'EXECUTION DEFAULTS'),
               _SettingTile(icon: Icons.flag_rounded, title: 'Default plan time', subtitle: 'When to start your morning ritual', trailing: const Icon(Icons.chevron_right_rounded)),
-              _SettingTile(icon: Icons.star_rounded, title: 'MIT limit', subtitle: 'Max MITs per day (3 recommended)', trailing: const Text('3', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700))),
+              _SettingTile(icon: Icons.star_rounded, title: "Today's list", subtitle: 'How many things a day is for (3 recommended)', trailing: const Text('3', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700))),
               _SettingTile(icon: Icons.bolt_rounded, title: 'Default energy level', subtitle: 'New tasks default to Medium', trailing: const Icon(Icons.chevron_right_rounded)),
               const SizedBox(height: 16),
               _Section(label: 'ACCOUNT'),

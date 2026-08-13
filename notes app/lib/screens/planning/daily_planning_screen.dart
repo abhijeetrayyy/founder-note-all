@@ -84,19 +84,13 @@ class _DailyPlanningScreenState extends State<DailyPlanningScreen> {
       setState(() => _step++);
       return;
     }
-    // Commit: save the plan + mark selected MITs as non-inbox
+    // Commit: save the plan + commit each pick to today
     await context.read<DailyPlanProvider>().savePlan(
       mitTaskIds: _selectedMITs,
       intentionText: _intentionCtrl.text.trim(),
       blockerNotes: _blockerCtrl.text.trim(),
     );
-    final tasks = context.read<TasksProvider>();
-    for (final id in _selectedMITs) {
-      final t = tasks.taskById(id);
-      if (t != null && t.isInbox) {
-        await tasks.setInbox(id, false);
-      }
-    }
+    await context.read<TasksProvider>().commitToToday(_selectedMITs);
     if (mounted) Navigator.pop(context, true);
   }
 }
@@ -246,7 +240,7 @@ class _StepBrainDump extends StatelessWidget {
   }
 }
 
-// ── Step 2: Pick MITs ─────────────────────────────────────────────────────
+// ── Step 2: Pick what today is for ────────────────────────────────────────
 class _StepPickMITs extends StatelessWidget {
   final List<String> selected;
   final ValueChanged<List<String>> onChanged;
@@ -263,9 +257,9 @@ class _StepPickMITs extends StatelessWidget {
       Padding(
         padding: const EdgeInsets.fromLTRB(28, 36, 28, 0),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          _StepLabel(label: 'MOST IMPORTANT TASKS'),
+          _StepLabel(label: 'WHAT TODAY IS FOR'),
           const SizedBox(height: 8),
-          Text("Pick your 3 MITs.", style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: isDark ? Colors.white : const Color(0xFF1A1A2E))),
+          Text("Pick the three things today is for.", style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: isDark ? Colors.white : const Color(0xFF1A1A2E))),
           const SizedBox(height: 8),
           Text(
             "These are the 3 things that, if done today, make today a win. Everything else is a bonus. Max 3.",
@@ -454,7 +448,7 @@ class _StepCommit extends StatelessWidget {
           const SizedBox(height: 16),
         ],
         _SummarySection(
-          label: 'YOUR 3 MITs',
+          label: 'WHAT TODAY IS FOR',
           isDark: isDark,
           trailing: Text(estimateLabel, style: TextStyle(fontSize: 12, color: Colors.grey.shade500, fontWeight: FontWeight.w600)),
           child: Column(children: [
@@ -484,7 +478,7 @@ class _StepCommit extends StatelessWidget {
             const Icon(Icons.bolt_rounded, color: AppTheme.primary, size: 20),
             const SizedBox(width: 10),
             Expanded(child: Text(
-              'When you finish all 3 MITs, everything else is a bonus. Protect this list from urgency theater.',
+              'When those three are done, everything else is a bonus. Protect this list from urgency theatre.',
               style: TextStyle(fontSize: 13, color: isDark ? Colors.white70 : const Color(0xFF1A1A2E), height: 1.5),
             )),
           ]),

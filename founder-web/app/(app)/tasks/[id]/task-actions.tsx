@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/toast";
-import { toggleTask, releaseLoop, restoreLoop, updateTask } from "@/lib/actions";
+import { toggleTask, releaseLoop, restoreLoop, addMITAction } from "@/lib/actions";
 
 export function TaskActions({ taskId, completed }: { taskId: string; completed: boolean }) {
   const router = useRouter();
@@ -36,13 +36,22 @@ export function TaskActions({ taskId, completed }: { taskId: string; completed: 
     router.refresh();
   }
 
-  async function onMakeMIT() {
+  /**
+   * Put this on today's list.
+   *
+   * Was labelled "Mark MIT" and did not do it: it set priority and cleared the
+   * inbox flag but never touched `daily_plans`, so the task was not among the
+   * day's picks and Today never showed it. It goes through the same writer the
+   * plan board uses, which is the only thing that actually commits a loop to a
+   * day.
+   */
+  async function onPickForToday() {
     setPending(true);
-    const result = await updateTask(taskId, { priority: 2, is_inbox: false });
+    const result = await addMITAction(taskId);
     setPending(false);
     if (result.error) toast.show(result.error, "error");
     else {
-      toast.show("Marked as high priority / MIT", "success");
+      toast.show("On today's list", "success");
       router.refresh();
     }
   }
@@ -58,11 +67,11 @@ export function TaskActions({ taskId, completed }: { taskId: string; completed: 
       </button>
       {!completed ? (
         <button
-          onClick={onMakeMIT}
+          onClick={onPickForToday}
           disabled={pending}
           className="h-9 px-3.5 rounded-xl text-foreground-muted hover:text-foreground hover:bg-base-raised transition-colors text-sm font-bold focus-ring disabled:opacity-50"
         >
-          Mark MIT
+          Pick for today
         </button>
       ) : null}
       <button

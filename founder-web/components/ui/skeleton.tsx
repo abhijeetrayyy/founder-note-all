@@ -39,7 +39,7 @@ export function SkeletonTaskRow() {
   );
 }
 
-export function SkeletonMITRow() {
+export function SkeletonPickRow() {
   return (
     <div className="flex items-start gap-3">
       <Skeleton className="w-7 h-7 rounded-full shrink-0 mt-1" />

@@ -1,6 +1,6 @@
 /**
  * Smart NLP parser for natural-language capture.
- * Detects dates, times, priority, energy, recurrence, MIT, projects, tags
+ * Detects dates, times, priority, energy, recurrence, "for today", projects, tags
  * from a freeform string. Used by the Quick Add bar everywhere.
  */
 export interface SmartInput {
@@ -157,10 +157,23 @@ function parseRecurrence(text: string): 0 | 1 | 2 | 3 | null {
   return null;
 }
 
+/**
+ * "Put this on today's list."
+ *
+ * The old triggers were all house jargon — `/mit`, "most important", "key
+ * task" — which nobody types because nobody knows the term. They still work,
+ * so anyone who learned them is not broken, but the phrases a founder would
+ * actually reach for are recognised now: `/today`, "top three", "pick for
+ * today".
+ *
+ * Note that a bare "today" is deliberately NOT here: it already parses as a
+ * due date, and "call Nikhil today" means due today, not one of the three
+ * things the whole day is for.
+ */
 function parseMIT(text: string): boolean {
   const lower = text.toLowerCase();
-  if (lower.startsWith("/mit")) return true;
-  if (/\b(most important|key task|mit)\b/.test(lower)) return true;
+  if (lower.startsWith("/today") || lower.startsWith("/mit")) return true;
+  if (/\b(top three|top 3|pick for today|most important|key task|mit)\b/.test(lower)) return true;
   return false;
 }
 
@@ -202,7 +215,10 @@ export function parseSmartInput(text: string): SmartInput {
     /\b\d{1,2}\/\d{1,2}(\/\d{2,4})?\b/g,
     /\b(urgent|asap|important|critical|low priority|high priority|deep work|deep focus|admin task|quick)\b/gi,
     /\b(every|daily|weekly|monthly|recurring)\b/gi,
-    /\b(most important|mit|key task)\b/gi,
+    // Must match the triggers in parseMIT, or the phrase that flagged the loop
+    // stays in its own title — "top three fix the signup bug".
+    /^\/(today|mit)\b/gi,
+    /\b(top three|top 3|pick for today|most important|mit|key task)\b/gi,
     /#[\w-]+/g,
   ];
   for (const re of stripRe) remaining = remaining.replace(re, "").trim();
@@ -226,7 +242,7 @@ export function parseSmartInput(text: string): SmartInput {
 
 export function summary(p: SmartInput): string {
   const parts: string[] = [];
-  if (p.isMIT) parts.push("MIT");
+  if (p.isMIT) parts.push("For today");
   if (p.date) parts.push(fmtDate(p.date));
   if (p.time) parts.push(`at ${p.time.label}`);
   if (p.priority != null && p.priority > 0) parts.push(["Low", "Medium", "High"][p.priority]);

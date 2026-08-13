@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../models/daily_plan.dart';
 import '../services/database_service.dart';
+import '../utils/day_key.dart';
 
 class DailyPlanProvider extends ChangeNotifier {
   final DatabaseService _db = DatabaseService.instance;
@@ -11,7 +12,7 @@ class DailyPlanProvider extends ChangeNotifier {
   DailyPlan? get todayPlan => _todayPlan;
   List<DailyPlan> get recentPlans => _recentPlans;
 
-  String get todayId => DateTime.now().toIso8601String().substring(0, 10);
+  String get todayId => todayKey();
 
   bool get hasPlannedToday => _todayPlan != null && _todayPlan!.morningDone;
   List<String> get todayMITs => _todayPlan?.mitTaskIds ?? [];
@@ -56,7 +57,7 @@ class DailyPlanProvider extends ChangeNotifier {
     int streak = 0;
     final today = DateTime.now();
     for (int i = 0; i < 30; i++) {
-      final d = today.subtract(Duration(days: i)).toIso8601String().substring(0, 10);
+      final d = dayKey(today.subtract(Duration(days: i)));
       final plan = _recentPlans.where((p) => p.id == d).firstOrNull;
       if (plan != null && plan.morningDone) {
         streak++;

@@ -1,4 +1,4 @@
-import { Skeleton, SkeletonMITRow, SkeletonHabitRow, SkeletonGoalCard, SkeletonNoteCard } from "@/components/ui/skeleton";
+import { Skeleton, SkeletonPickRow, SkeletonHabitRow, SkeletonGoalCard, SkeletonNoteCard } from "@/components/ui/skeleton";
 
 export default function TodayLoading() {
   return (
@@ -19,8 +19,8 @@ export default function TodayLoading() {
           <Skeleton className="h-3 w-20" />
         </div>
         <div className="space-y-2">
-          <SkeletonMITRow />
-          <SkeletonMITRow />
+          <SkeletonPickRow />
+          <SkeletonPickRow />
         </div>
       </div>
 

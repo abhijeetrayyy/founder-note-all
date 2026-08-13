@@ -9,6 +9,7 @@ import '../../theme/app_theme.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/quick_add_sheet.dart';
 import 'task_editor_screen.dart';
+import '../../utils/day_key.dart';
 
 enum _Filter { all, today, upcoming, inbox, mits, completed }
 
@@ -29,13 +30,13 @@ class _TasksScreenState extends State<TasksScreen> {
     final p = context.watch<TasksProvider>();
     final plan = context.watch<DailyPlanProvider>().todayPlan;
     final all = p.tasks;
-    final today = DateTime.now().toIso8601String().substring(0, 10);
+    final today = todayKey();
     final active = all.where((t) => !t.completed).toList();
     final done = all.where((t) => t.completed).toList();
     final mitIds = plan?.mitTaskIds ?? [];
     final inbox = active.where((t) => t.isInbox).toList();
-    final todayList = active.where((t) => t.dueDate == null || t.dueDate!.toIso8601String().substring(0, 10) == today).toList();
-    final upcoming = active.where((t) => t.dueDate != null && t.dueDate!.toIso8601String().substring(0, 10) != today).toList()
+    final todayList = active.where((t) => t.dueDate == null || dayKey(t.dueDate!) == today).toList();
+    final upcoming = active.where((t) => t.dueDate != null && dayKey(t.dueDate!) != today).toList()
       ..sort((a, b) => a.dueDate!.compareTo(b.dueDate!));
     final mitList = active.where((t) => mitIds.contains(t.id)).toList();
 
@@ -45,7 +46,7 @@ class _TasksScreenState extends State<TasksScreen> {
       case _Filter.today: shown = todayList; sectionLabel = 'Today'; break;
       case _Filter.upcoming: shown = upcoming; sectionLabel = 'Upcoming'; break;
       case _Filter.inbox: shown = inbox; sectionLabel = 'Inbox'; break;
-      case _Filter.mits: shown = mitList; sectionLabel = "Today's MITs"; break;
+      case _Filter.mits: shown = mitList; sectionLabel = "What today is for"; break;
       case _Filter.completed: shown = done; sectionLabel = 'Completed'; break;
       case _Filter.all: shown = active; sectionLabel = 'Active'; break;
     }
@@ -75,7 +76,7 @@ class _TasksScreenState extends State<TasksScreen> {
                   _FilterChip(label: 'Today (${todayList.length})', selected: _filter == _Filter.today, onTap: () => setState(() => _filter = _Filter.today)),
                   _FilterChip(label: 'Upcoming (${upcoming.length})', selected: _filter == _Filter.upcoming, onTap: () => setState(() => _filter = _Filter.upcoming)),
                   _FilterChip(label: 'Inbox (${inbox.length})', selected: _filter == _Filter.inbox, onTap: () => setState(() => _filter = _Filter.inbox), dot: inbox.isNotEmpty ? AppTheme.warning : null),
-                  _FilterChip(label: 'MITs (${mitList.length})', selected: _filter == _Filter.mits, onTap: () => setState(() => _filter = _Filter.mits), dot: mitList.isNotEmpty ? AppTheme.primary : null),
+                  _FilterChip(label: 'Today (${mitList.length})', selected: _filter == _Filter.mits, onTap: () => setState(() => _filter = _Filter.mits), dot: mitList.isNotEmpty ? AppTheme.primary : null),
                   _FilterChip(label: 'Done (${done.length})', selected: _filter == _Filter.completed, onTap: () => setState(() => _filter = _Filter.completed)),
                 ],
               ),
@@ -221,7 +222,7 @@ class _TaskRow extends StatelessWidget {
                       _Tag(icon: task.energyIcon, label: task.energyLabel, color: task.energyColor),
                       if (task.estimatedMinutes != null) _Tag(icon: Icons.timer_outlined, label: task.estimatedLabel, color: isDark ? AppTheme.darkTextMuted : AppTheme.lightTextMuted),
                       if (task.dueDate != null) _Tag(icon: Icons.calendar_today_rounded, label: DateFormat('MMM d').format(task.dueDate!), color: AppTheme.warning),
-                      if (isMIT) _Tag(label: 'MIT', color: AppTheme.primary, filled: true),
+                      if (isMIT) _Tag(label: 'TODAY', color: AppTheme.primary, filled: true),
                     ]),
                   ],
                 ]),

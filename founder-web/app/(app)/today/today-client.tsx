@@ -14,7 +14,7 @@ import { energyLabel, type Task, type Note, type Goal, type Habit, type HabitLog
  * Today.
  *
  * Two columns. Left: the one thing, capacity, the rotting shelf, the day's
- * list. Right: energy, the three MITs, the anti-list and rituals. Colour only
+ * list. Right: energy, today's picks, the anti-list and rituals. Colour only
  * appears where something needs answering or has just resolved.
  */
 export function TodayClient({

@@ -53,10 +53,22 @@ class DashboardScreen extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(20, 8, 12, 4),
                   child: Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
                     Expanded(
+                      // The name lives on the small line; the headline is a
+                      // fixed short phrase. It used to read "What's on your
+                      // mind, $firstName?" at 22px inside an 80px app bar, so
+                      // any name long enough to wrap overflowed the header by
+                      // 18px and clipped itself behind a striped warning bar —
+                      // on the first screen of the app, for every user who had
+                      // filled in a name. Both lines are clamped so no name can
+                      // do it again.
                       child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.center, children: [
-                        Text(_greeting(firstName), style: TextStyle(fontSize: 12, fontFamily: 'Inter', fontWeight: FontWeight.w600, color: isDark ? AppTheme.darkTextMuted : AppTheme.lightTextMuted, letterSpacing: 0.3)),
+                        Text(firstName.isEmpty ? _greeting(firstName) : '${_greeting(firstName)}, $firstName',
+                            maxLines: 1, overflow: TextOverflow.ellipsis,
+                            style: TextStyle(fontSize: 12, fontFamily: 'Inter', fontWeight: FontWeight.w600, color: isDark ? AppTheme.darkTextMuted : AppTheme.lightTextMuted, letterSpacing: 0.3)),
                         const SizedBox(height: 2),
-                        Text(firstName.isEmpty ? "What's on your mind?" : "What's on your mind, $firstName?", style: TextStyle(fontSize: 22, fontFamily: 'Inter', fontWeight: FontWeight.w800, color: isDark ? AppTheme.darkText : AppTheme.lightText, letterSpacing: -0.5)),
+                        Text("What's on your mind?",
+                            maxLines: 1, overflow: TextOverflow.ellipsis,
+                            style: TextStyle(fontSize: 22, fontFamily: 'Inter', fontWeight: FontWeight.w800, color: isDark ? AppTheme.darkText : AppTheme.lightText, letterSpacing: -0.5)),
                       ]),
                     ),
                     IconButton(
@@ -83,7 +95,7 @@ class DashboardScreen extends StatelessWidget {
                 _StatStrip(inboxCount: inboxCount, completedToday: tasks.tasks.where((t) => t.completed).length, habitDone: habits.todayStatus.values.where((v) => v).length, habitTotal: habits.habits.length),
                 const SizedBox(height: 20),
 
-                // ── Hero: planning / MITs / day-won ──
+                // ── Hero: planning / today's list / day-won ──
                 _CommandCenter(plan: plan, onPlan: () => _openPlanning(context), onStartMIT: (t) => Navigator.of(context).push(MaterialPageRoute(builder: (_) => FocusTimerScreen(taskTitle: t.title))), onToggleMIT: (id) => tasks.toggle(id)),
                 const SizedBox(height: 20),
 
@@ -107,7 +119,7 @@ class DashboardScreen extends StatelessWidget {
                         const SizedBox(height: 8),
                         Text('Nothing scheduled', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: isDark ? AppTheme.darkText : AppTheme.lightText)),
                         const SizedBox(height: 4),
-                        Text('Add tasks with dates or MITs in your morning plan.', textAlign: TextAlign.center, style: TextStyle(fontSize: 12, color: isDark ? AppTheme.darkTextMuted : AppTheme.lightTextMuted)),
+                        Text('Add tasks with dates, or choose what today is for in your morning plan.', textAlign: TextAlign.center, style: TextStyle(fontSize: 12, color: isDark ? AppTheme.darkTextMuted : AppTheme.lightTextMuted)),
                       ]),
                     ),
                   )
@@ -385,7 +397,7 @@ class _PlanningCTA extends StatelessWidget {
         Text('What deserves your', style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Colors.white, height: 1.2)),
         Text('attention today?', style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Colors.white, height: 1.2)),
         const SizedBox(height: 8),
-        Text('Pick 3 MITs. Protect them. Everything else is a bonus.', style: TextStyle(color: Colors.white.withValues(alpha: 0.85), fontSize: 14, height: 1.5)),
+        Text('Pick the three things today is for. Protect them. Everything else is a bonus.', style: TextStyle(color: Colors.white.withValues(alpha: 0.85), fontSize: 14, height: 1.5)),
         const SizedBox(height: 20),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
@@ -421,7 +433,7 @@ class _DayWonCard extends StatelessWidget {
       const SizedBox(height: 16),
       Text('You shipped it all.', style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Colors.white, height: 1.2)),
       const SizedBox(height: 8),
-      Text('$done MITs complete. Rest earned.', style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontSize: 14, height: 1.5)),
+      Text('All $done done. Rest earned.', style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontSize: 14, height: 1.5)),
     ]),
   );
 }
@@ -654,7 +666,7 @@ class _TaskRow extends StatelessWidget {
           ),
           const SizedBox(width: 10),
           Expanded(child: Text(task.title, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 14, fontWeight: isMIT ? FontWeight.w700 : FontWeight.w500, decoration: task.completed ? TextDecoration.lineThrough : null, color: isDark ? AppTheme.darkText : AppTheme.lightText))),
-          if (isMIT) Container(padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2), margin: const EdgeInsets.only(left: 6), decoration: BoxDecoration(color: AppTheme.primary.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(4)), child: const Text('MIT', style: TextStyle(fontSize: 9, fontWeight: FontWeight.w800, color: AppTheme.primary, letterSpacing: 0.5))),
+          if (isMIT) Container(padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2), margin: const EdgeInsets.only(left: 6), decoration: BoxDecoration(color: AppTheme.primary.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(4)), child: const Text('TODAY', style: TextStyle(fontSize: 9, fontWeight: FontWeight.w800, color: AppTheme.primary, letterSpacing: 0.5))),
           const SizedBox(width: 4),
           Icon(task.energyIcon, size: 14, color: task.energyColor),
         ]),

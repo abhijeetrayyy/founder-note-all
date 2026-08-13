@@ -136,6 +136,8 @@ class _QuickAddSheetState extends State<QuickAddSheet> {
         if (ids.length < 3 && !ids.contains(task.id)) ids.add(task.id);
         await plan.updateMITs(ids);
       }
+      if (!mounted) return;
+      await context.read<TasksProvider>().commitToToday([task.id]);
     }
 
     if (!mounted) return;
@@ -168,7 +170,7 @@ class _QuickAddSheetState extends State<QuickAddSheet> {
             Row(children: [
               Expanded(
                 child: Text(
-                  isTask ? (_isMIT ? 'New MIT' : 'New task') : 'New note',
+                  isTask ? (_isMIT ? 'For today' : 'New task') : 'New note',
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
               ),
@@ -177,7 +179,7 @@ class _QuickAddSheetState extends State<QuickAddSheet> {
             const SizedBox(height: 4),
             Text(
               isTask
-                  ? "Type naturally. Add dates, times, or 'mit' anywhere."
+                  ? "Type naturally. Add a date, a time, or '/today' anywhere."
                   : "Type your thought. Use # for tags, @ for projects.",
               style: TextStyle(fontSize: 12, color: isDark ? AppTheme.darkTextMuted : AppTheme.lightTextMuted, fontWeight: FontWeight.w500),
             ),
@@ -189,7 +191,7 @@ class _QuickAddSheetState extends State<QuickAddSheet> {
               const SizedBox(width: 6),
               Expanded(child: _TypePill(label: 'Task', icon: Icons.check_circle_outline_rounded, active: isTask && !_isMIT, onTap: () { HapticFeedback.selectionClick(); setState(() => _override = _TypeOverride.task); })),
               const SizedBox(width: 6),
-              Expanded(child: _TypePill(label: 'MIT', icon: Icons.star_rounded, active: _isMIT, onTap: () { HapticFeedback.selectionClick(); setState(() => _override = _TypeOverride.mit); })),
+              Expanded(child: _TypePill(label: 'For today', icon: Icons.star_rounded, active: _isMIT, onTap: () { HapticFeedback.selectionClick(); setState(() => _override = _TypeOverride.mit); })),
             ]),
             const SizedBox(height: 14),
 
@@ -277,7 +279,7 @@ class _QuickAddSheetState extends State<QuickAddSheet> {
                 onPressed: _ctrl.text.trim().isEmpty ? null : _save,
                 style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
                 icon: Icon(_isMIT ? Icons.star_rounded : (isTask ? Icons.check_rounded : Icons.save_rounded), size: 18),
-                label: Text(_isMIT ? 'Add as MIT' : (isTask ? 'Add to Inbox' : 'Save note')),
+                label: Text(_isMIT ? "Add to today's list" : (isTask ? 'Add to Inbox' : 'Save note')),
               ),
             ]),
           ]),
@@ -579,7 +581,7 @@ Future<void> showQuickAdd(BuildContext context, {String? prefill, bool defaultTo
   );
   if (result == null) return;
   if (!context.mounted) return;
-  final typeLabel = result.type == _QuickAddType.mit ? 'MIT ' : (result.type == _QuickAddType.task ? 'Task ' : 'Note ');
+  final typeLabel = result.type == _QuickAddType.mit ? 'On today ' : (result.type == _QuickAddType.task ? 'Task ' : 'Note ');
   ScaffoldMessenger.of(context).clearSnackBars();
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(

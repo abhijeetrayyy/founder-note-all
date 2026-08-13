@@ -25,7 +25,7 @@ export function QuickAdd({ open, onClose }: { open: boolean; onClose: () => void
       <form onSubmit={submit} className="space-y-4">
         <div className="flex gap-2">
           {(["auto","task","note","mit"] as Mode[]).map((m) => {
-            const labels: Record<Mode,string> = { auto: "Auto", task: "Task", note: "Note", mit: "MIT" };
+            const labels: Record<Mode,string> = { auto: "Auto", task: "Task", note: "Note", mit: "For today" };
             const active = mode === m;
             return <button key={m} type="button" onClick={() => setMode(m)} aria-pressed={active} className={cn("h-9 px-3.5 rounded-full text-sm font-semibold transition focus-ring", active ? "bg-accent-600 text-[#0B0B0D]" : "bg-base-raised text-foreground-muted hover:bg-base-overlay")}>{labels[m]}</button>;
           })}
@@ -40,7 +40,7 @@ export function QuickAdd({ open, onClose }: { open: boolean; onClose: () => void
           <span className="text-foreground-subtle hidden sm:inline">↵ Enter · Esc close</span>
         </div>
         <button type="submit" disabled={!text.trim() || busy} className="w-full h-12 rounded-2xl text-[#0B0B0D] font-bold text-base bg-[#F0F0EE] hover:shadow-lg transition disabled:opacity-50 focus-ring">
-          {busy ? "Capturing…" : mode === "note" ? "Save thought" : mode === "mit" ? "Save as priority" : "Capture"}
+          {busy ? "Capturing…" : mode === "note" ? "Save thought" : mode === "mit" ? "Add to today's list" : "Capture"}
         </button>
       </form>
     </Sheet>
