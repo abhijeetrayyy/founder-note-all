@@ -103,7 +103,7 @@ class SettingsScreen extends StatelessWidget {
               const SizedBox(height: 16),
               _Section(label: 'EXECUTION DEFAULTS'),
               _SettingTile(icon: Icons.flag_rounded, title: 'Default plan time', subtitle: 'When to start your morning ritual', trailing: const Icon(Icons.chevron_right_rounded)),
-              _SettingTile(icon: Icons.star_rounded, title: 'MIT limit', subtitle: 'Max MITs per day (3 recommended)', trailing: const Text('3', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700))),
+              _SettingTile(icon: Icons.star_rounded, title: "Today's list", subtitle: 'How many things a day is for (3 recommended)', trailing: const Text('3', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700))),
               _SettingTile(icon: Icons.bolt_rounded, title: 'Default energy level', subtitle: 'New tasks default to Medium', trailing: const Icon(Icons.chevron_right_rounded)),
               const SizedBox(height: 16),
               _Section(label: 'ACCOUNT'),
@@ -276,24 +276,24 @@ class _ProfileCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          gradient: const LinearGradient(colors: [AppTheme.primary, AppTheme.primaryDeep]),
+          color: AppTheme.ink,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(children: [
           Container(
             width: 48, height: 48,
-            decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), shape: BoxShape.circle),
-            child: Center(child: Text(name.isNotEmpty ? name[0].toUpperCase() : '?', style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w800))),
+            decoration: BoxDecoration(color: AppTheme.onInk.withValues(alpha: 0.12), shape: BoxShape.circle),
+            child: Center(child: Text(name.isNotEmpty ? name[0].toUpperCase() : '?', style: const TextStyle(color: AppTheme.onInk, fontSize: 22, fontWeight: FontWeight.w800))),
           ),
           const SizedBox(width: 14),
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(name.isEmpty ? 'Set your name' : name, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w800)),
+              Text(name.isEmpty ? 'Set your name' : name, style: const TextStyle(color: AppTheme.onInk, fontSize: 18, fontWeight: FontWeight.w800)),
               const SizedBox(height: 2),
-              Text('Tap to edit', style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12)),
+              Text('Tap to edit', style: TextStyle(color: AppTheme.onInk.withValues(alpha: 0.65), fontSize: 12)),
             ]),
           ),
-          const Icon(Icons.edit_rounded, color: Colors.white, size: 18),
+          const Icon(Icons.edit_rounded, color: AppTheme.onInk, size: 18),
         ]),
       ),
     );

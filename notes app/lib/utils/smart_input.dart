@@ -1,5 +1,5 @@
 /// NLP-lite parser for natural language task input.
-/// Detects dates, times, priority, energy level, recurrence, MIT flag, projects, tags.
+/// Detects dates, times, priority, energy level, recurrence, "for today", projects, tags.
 class SmartInput {
   final String original;
   final String cleanedTitle;
@@ -29,7 +29,7 @@ class SmartInput {
 
   String get summary {
     final parts = <String>[];
-    if (isMIT) parts.add('MIT');
+    if (isMIT) parts.add('For today');
     if (date != null) parts.add(_fmtDate(date!));
     if (time != null) parts.add('at ${time!.label}');
     if (priority != null && priority! > 0) parts.add(['Low', 'Medium', 'High'][priority!]);
@@ -74,7 +74,10 @@ class SmartInput {
       RegExp(r'\b\d{1,2}/\d{1,2}(/\d{2,4})?\b'),
       RegExp(r'\b(urgent|asap|important|critical|low priority|high priority|deep work|deep focus|admin task|quick)\b', caseSensitive: false),
       RegExp(r'\b(every|daily|weekly|monthly|recurring)\b', caseSensitive: false),
-      RegExp(r'\b(most important|mit|key task)\b', caseSensitive: false),
+      // Must match the triggers in _parseMIT, or the phrase that flagged the
+      // loop stays in its own title — "top three fix the signup bug".
+      RegExp(r'^/(today|mit)\b', caseSensitive: false),
+      RegExp(r'\b(top three|top 3|pick for today|most important|mit|key task)\b', caseSensitive: false),
       RegExp(r'#[\w-]+', caseSensitive: false),
     ];
     for (final re in toStrip) {
@@ -105,7 +108,7 @@ class SmartInput {
   static bool _looksLikeTask(String text) {
     final lower = text.toLowerCase();
     if (lower.startsWith('/task')) return true;
-    if (lower.startsWith('/mit')) return true;
+    if (lower.startsWith('/mit') || lower.startsWith('/today')) return true;
     if (lower.startsWith('/note')) return false;
     if (lower.startsWith('/idea')) return false;
     if (RegExp(r'^(buy|call|email|send|fix|write|review|ship|build|finish|complete|schedule|reply|book|reserve|pay|submit|prepare|draft|update|clean|organize|talk|meet|investigate|research|read|learn|practice|design|plan|create|make|tidy|sort|push|deploy|merge|test|verify|check|file|submit|print|order|return|reply|confirm|contact|reach out|follow up|setup|set up|clean up|clear|triage|prioritize|respond|audit|update|reach)\b').hasMatch(lower)) {
@@ -220,10 +223,20 @@ class SmartInput {
     return null;
   }
 
+  /// "Put this on today's list."
+  ///
+  /// The old triggers were all house jargon — `/mit`, "most important", "key
+  /// task" — which nobody types because nobody knows the term. They still work,
+  /// so anyone who learned them is not broken, but the phrases a founder would
+  /// actually reach for are recognised now: `/today`, "top three".
+  ///
+  /// A bare "today" is deliberately NOT here: it already parses as a due date,
+  /// and "call Nikhil today" means due today, not one of the three things the
+  /// whole day is for.
   static bool _parseMIT(String text) {
     final lower = text.toLowerCase();
-    if (lower.startsWith('/mit')) return true;
-    if (RegExp(r'\b(most important|key task|mit)\b').hasMatch(lower)) return true;
+    if (lower.startsWith('/today') || lower.startsWith('/mit')) return true;
+    if (RegExp(r'\b(top three|top 3|pick for today|most important|key task|mit)\b').hasMatch(lower)) return true;
     return false;
   }
 

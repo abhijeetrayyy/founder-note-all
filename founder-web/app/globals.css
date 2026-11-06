@@ -2,141 +2,113 @@
 @tailwind components;
 @tailwind utilities;
 
-* { box-sizing: border-box; }
+/* Colours as space-separated RGB so Tailwind can apply alpha to them. */
+:root {
+  --desk: 234 237 241;      /* cool grey desk */
+  --card: 255 255 255;      /* card stock */
+  --sunk: 244 246 249;      /* inputs, hover */
+  --ink: 28 32 36;          /* graphite */
+  --ink-2: 86 94 103;
+  --ink-3: 140 148 157;
+  --hair: 218 223 230;      /* borders */
+  --rule: 214 226 242;      /* the card's faint blue lines */
+  --red: 213 68 59;         /* the card's red header line */
+  --pen: 40 83 194;         /* ballpoint blue — anything you can press */
+  --pen-tint: 232 238 252;
+  --amber: 176 112 16;
+  --shadow: 22 32 46;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --desk: 16 18 20;
+    --card: 27 30 33;
+    --sunk: 34 38 42;
+    --ink: 231 234 237;
+    --ink-2: 161 169 177;
+    --ink-3: 110 118 126;
+    --hair: 46 51 57;
+    --rule: 38 50 68;
+    --red: 239 106 96;
+    --pen: 132 164 255;
+    --pen-tint: 33 42 66;
+    --amber: 226 170 82;
+    --shadow: 0 0 0;
+    color-scheme: dark;
+  }
+}
 
 html {
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  color-scheme: dark;
+}
+
+/* Controls are things you press, not text you select: a long press on a row
+   (or the start of a swipe) shouldn't pop up a selection handle. */
+button, [role="tab"], nav a {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 body {
-  font-family: var(--font-sans), "IBM Plex Sans", system-ui, sans-serif;
-  background: #0B0B0D;
-  color: #F0F0EE;
+  @apply bg-desk text-ink font-sans antialiased;
   min-height: 100dvh;
+  font-size: 15px;
   line-height: 1.45;
-  font-size: 13px;
 }
 
-/* Headings are the same grotesk, just tighter and heavier. The old system used
-   a serif here, which is what made every screen read as an article rather than
-   a panel. */
-h1, h2, h3 { letter-spacing: -0.022em; font-weight: 500; text-wrap: balance; }
+::selection { background: rgb(var(--pen) / 0.22); }
 
-::selection { background: rgba(255,138,76,0.22); color: #FFFFFF; }
-
-::-webkit-scrollbar { width: 11px; height: 11px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #26262B; border-radius: 99px; border: 3px solid #0B0B0D; }
-::-webkit-scrollbar-thumb:hover { background: #35353C; }
-
+/* In the base layer so a component can opt out (the capture box draws its own focus). */
 @layer base {
-  * { @apply border-base-border; }
-  body { @apply bg-void text-foreground; }
+  :focus-visible {
+    outline: 2px solid rgb(var(--pen));
+    outline-offset: 2px;
+  }
+}
+
+/* Inputs at 16px on touch screens, or iOS zooms the page on focus.
+   Fields already bigger than that (a task's title) opt out with data-big. */
+@media (pointer: coarse) {
+  input, textarea:not([data-big]), select { font-size: 16px !important; }
 }
 
 @layer components {
-  /* Surfaces. These kept their old glass-* names so every component that
-     already uses them re-skins for free — but there is no glass and no paper
-     now, just machined panels separated by hairlines. Depth comes from the
-     border, never from a shadow. */
-  .glass-ambient { background: #141417; border: 1px solid #26262B; }
-  .glass-active  { background: #17171B; border: 1px solid #35353C; }
-  .glass-focused { background: #141417; border: 1px solid #35353C; }
-  .glass-surface { background: #101013; border: 1px solid #26262B; }
-
-  .focus-ring {
-    @apply focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-signal focus-visible:ring-offset-2 focus-visible:ring-offset-void;
+  /* The ruled lines of an index card, for long-form writing (notes). */
+  .ruled {
+    background-image: linear-gradient(to bottom, transparent calc(var(--lh) - 1px), rgb(var(--rule)) calc(var(--lh) - 1px));
+    background-size: 100% var(--lh);
+    background-attachment: local;
+    line-height: var(--lh);
   }
 
-  /* Every label and every number is mono. In an instrument, data and its
-     labels share a voice — that is what makes a readout read as a readout. */
-  .label-mono {
-    font-family: var(--font-mono), "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 10px;
-    font-weight: 500;
-    letter-spacing: 0.13em;
-    text-transform: uppercase;
-    color: #9C9CA4;
+  .label {
+    @apply font-mono text-[11px] uppercase tracking-[0.12em] text-ink-3;
   }
 
-  /* Inverted fill — the primary action. Ink on ground, no brand colour. */
-  .btn-ink {
-    background: #F0F0EE; color: #0B0B0D;
-    font-weight: 500; border-radius: 6px;
-    transition: background 120ms ease;
+  .btn {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-lg px-3 h-9 text-[14px] font-medium transition-colors disabled:opacity-40;
   }
-  .btn-ink:hover { background: #FFFFFF; }
+  .btn-ink { @apply btn bg-ink text-card hover:bg-ink/85; }
+  .btn-pen { @apply btn text-pen hover:bg-pen-tint; }
+  .btn-quiet { @apply btn text-ink-2 hover:bg-sunk hover:text-ink; }
 
-  /* Outlined — everything secondary. */
-  .btn-line {
-    background: transparent; color: #F0F0EE;
-    border: 1px solid #35353C; border-radius: 6px;
-    transition: border-color 120ms ease, background 120ms ease;
+  .icon-btn {
+    @apply inline-flex items-center justify-center rounded-lg h-9 w-9 text-ink-3 hover:text-ink hover:bg-sunk transition-colors;
   }
-  .btn-line:hover { border-color: #4A4A53; background: #17171B; }
 
-  .ink-panel { background: #141417; border: 1px solid #26262B; color: #F0F0EE; }
-
-  /* A hairline rule that carries a label — the divider used between sections. */
-  .rule {
-    display: flex; align-items: center; gap: 12px;
-    color: #9C9CA4;
-  }
-  .rule::after {
-    content: ""; flex: 1; height: 1px; background: #26262B;
+  /* Fingers need 44px; a mouse is happy with 36. */
+  @media (pointer: coarse) {
+    .btn { height: 2.75rem; }
+    .icon-btn { height: 2.75rem; width: 2.75rem; }
   }
 }
-
-@layer utilities {
-  .scrollbar-hide::-webkit-scrollbar { display: none; }
-  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-  .safe-bottom { padding-bottom: max(env(safe-area-inset-bottom), 1rem); }
-  .safe-top { padding-top: max(env(safe-area-inset-top), 0.5rem); }
-  .shimmer-bg {
-    background: linear-gradient(90deg, #141417 25%, #1B1B1F 50%, #141417 75%);
-    background-size: 200% 100%;
-    animation: shimmer 2s linear infinite;
-  }
-  .text-gradient { color: #F0F0EE; }
-  .number-mono {
-    font-family: var(--font-mono), "IBM Plex Mono", ui-monospace, monospace;
-    font-feature-settings: "tnum" 1, "zero" 1;
-    font-variant-numeric: tabular-nums;
-  }
-}
-
-/* ── Feel ──
-   Acknowledge, never celebrate. Movement is short and mechanical: this is a
-   panel responding, not an interface performing. */
-
-button:not(:disabled), a[href], [role="button"] { transition: transform 90ms cubic-bezier(0.2,0,0.2,1), border-color 120ms ease, background 120ms ease, color 120ms ease; }
-button:not(:disabled):active, a[href]:active, [role="button"]:active { transform: scale(0.985); }
-
-@keyframes check-draw { from { stroke-dashoffset: 24; } to { stroke-dashoffset: 0; } }
-.check-draw path { stroke-dasharray: 24; animation: check-draw 200ms cubic-bezier(0.65,0,0.35,1) forwards; }
-
-@keyframes settle { 0% { opacity: 1; } 100% { opacity: 0; transform: translateY(2px); } }
-.animate-settle { animation: settle 420ms cubic-bezier(0.4,0,0.2,1) forwards; }
-
-@keyframes relieve { from { opacity: 0; transform: translateY(-2px); } to { opacity: 1; transform: translateY(0); } }
-.animate-relieve { animation: relieve 300ms cubic-bezier(0.16,1,0.3,1); }
-
-@keyframes rise { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-.animate-rise { animation: rise 320ms cubic-bezier(0.16,1,0.3,1) both; }
-.delay-1 { animation-delay: 50ms; }
-.delay-2 { animation-delay: 110ms; }
-.delay-3 { animation-delay: 170ms; }
-
-@keyframes caret { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+    animation-duration: 1ms !important;
+    transition-duration: 1ms !important;
   }
 }

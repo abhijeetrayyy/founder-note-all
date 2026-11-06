@@ -2,6 +2,15 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'app_theme.dart';
 
+/// Surfaces.
+///
+/// These kept their `glass*` names so every widget already using them re-skins
+/// for free — the same trick the web app used with its `.glass-*` class names.
+/// But there is no glass any more and no blur: just machined panels separated
+/// by hairlines. Depth comes from the border, never from a shadow, and there
+/// is exactly one ground rather than a light and a dark variant to keep in
+/// step. The purple borders and violet glows that used to live here were the
+/// last of the old brand.
 class GlassTokens {
   GlassTokens._();
 
@@ -11,51 +20,40 @@ class GlassTokens {
   static const double focusedOpacity = 0.88;
   static const double surfaceOpacity = 0.64;
 
-  // ── Light-mode glass colors ─────────────────────────────────────────
-  static Color glassAmbientLight = Color.lerp(AppTheme.lightSurface, AppTheme.lightBg, 1 - ambientOpacity)!.withValues(alpha: ambientOpacity);
-  static Color glassActiveLight = Color.lerp(AppTheme.lightSurface, AppTheme.lightBg, 1 - activeOpacity)!.withValues(alpha: activeOpacity);
-  static Color glassFocusedLight = Color.lerp(AppTheme.lightSurface, AppTheme.lightBg, 1 - focusedOpacity)!.withValues(alpha: focusedOpacity);
-  static Color glassSurfaceLight = Color.lerp(AppTheme.lightSurface, AppTheme.lightBg, 1 - surfaceOpacity)!.withValues(alpha: surfaceOpacity);
+  // ── Panels. Opaque; the level picks a surface, not a transparency. ──
+  static const Color glassAmbientLight = AppTheme.surface;
+  static const Color glassActiveLight = Color(0xFF17171B);
+  static const Color glassFocusedLight = AppTheme.surface;
+  static const Color glassSurfaceLight = AppTheme.raised;
+  static const Color glassAmbientDark = AppTheme.surface;
+  static const Color glassActiveDark = Color(0xFF17171B);
+  static const Color glassFocusedDark = AppTheme.surface;
+  static const Color glassSurfaceDark = AppTheme.raised;
 
-  // ── Dark-mode glass colors ──────────────────────────────────────────
-  static Color glassAmbientDark = Color.lerp(AppTheme.darkSurface, AppTheme.darkBg, 1 - ambientOpacity)!.withValues(alpha: ambientOpacity);
-  static Color glassActiveDark = Color.lerp(AppTheme.darkSurface, AppTheme.darkBg, 1 - activeOpacity)!.withValues(alpha: activeOpacity);
-  static Color glassFocusedDark = Color.lerp(AppTheme.darkSurface, AppTheme.darkBg, 1 - focusedOpacity)!.withValues(alpha: focusedOpacity);
-  static Color glassSurfaceDark = Color.lerp(AppTheme.darkSurface, AppTheme.darkBg, 1 - surfaceOpacity)!.withValues(alpha: surfaceOpacity);
 
   // ── Blur values ─────────────────────────────────────────────────────
-  static const double blurAmbient = 20;
-  static const double blurActive = 28;
-  static const double blurFocused = 40;
-  static const double blurSurface = 24;
+  // No blur. A panel is a panel.
+  static const double blurAmbient = 0;
+  static const double blurActive = 0;
+  static const double blurFocused = 0;
+  static const double blurSurface = 0;
 
   // ── Border colors ───────────────────────────────────────────────────
-  static Color borderLight = const Color(0x0D000000); // rgba(0,0,0,0.05)
-  static Color borderDark = const Color(0x0DFFFFFF);  // rgba(255,255,255,0.05)
-  static Color borderActiveLight = const Color(0x1A7C3AED); // rgba(124,58,237,0.10)
-  static Color borderFocusedLight = const Color(0x2E7C3AED); // rgba(124,58,237,0.18)
+  static const Color borderLight = AppTheme.border;
+  static const Color borderDark = AppTheme.border;
+  static const Color borderActiveLight = AppTheme.borderStrong;
+  static const Color borderFocusedLight = AppTheme.borderStrong;
 
-  // ── Shadows ─────────────────────────────────────────────────────────
-  static List<BoxShadow> ambientShadow = [
-    BoxShadow(color: const Color(0x0D000000), blurRadius: 2, offset: const Offset(0, 1)),
-  ];
+  // ── Shadows. There are none; the hairline does the separating. ──
+  static const List<BoxShadow> ambientShadow = [];
+  static const List<BoxShadow> activeShadow = [];
+  static const List<BoxShadow> focusedShadow = [];
+  static const List<BoxShadow> glowShadow = [];
+  static const List<BoxShadow> glowStrongShadow = [];
 
-  static List<BoxShadow> activeShadow = [
-    BoxShadow(color: const Color(0x0F000000), blurRadius: 24, offset: const Offset(0, 4)),
-  ];
 
-  static List<BoxShadow> focusedShadow = [
-    BoxShadow(color: const Color(0x1A7C3AED), blurRadius: 40, offset: const Offset(0, 8)),
-    BoxShadow(color: const Color(0x14000000), blurRadius: 8, offset: const Offset(0, 2)),
-  ];
 
-  static List<BoxShadow> glowShadow = [
-    BoxShadow(color: AppTheme.primary.withValues(alpha: 0.08), blurRadius: 40, offset: const Offset(0, 0)),
-  ];
 
-  static List<BoxShadow> glowStrongShadow = [
-    BoxShadow(color: AppTheme.primary.withValues(alpha: 0.14), blurRadius: 60, offset: const Offset(0, 0)),
-  ];
 
   // ── Helper: resolve glass color for current brightness ──────────────
   static Color glass(Brightness brightness, {GlassLevel level = GlassLevel.ambient}) {

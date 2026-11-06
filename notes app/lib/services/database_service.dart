@@ -29,7 +29,7 @@ class DatabaseService {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, 'notes_app.db');
 
-    return await openDatabase(path, version: 11, onCreate: _onCreate, onUpgrade: _onUpgrade);
+    return await openDatabase(path, version: 12, onCreate: _onCreate, onUpgrade: _onUpgrade);
   }
 
   Future<void> _onCreate(Database db, int version) async {
@@ -52,7 +52,17 @@ class DatabaseService {
         estimatedMinutes INTEGER,
         firstStep TEXT NOT NULL DEFAULT '',
         implementationIntention TEXT NOT NULL DEFAULT '',
-        isInbox INTEGER NOT NULL DEFAULT 1
+        isInbox INTEGER NOT NULL DEFAULT 1,
+        owedTo TEXT NOT NULL DEFAULT '',
+        owedDirection INTEGER NOT NULL DEFAULT 0,
+        kind INTEGER NOT NULL DEFAULT 0,
+        decideBy TEXT,
+        decisionUnlock TEXT NOT NULL DEFAULT '',
+        answeredAt TEXT,
+        releasedAt TEXT,
+        releaseReason TEXT NOT NULL DEFAULT '',
+        notThisWeek INTEGER NOT NULL DEFAULT 0,
+        antiReason TEXT NOT NULL DEFAULT ''
       )
     ''');
     await db.execute('''
@@ -161,6 +171,29 @@ class DatabaseService {
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    // v12 — the loop model.
+    //
+    // These columns have existed in Supabase since the web app's 00003
+    // migration. Sync was pulling rows that carried them and dropping every
+    // one, so the phone held a strictly poorer copy of the same task: no idea
+    // who was waiting, whether it had ever been triaged, or whether it had
+    // been let go. Added last so the guards below still see the older shapes.
+    if (oldVersion < 12) {
+      for (final col in const [
+        "owedTo TEXT NOT NULL DEFAULT ''",
+        'owedDirection INTEGER NOT NULL DEFAULT 0',
+        'kind INTEGER NOT NULL DEFAULT 0',
+        'decideBy TEXT',
+        "decisionUnlock TEXT NOT NULL DEFAULT ''",
+        'answeredAt TEXT',
+        'releasedAt TEXT',
+        "releaseReason TEXT NOT NULL DEFAULT ''",
+        'notThisWeek INTEGER NOT NULL DEFAULT 0',
+        "antiReason TEXT NOT NULL DEFAULT ''",
+      ]) {
+        try { await db.execute('ALTER TABLE tasks ADD COLUMN $col'); } catch (_) {}
+      }
+    }
     if (oldVersion < 2) {
       try { await db.execute('ALTER TABLE notes ADD COLUMN isLocked INTEGER NOT NULL DEFAULT 0'); } catch (_) {}
     }

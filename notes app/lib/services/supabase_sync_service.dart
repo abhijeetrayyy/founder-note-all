@@ -11,6 +11,7 @@ import '../models/goal_milestone.dart';
 import '../models/focus_session.dart';
 import '../models/energy_log.dart';
 import 'database_service.dart';
+import '../utils/day_key.dart';
 
 /// Cloud sync bridge between the local SQLite database and Supabase.
 ///
@@ -93,6 +94,20 @@ class SupabaseSyncService {
           'first_step': t.firstStep,
           'implementation_intention': t.implementationIntention,
           'is_inbox': t.isInbox,
+          // The loop model. Previously omitted entirely, which was survivable
+          // only because a partial upsert leaves absent columns alone — but it
+          // meant a loop answered or released on the phone never reached the
+          // web app.
+          'owed_to': t.owedTo,
+          'owed_direction': t.owedDirection,
+          'kind': t.kind,
+          'decide_by': t.decideBy == null ? null : dayKey(t.decideBy!),
+          'decision_unlock': t.decisionUnlock,
+          'answered_at': t.answeredAt?.toUtc().toIso8601String(),
+          'released_at': t.releasedAt?.toUtc().toIso8601String(),
+          'release_reason': t.releaseReason,
+          'not_this_week': t.notThisWeek,
+          'anti_reason': t.antiReason,
           'updated_at': t.updatedAt.toIso8601String(),
         });
         upserted++;
@@ -285,6 +300,16 @@ class SupabaseSyncService {
           firstStep: r['first_step'] as String? ?? '',
           implementationIntention: r['implementation_intention'] as String? ?? '',
           isInbox: r['is_inbox'] as bool? ?? false,
+          owedTo: r['owed_to'] as String? ?? '',
+          owedDirection: (r['owed_direction'] as int?) ?? 0,
+          kind: (r['kind'] as int?) ?? 0,
+          decideBy: _optDate(r['decide_by']),
+          decisionUnlock: r['decision_unlock'] as String? ?? '',
+          answeredAt: _optDate(r['answered_at']),
+          releasedAt: _optDate(r['released_at']),
+          releaseReason: r['release_reason'] as String? ?? '',
+          notThisWeek: r['not_this_week'] as bool? ?? false,
+          antiReason: r['anti_reason'] as String? ?? '',
         ));
         pulled++;
       }
@@ -417,6 +442,13 @@ class SupabaseSyncService {
     if (raw is! int) return fallback;
     if (raw >= 0x1000000) return raw;
     return _webPalette[raw.abs() % _webPalette.length];
+  }
+
+  /// A nullable date from a row, tolerant of the two shapes this schema uses:
+  /// `due_date`/`answered_at` are timestamptz, `decide_by` is a plain date.
+  static DateTime? _optDate(dynamic v) {
+    if (v == null) return null;
+    return DateTime.tryParse(v as String);
   }
 
   Future<void> _upsert(String table, Map<String, dynamic> data) async {

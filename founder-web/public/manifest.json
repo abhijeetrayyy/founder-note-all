@@ -1,17 +1,17 @@
 {
   "name": "FounderOS",
   "short_name": "FounderOS",
-  "description": "A founder execution system for tasks, notes, goals, habits, and daily planning",
-  "start_url": "/today",
+  "description": "Dump tasks, pick a few for today, keep the list honest. Plus notes.",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#0a0a0f",
-  "theme_color": "#5B4FE9",
+  "background_color": "#EAEDF1",
+  "theme_color": "#EAEDF1",
   "icons": [
-    {
-      "src": "/icons/icon-192.svg",
-      "sizes": "192x192",
-      "type": "image/svg+xml",
-      "purpose": "any monochrome maskable"
-    }
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ],
+  "shortcuts": [
+    { "name": "List", "url": "/list" },
+    { "name": "Notes", "url": "/notes" }
   ]
 }

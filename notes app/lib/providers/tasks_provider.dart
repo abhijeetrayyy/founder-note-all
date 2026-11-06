@@ -3,6 +3,7 @@ import 'package:uuid/uuid.dart';
 import '../models/task.dart';
 import '../services/database_service.dart';
 import 'reminder_provider.dart';
+import '../utils/day_key.dart';
 
 class TasksProvider extends ChangeNotifier {
   final DatabaseService _db = DatabaseService.instance;
@@ -13,7 +14,7 @@ class TasksProvider extends ChangeNotifier {
 
   List<Task> get tasks => _search.isEmpty ? _tasks : _tasks.where((t) => t.title.toLowerCase().contains(_search.toLowerCase()) || t.description.toLowerCase().contains(_search.toLowerCase())).toList();
   List<Task> get active => _tasks.where((t) => !t.completed && !t.isSubtask).toList();
-  List<Task> get todayTasks => active.where((t) => t.dueDate == null || t.dueDate!.toIso8601String().substring(0, 10) == DateTime.now().toIso8601String().substring(0, 10)).toList();
+  List<Task> get todayTasks => active.where((t) => t.dueDate == null || dayKey(t.dueDate!) == todayKey()).toList();
   String get search => _search;
   int get activeCount => active.length;
 
@@ -134,6 +135,34 @@ class TasksProvider extends ChangeNotifier {
     await update(id: id, isInbox: isInbox);
   }
 
+  /// Commit picks to today.
+  ///
+  /// Choosing something has to be a real change on the row, not just an entry
+  /// in `DailyPlan.mitTaskIds`. Every write path used to only clear the inbox
+  /// flag, which left the pick with no date — so it was absent from
+  /// `todayTasks`, from the calendar, and from anything else that asks "what is
+  /// on today", and the one screen that did show it (the dashboard, which reads
+  /// the plan by id) disagreed with all of them.
+  ///
+  /// A date already at today or earlier is left alone: that lateness is a fact
+  /// about the task, and quietly resetting it to now would launder it.
+  Future<void> commitToToday(List<String> ids) async {
+    final today = DateTime.now();
+    final tk = todayKey();
+    for (final id in ids) {
+      final t = _byId[id];
+      if (t == null) continue;
+      final key = t.dueDate == null ? null : dayKey(t.dueDate!);
+      final needsDate = key == null || key.compareTo(tk) > 0;
+      if (!needsDate && !t.isInbox) continue;
+      await update(
+        id: id,
+        isInbox: false,
+        dueDate: needsDate ? DateTime(today.year, today.month, today.day) : null,
+      );
+    }
+  }
+
   Future<void> toggle(String id, {ReminderProvider? reminderProvider}) async {
     final i = _tasks.indexWhere((t) => t.id == id);
     if (i == -1) return;
@@ -211,7 +240,7 @@ class TasksProvider extends ChangeNotifier {
   List<Task> tasksForProject(String projectId) => _tasks.where((t) => t.projectId == projectId && !t.completed && !t.isSubtask).toList();
 
   List<Task> tasksForDate(DateTime date) {
-    final d = date.toIso8601String().substring(0, 10);
-    return _tasks.where((t) => !t.isSubtask && (t.dueDate != null && t.dueDate!.toIso8601String().substring(0, 10) == d)).toList();
+    final d = dayKey(date);
+    return _tasks.where((t) => !t.isSubtask && (t.dueDate != null && dayKey(t.dueDate!) == d)).toList();
   }
 }

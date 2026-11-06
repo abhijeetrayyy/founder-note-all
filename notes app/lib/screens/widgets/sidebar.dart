@@ -88,7 +88,7 @@ class _Header extends StatelessWidget {
     return Container(
       padding: EdgeInsets.fromLTRB(collapsed ? 12 : 16, 18, 12, 18),
       child: Row(children: [
-        Container(width: 38, height: 38, decoration: BoxDecoration(gradient: const LinearGradient(colors: [AppTheme.primary, AppTheme.primaryDeep]), borderRadius: BorderRadius.circular(11)), child: const Icon(Icons.rocket_launch_rounded, color: Colors.white, size: 20)),
+        Container(width: 38, height: 38, decoration: BoxDecoration(color: AppTheme.ink, borderRadius: BorderRadius.circular(11)), child: const Icon(Icons.rocket_launch_rounded, color: Colors.white, size: 20)),
         if (!collapsed) ...[
           const SizedBox(width: 12),
           const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [Text('Founder', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800, letterSpacing: -0.3)), Text('Execution OS', style: TextStyle(fontSize: 11, color: AppTheme.lightTextMuted, fontWeight: FontWeight.w500))])),

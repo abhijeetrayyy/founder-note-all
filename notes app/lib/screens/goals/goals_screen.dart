@@ -66,7 +66,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
           ? EmptyState(
               icon: Icons.track_changes_rounded,
               title: 'Set your goals',
-              subtitle: 'Goals are the long-term outcomes your daily MITs serve. Pick 1-3 to focus on.',
+              subtitle: 'Goals are the long-term outcomes your daily picks serve. Pick 1-3 to focus on.',
               actionLabel: 'Add a goal',
               onAction: () => _showGoalSheet(context, null),
             )
@@ -75,7 +75,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
               children: [
                 Padding(
                   padding: const EdgeInsets.only(bottom: 12),
-                  child: Text('Top-level outcomes your daily MITs serve.', style: TextStyle(fontSize: 13, color: isDark ? AppTheme.darkTextMuted : AppTheme.lightTextMuted)),
+                  child: Text('Top-level outcomes your daily picks serve.', style: TextStyle(fontSize: 13, color: isDark ? AppTheme.darkTextMuted : AppTheme.lightTextMuted)),
                 ),
                 ...goals.goals.map((g) => Padding(
                   padding: const EdgeInsets.only(bottom: 10),
@@ -181,7 +181,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
                                   child: Container(
                                     width: 36, height: 36,
                                     decoration: BoxDecoration(color: AppTheme.primary, borderRadius: BorderRadius.circular(10)),
-                                    child: const Icon(Icons.add_rounded, color: Colors.white, size: 20),
+                                    child: const Icon(Icons.add_rounded, color: AppTheme.onInk, size: 20),
                                   ),
                                 ),
                               ]),

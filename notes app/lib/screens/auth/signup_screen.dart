@@ -36,11 +36,11 @@ class _SignupScreenState extends State<SignupScreen> {
                 Container(
                   width: 48, height: 48,
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(colors: [AppTheme.primary, AppTheme.primaryGlow], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                    color: AppTheme.ink,
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [BoxShadow(color: AppTheme.primary.withValues(alpha: 0.35), blurRadius: 16, offset: const Offset(0, 6))],
                   ),
-                  child: const Center(child: Text('F', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 22))),
+                  child: const Center(child: Text('F', style: TextStyle(color: AppTheme.onInk, fontWeight: FontWeight.w600, fontSize: 22))),
                 ),
                 const SizedBox(width: 14),
                 Text('FounderOS', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: AppTheme.primary, letterSpacing: -0.5)),
@@ -90,7 +90,7 @@ class _SignupScreenState extends State<SignupScreen> {
               FilledButton(
                 onPressed: auth.loading ? null : _signup,
                 style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)), textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
-                child: auth.loading ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) : const Text('Sign up'),
+                child: auth.loading ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.onInk)) : const Text('Sign up'),
               ),
               const SizedBox(height: 20),
               TextButton(onPressed: () => Navigator.pop(context), child: const Text('Already have an account? Log in')),

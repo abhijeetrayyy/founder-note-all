@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The app's desk colour, so the strips behind the status and gesture bars
+     match the page instead of flashing white (light) or grey (dark). -->
+<resources>
+    <color name="desk">#EAEDF1</color>
+</resources>

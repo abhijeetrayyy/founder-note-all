@@ -211,7 +211,7 @@ class _TaskEditorScreenState extends State<TaskEditorScreen> {
           Wrap(spacing: 8, runSpacing: 8, children: [
             _QuickPill(
               icon: _asMIT ? Icons.star_rounded : Icons.star_border_rounded,
-              label: _asMIT ? 'MIT' : 'Make MIT',
+              label: _asMIT ? 'On today\'s list' : 'Pick for today',
               color: AppTheme.primary,
               active: _asMIT,
               onTap: () { HapticFeedback.selectionClick(); setState(() => _asMIT = !_asMIT); },

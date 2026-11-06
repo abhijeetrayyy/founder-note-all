@@ -26,6 +26,27 @@ class Task {
   final String implementationIntention; // "When X, I will Y at Z"
   final bool isInbox;           // true = not yet triaged for a day
 
+  // ── The loop model (web migration 00003) ──
+  // A task is a loop: something open in the founder's head. These are the
+  // fields that make it one rather than a checkbox. They exist in Supabase and
+  // the web app has used them for months; this model simply did not read them,
+  // so every one arrived from sync and was dropped on the floor.
+  /// Name of the person attached to this loop. Empty when nobody is waiting.
+  final String owedTo;
+  /// 0 = they are waiting on you, 1 = you are waiting on them.
+  final int owedDirection;
+  /// 0 = task, 1 = decision.
+  final int kind;
+  final DateTime? decideBy;
+  final String decisionUnlock;
+  /// When this loop was triaged. Null = still raw; only raw loops decay.
+  final DateTime? answeredAt;
+  /// Soft drop — hidden everywhere, restorable for 30 days.
+  final DateTime? releasedAt;
+  final String releaseReason;
+  final bool notThisWeek;
+  final String antiReason;
+
   Task({
     required this.id,
     required this.title,
@@ -44,6 +65,16 @@ class Task {
     this.firstStep = '',
     this.implementationIntention = '',
     this.isInbox = true,
+    this.owedTo = '',
+    this.owedDirection = 0,
+    this.kind = 0,
+    this.decideBy,
+    this.decisionUnlock = '',
+    this.answeredAt,
+    this.releasedAt,
+    this.releaseReason = '',
+    this.notThisWeek = false,
+    this.antiReason = '',
   })  : createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now();
 
@@ -58,6 +89,12 @@ class Task {
     int? energyLevel, int? estimatedMinutes, bool clearEstimate = false,
     String? firstStep, String? implementationIntention,
     bool? isInbox,
+    String? owedTo, int? owedDirection, int? kind,
+    DateTime? decideBy, bool clearDecideBy = false,
+    String? decisionUnlock,
+    DateTime? answeredAt, bool clearAnsweredAt = false,
+    DateTime? releasedAt, bool clearReleasedAt = false,
+    String? releaseReason, bool? notThisWeek, String? antiReason,
   }) {
     return Task(
       id: id ?? this.id, title: title ?? this.title,
@@ -75,8 +112,29 @@ class Task {
       firstStep: firstStep ?? this.firstStep,
       implementationIntention: implementationIntention ?? this.implementationIntention,
       isInbox: isInbox ?? this.isInbox,
+      owedTo: owedTo ?? this.owedTo,
+      owedDirection: owedDirection ?? this.owedDirection,
+      kind: kind ?? this.kind,
+      decideBy: clearDecideBy ? null : (decideBy ?? this.decideBy),
+      decisionUnlock: decisionUnlock ?? this.decisionUnlock,
+      answeredAt: clearAnsweredAt ? null : (answeredAt ?? this.answeredAt),
+      releasedAt: clearReleasedAt ? null : (releasedAt ?? this.releasedAt),
+      releaseReason: releaseReason ?? this.releaseReason,
+      notThisWeek: notThisWeek ?? this.notThisWeek,
+      antiReason: antiReason ?? this.antiReason,
     );
   }
+
+  /// Someone is waiting on you. The heaviest thing a founder carries.
+  bool get isOwedByYou => owedTo.trim().isNotEmpty && owedDirection == 0;
+
+  /// It is sitting in someone else's court. Nudge it, do not schedule it.
+  bool get isBlockedOnThem => owedTo.trim().isNotEmpty && owedDirection == 1;
+
+  bool get isDecision => kind == 1;
+  bool get isReleased => releasedAt != null;
+  /// Raw means never triaged — and only raw loops decay.
+  bool get isRaw => answeredAt == null;
 
   bool get isSubtask => parentId != null;
   bool get isRecurring => recurrence > 0;
@@ -109,6 +167,16 @@ class Task {
     'firstStep': firstStep,
     'implementationIntention': implementationIntention,
     'isInbox': isInbox ? 1 : 0,
+    'owedTo': owedTo,
+    'owedDirection': owedDirection,
+    'kind': kind,
+    'decideBy': decideBy?.toIso8601String(),
+    'decisionUnlock': decisionUnlock,
+    'answeredAt': answeredAt?.toIso8601String(),
+    'releasedAt': releasedAt?.toIso8601String(),
+    'releaseReason': releaseReason,
+    'notThisWeek': notThisWeek ? 1 : 0,
+    'antiReason': antiReason,
   };
 
   factory Task.fromMap(Map<String, dynamic> map) => Task(
@@ -127,5 +195,15 @@ class Task {
     firstStep: map['firstStep'] as String? ?? '',
     implementationIntention: map['implementationIntention'] as String? ?? '',
     isInbox: (map['isInbox'] as int?) == 1,
+    owedTo: map['owedTo'] as String? ?? '',
+    owedDirection: (map['owedDirection'] as int?) ?? 0,
+    kind: (map['kind'] as int?) ?? 0,
+    decideBy: map['decideBy'] != null ? DateTime.parse(map['decideBy'] as String) : null,
+    decisionUnlock: map['decisionUnlock'] as String? ?? '',
+    answeredAt: map['answeredAt'] != null ? DateTime.parse(map['answeredAt'] as String) : null,
+    releasedAt: map['releasedAt'] != null ? DateTime.parse(map['releasedAt'] as String) : null,
+    releaseReason: map['releaseReason'] as String? ?? '',
+    notThisWeek: (map['notThisWeek'] as int?) == 1,
+    antiReason: map['antiReason'] as String? ?? '',
   );
 }

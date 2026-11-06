@@ -74,17 +74,17 @@ class _InboxScreenState extends State<InboxScreen> {
               child: Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(colors: [AppTheme.primary, AppTheme.primaryDeep]),
+                  color: AppTheme.ink,
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Row(children: [
-                  const Icon(Icons.inbox_rounded, color: Colors.white, size: 22),
+                  const Icon(Icons.inbox_rounded, color: AppTheme.onInk, size: 22),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Text('$total ${total == 1 ? "item" : "items"} waiting', style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w800)),
+                      Text('$total ${total == 1 ? "item" : "items"} waiting', style: const TextStyle(color: AppTheme.onInk, fontSize: 14, fontWeight: FontWeight.w800)),
                       const SizedBox(height: 2),
-                      Text('Swipe right to MIT, left to schedule.', style: TextStyle(color: Colors.white.withValues(alpha: 0.85), fontSize: 12)),
+                      Text('Swipe right to put it on today, left to schedule.', style: TextStyle(color: AppTheme.onInk.withValues(alpha: 0.65), fontSize: 12)),
                     ]),
                   ),
                 ]),
@@ -157,14 +157,14 @@ class _InboxScreenState extends State<InboxScreen> {
     } else {
       final ids = List<String>.from(plan.todayPlan!.mitTaskIds);
       if (ids.length >= 3) {
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Already 3 MITs. Replace one in the plan view.')));
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Today already has three. Swap one out when you plan.")));
         return;
       }
       if (!ids.contains(t.id)) ids.add(t.id);
       await plan.updateMITs(ids);
     }
-    await context.read<TasksProvider>().setInbox(t.id, false);
-    if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('"${t.title}" added as MIT')));
+    await context.read<TasksProvider>().commitToToday([t.id]);
+    if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('"${t.title}" is on today\'s list')));
   }
 
   Future<void> _scheduleTask(Task t) async {
@@ -216,7 +216,7 @@ class _InboxTaskRow extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Dismissible(
       key: ValueKey('inbox_task_${task.id}'),
-      background: _SwipeBg(color: AppTheme.primary, icon: Icons.star_rounded, label: 'MIT', align: Alignment.centerLeft),
+      background: _SwipeBg(color: AppTheme.primary, icon: Icons.star_rounded, label: 'TODAY', align: Alignment.centerLeft),
       secondaryBackground: _SwipeBg(color: AppTheme.warning, icon: Icons.calendar_today_rounded, label: 'Schedule', align: Alignment.centerRight),
       confirmDismiss: (dir) async {
         if (dir == DismissDirection.startToEnd) { onMIT(); return false; }
@@ -239,7 +239,7 @@ class _InboxTaskRow extends StatelessWidget {
                 child: Container(
                   width: 22, height: 22,
                   decoration: BoxDecoration(shape: BoxShape.circle, color: task.completed ? AppTheme.success : Colors.transparent, border: Border.all(color: task.completed ? AppTheme.success : Theme.of(context).dividerColor, width: 2)),
-                  child: task.completed ? const Icon(Icons.check_rounded, color: Colors.white, size: 14) : null,
+                  child: task.completed ? const Icon(Icons.check_rounded, color: AppTheme.onInk, size: 14) : null,
                 ),
               ),
               const SizedBox(width: 12),
@@ -316,7 +316,7 @@ class _SwipeBg extends StatelessWidget {
     padding: const EdgeInsets.symmetric(horizontal: 20),
     alignment: align,
     decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(12)),
-    child: Row(mainAxisSize: MainAxisSize.min, children: [Icon(icon, color: Colors.white, size: 18), const SizedBox(width: 6), Text(label, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700))]),
+    child: Row(mainAxisSize: MainAxisSize.min, children: [Icon(icon, color: AppTheme.onInk, size: 18), const SizedBox(width: 6), Text(label, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700))]),
   );
 }
 
