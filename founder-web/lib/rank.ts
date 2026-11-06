@@ -1,6 +1,6 @@
-import { dayKey, daysSince, diffDays, shortDay, weekday, type DayKey } from "./dates";
+import { daysSince, diffDays, shortDay, weekday, workDay, type DayKey } from "./dates";
 import {
-  FADE_DAYS, LATER_THAN_DAYS, LIST_HOLDS, STALE_DAYS,
+  CARRIED_LIMIT, FADE_DAYS, KEEP_DAYS, LATER_THAN_DAYS, LIST_HOLDS, NEW_GRACE_DAYS, OVERDUE_HOLD_DAYS, STALE_DAYS, TRASH_DAYS,
   type Task,
 } from "./model";
 
@@ -34,7 +34,10 @@ export function rate(t: Task, today: DayKey, now: Date): Rated {
 
   if (t.due) {
     const d = diffDays(t.due, today);
-    if (d < 0) parts.push({ pts: 120 + Math.min(30, -d * 5), why: -d === 1 ? "Overdue since yesterday" : `Overdue ${-d} days`, tone: "hot" });
+    // Long past its date, a deadline stops being one: flag it, but stop letting
+    // it sit on top of everything forever. The list asks for a new date instead.
+    if (d < -OVERDUE_HOLD_DAYS) parts.push({ pts: 30, why: `Overdue ${-d} days`, tone: "hot" });
+    else if (d < 0) parts.push({ pts: 120 + Math.min(30, -d * 5), why: -d === 1 ? "Overdue since yesterday" : `Overdue ${-d} days`, tone: "hot" });
     else if (d === 0) parts.push({ pts: 100, why: "Due today", tone: "hot" });
     else if (d === 1) parts.push({ pts: 60, why: "Due tomorrow", tone: "warm" });
     else if (d <= 3) parts.push({ pts: 40, why: `Due ${weekday(t.due)}`, tone: "warm" });
@@ -43,15 +46,18 @@ export function rate(t: Task, today: DayKey, now: Date): Rated {
 
   if (t.starred) parts.push({ pts: 50, why: "Starred", tone: "plain" });
 
+  // Left over once or twice: it was meant for that day, so offer it again.
+  // Past that, ranking it higher only builds a loop of re-picking and not
+  // doing — so it stops climbing, and the list asks what's going on instead.
   if (t.skips > 0 && t.lastPickedFor) {
     const ago = diffDays(today, t.lastPickedFor);
-    if (ago >= 1 && ago <= 2) {
+    if (t.skips >= CARRIED_LIMIT) {
+      parts.push({ pts: 0, why: `Carried over ${t.skips} times`, tone: "warm" });
+    } else if (ago >= 1 && ago <= 2) {
       parts.push({
         pts: 30,
-        why: t.skips >= 3
-          ? `Carried over ${t.skips} times — do it or let it go`
-          : ago === 1 ? "Left over from yesterday" : `Left over from ${weekday(t.lastPickedFor)}`,
-        tone: t.skips >= 3 ? "warm" : "plain",
+        why: ago === 1 ? "Left over from yesterday" : `Left over from ${weekday(t.lastPickedFor)}`,
+        tone: "plain",
       });
     }
   }
@@ -60,19 +66,46 @@ export function rate(t: Task, today: DayKey, now: Date): Rated {
 
   if (t.bumps > 0) parts.push({ pts: Math.min(3, t.bumps) * 16, why: `You wrote this down ${t.bumps + 1} times`, tone: "plain" });
 
+  if (isKept(t, now)) parts.push({ pts: 1, why: "You kept this", tone: "plain" });
+
   const age = daysSince(t.createdAt, now);
   if (age === 0) parts.push({ pts: 15, why: "", tone: "plain" });
   else if (age === 1) parts.push({ pts: 8, why: "", tone: "plain" });
 
   const idle = daysSince(t.touchedAt, now);
-  // A deadline inside the week is holding it up; sitting untouched is not neglect.
-  const held = t.due !== null && diffDays(t.due, today) <= LATER_THAN_DAYS;
-  const score = parts.reduce((s, p) => s + p.pts, 0) - (held ? 0 : Math.min(30, idle));
+  // A live deadline is holding it up; sitting untouched is not neglect.
+  const score = parts.reduce((s, p) => s + p.pts, 0) - (heldByDate(t, today) ? 0 : Math.min(30, idle));
 
   const best = parts.filter((p) => p.why).reduce<(typeof parts)[number] | null>((b, p) => (!b || p.pts > b.pts ? p : b), null);
   if (best) return { task: t, score, why: best.why, tone: best.tone };
-  if (idle >= 7) return { task: t, score, why: `Untouched ${idle} days`, tone: "quiet" };
+  if (idle >= 10) return { task: t, score, why: `Untouched ${idle} days`, tone: "quiet" };
   return { task: t, score, why: null, tone: "plain" };
+}
+
+/**
+ * Tasks finished per day over the last two weeks, or null when there's too
+ * little history to say. Gives the list's size a meaning you can feel:
+ * thirty things at three a day is ten days of work.
+ */
+export function pace(tasks: Task[], now: Date): number | null {
+  const done = tasks.filter((t) => !t.deleted && t.status === "done" && t.doneAt && daysSince(t.doneAt, now) < 14).length;
+  return done >= 7 ? done / 14 : null;
+}
+
+/** A deadline that is still meaningful: within the week ahead, or missed by less than OVERDUE_HOLD_DAYS. */
+function heldByDate(t: Task, today: DayKey): boolean {
+  if (!t.due) return false;
+  const d = diffDays(t.due, today);
+  return d <= LATER_THAN_DAYS && d >= -OVERDUE_HOLD_DAYS;
+}
+
+function isKept(t: Task, now: Date): boolean {
+  return !!t.keptAt && daysSince(t.keptAt, now) < KEEP_DAYS;
+}
+
+/** Never placed below the line: just written down, or kept on purpose. */
+function isProtected(t: Task, now: Date): boolean {
+  return daysSince(t.createdAt, now) < NEW_GRACE_DAYS || isKept(t, now);
 }
 
 function byRank(a: Rated, b: Rated): number {
@@ -101,20 +134,22 @@ export interface Shelf {
   today: Task[];
   /** Finished today, most recent first. */
   doneToday: Task[];
-  /** The list proper: ranked, at most LIST_HOLDS. */
+  /**
+   * The list proper, ranked. Holds LIST_HOLDS — more only when that many were
+   * just written down or kept, in which case `over` says so.
+   */
   ranked: Rated[];
   /** Below the line or stale. Clearing unless kept. */
   fading: Fading[];
   /** Snoozed, or due far enough out that it should not be in the way yet. Soonest first. */
   later: Task[];
+  /** How far past LIST_HOLDS the list is (new or kept tasks can push it over). */
+  over: number;
 }
 
-function fadeVerdict(r: Rated, index: number, idle: number): Fading["because"] | null {
-  const t = r.task;
-  // Neglect is the truer reason when both apply, so it is the one we say.
-  if (idle >= STALE_DAYS && !t.starred && !t.due) return "stale";
-  if (index >= LIST_HOLDS) return "below-line";
-  return null;
+/** Untouched for STALE_DAYS with no star and no live deadline holding it up. */
+function isStale(t: Task, today: DayKey, now: Date): boolean {
+  return daysSince(t.touchedAt, now) >= STALE_DAYS && !t.starred && !heldByDate(t, today) && !isProtected(t, now);
 }
 
 export function shelve(tasks: Task[], today: DayKey, now: Date): Shelf {
@@ -126,7 +161,7 @@ export function shelve(tasks: Task[], today: DayKey, now: Date): Shelf {
   for (const t of tasks) {
     if (t.deleted) continue;
     if (t.status === "done") {
-      if (t.doneAt && dayKey(new Date(t.doneAt)) === today) doneToday.push(t);
+      if (t.doneAt && workDay(new Date(t.doneAt)) === today) doneToday.push(t);
       continue;
     }
     if (t.status !== "open") continue;
@@ -138,22 +173,35 @@ export function shelve(tasks: Task[], today: DayKey, now: Date): Shelf {
   pool.sort(byRank);
   const ranked: Rated[] = [];
   const fading: Fading[] = [];
-  pool.forEach((r, i) => {
-    const because = fadeVerdict(r, i, daysSince(r.task.touchedAt, now));
-    if (!because) {
-      ranked.push(r);
-      return;
-    }
+  const fade = (r: Rated, because: Fading["because"]) => {
     const since = r.task.fadingSince ? daysSince(r.task.fadingSince, now) : 0;
     fading.push({ ...r, because, clearsIn: Math.max(0, FADE_DAYS - since) });
+  };
+
+  // Places on the list go first to what you just wrote or chose to keep; the
+  // rest are filled by rank. Neglect is the truer reason when a task is both
+  // stale and below the line, so stale is checked first.
+  const live = pool.filter((r) => {
+    if (!isStale(r.task, today, now)) return true;
+    fade(r, "stale");
+    return false;
   });
+  let free = Math.max(0, LIST_HOLDS - live.filter((r) => isProtected(r.task, now)).length);
+  for (const r of live) {
+    if (isProtected(r.task, now)) ranked.push(r);
+    else if (free > 0) {
+      ranked.push(r);
+      free--;
+    } else fade(r, "below-line");
+  }
+  fading.sort(byRank);
 
   todayList.sort((a, b) => (a.pickedAt ?? a.createdAt).localeCompare(b.pickedAt ?? b.createdAt));
   doneToday.sort((a, b) => (b.doneAt ?? "").localeCompare(a.doneAt ?? ""));
   const laterDay = (t: Task) => t.snoozedUntil ?? t.due ?? "9999";
   later.sort((a, b) => laterDay(a).localeCompare(laterDay(b)));
 
-  return { today: todayList, doneToday, ranked, fading, later };
+  return { today: todayList, doneToday, ranked, fading, later, over: Math.max(0, ranked.length - LIST_HOLDS) };
 }
 
 /**
@@ -163,21 +211,31 @@ export function shelve(tasks: Task[], today: DayKey, now: Date): Shelf {
  *     they rank up tomorrow and admit it when they keep slipping.
  *  2. Snoozes that are up come back, marked as such.
  *  3. Whatever is below the line or stale starts its fade; whatever recovered stops.
- *  4. Anything that has faded for FADE_DAYS is cleared to the archive.
+ *  4. Anything that has faded for FADE_DAYS is cleared to Recently deleted.
+ *  5. Anything deleted more than TRASH_DAYS ago is gone for good.
  *
  * Idempotent: running it twice in a row changes nothing the second time, which
  * matters because it runs on every load, focus and midnight.
+ *
+ * None of this counts as an edit. `updatedAt` is left alone, so housekeeping on
+ * a laptop that has been asleep all week can never outrank what you actually
+ * did on your phone this morning — every device works these out for itself.
  */
 export function tidy(tasks: Task[], today: DayKey, now: Date): Task[] {
   const iso = now.toISOString();
   const changed = new Map<string, Task>();
   const put = (t: Task, patch: Partial<Task>) => {
     const base = changed.get(t.id) ?? t;
-    changed.set(t.id, { ...base, ...patch, updatedAt: iso });
+    changed.set(t.id, { ...base, ...patch });
   };
 
   for (const t of tasks) {
-    if (t.deleted || t.status !== "open") continue;
+    if (t.deleted) continue;
+    if (t.status === "let-go") {
+      if (t.letGoAt && daysSince(t.letGoAt, now) >= TRASH_DAYS) put(t, { deleted: true });
+      continue;
+    }
+    if (t.status !== "open") continue;
     if (t.pickedFor && diffDays(t.pickedFor, today) < 0) {
       put(t, { pickedFor: null, pickedAt: null, skips: t.skips + 1, lastPickedFor: t.pickedFor });
     }

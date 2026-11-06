@@ -56,10 +56,46 @@ describe("parseCapture", () => {
   });
 });
 
+describe("leaves real words alone", () => {
+  it.each([
+    ["Reply to USA Today journalist", { title: "Reply to USA Today journalist", today: false }],
+    ["review today's numbers", { title: "review today's numbers", today: false }],
+    ["prep tomorrow's agenda", { title: "prep tomorrow's agenda", due: null }],
+    ["Pass the SAT", { title: "Pass the SAT", due: null }],
+    ["put on sun cream", { title: "put on sun cream", due: null }],
+    ["email Sun", { title: "email Sun", due: null }],
+    ["plan weekend offsite", { title: "plan weekend offsite", due: null }],
+    ["review monday's standup notes", { title: "review monday's standup notes", due: null }],
+  ])("%s", (input, expected) => {
+    expect(p(input)).toMatchObject(expected);
+  });
+
+  it("still reads the forms people really type", () => {
+    expect(p("Today: pay rent")).toMatchObject({ title: "pay rent", today: true });
+    expect(p("ship deck by Mon")).toMatchObject({ title: "ship deck", due: "2026-11-09" });
+    expect(p("ship deck by Monday")).toMatchObject({ title: "ship deck", due: "2026-11-09" });
+    expect(p("plan offsite this weekend")).toMatchObject({ title: "plan offsite", due: "2026-11-07" });
+    expect(p("clean garage weekend")).toMatchObject({ title: "clean garage", due: "2026-11-07" });
+  });
+
+  it("lets a tapped chip turn a reading off", () => {
+    expect(p("Read The Weekend Today")).toMatchObject({ today: false });
+    expect(parseCapture("pay rent today", TODAY, { today: true })).toMatchObject({ title: "pay rent today", today: false });
+    expect(parseCapture("send invoice tomorrow", TODAY, { due: true })).toMatchObject({ title: "send invoice tomorrow", due: null });
+    expect(parseCapture("! fix it", TODAY, { star: true })).toMatchObject({ starred: false });
+  });
+});
+
 describe("splitDump", () => {
   it("strips bullets, numbers and checkboxes", () => {
-    expect(splitDump("- one\n* two\n• three\n4. four\n[ ] five\n- [x] six\n\n   \nseven")).toEqual([
+    expect(splitDump("- one\n* two\n• three\n4. four\n[ ] five\n- [ ] six\n\n   \nseven")).toEqual([
       "one", "two", "three", "four", "five", "six", "seven",
+    ]);
+  });
+
+  it("skips lines already done or moved, and keeps numbers that aren't bullets", () => {
+    expect(splitDump("[x] shipped\n- [x] also done\n[>] sent on\n1.5x growth plan\n2) real item")).toEqual([
+      "1.5x growth plan", "real item",
     ]);
   });
 });

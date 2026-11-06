@@ -1,6 +1,6 @@
-import { dayKey, daysSince } from "./dates";
-import { MAX_STARS, makeNote, makeTask, normalize, type Note, type Rec, type Task } from "./model";
-import { parseCapture, sameTask, splitDump } from "./parse";
+import { daysSince, workDay } from "./dates";
+import { MAX_STARS, TRASH_DAYS, makeNote, makeTask, normalize, type Note, type Rec, type Task } from "./model";
+import { parseCapture, sameTask, splitDump, type Literal } from "./parse";
 import { tidy } from "./rank";
 
 /**
@@ -156,7 +156,7 @@ export function starCount(): number {
 
 export interface CaptureResult {
   added: Task[];
-  /** Already on the list (or recently let go) — moved up instead of duplicated. */
+  /** Already on the list — moved up instead of duplicated. */
   bumped: Task[];
   /** Asked for a star but MAX_STARS were already taken. */
   starRefused: boolean;
@@ -168,28 +168,37 @@ export interface CaptureResult {
 /**
  * Capture one line or a whole dump. Never blocks, never asks.
  *
- * A line that matches something already open (or let go in the last 60 days)
- * bumps that task instead of adding a twin: writing it down again is the
- * strongest signal there is that it matters.
+ * A line that matches something still open bumps that task instead of adding a
+ * twin: writing it down again is the strongest signal there is that it matters.
+ *
+ * The same goes for something that faded off the list on its own — an idea that
+ * comes back was worth keeping, so it returns with its history. What you
+ * deleted yourself, or finished, is never revived: "call the bank" next month
+ * is a new task.
  */
-export function capture(text: string, now = new Date()): CaptureResult {
-  const today = dayKey(now);
+export function capture(text: string, now = new Date(), literal: Literal = {}): CaptureResult {
+  const today = workDay(now);
   const lines = text.includes("\n") ? splitDump(text) : [text.trim()].filter(Boolean);
   const res: CaptureResult = { added: [], bumped: [], starRefused: false, undo: [], createdIds: [] };
   const working = { ...state.db.tasks };
   let stars = starCount();
 
   for (const line of lines) {
-    const p = parseCapture(line, today);
+    const p = parseCapture(line, today, literal);
     const wantStar = p.starred && stars < MAX_STARS;
     if (p.starred && !wantStar) res.starRefused = true;
 
-    const twin = Object.values(working).find(
-      (t) =>
-        !t.deleted &&
-        (t.status === "open" || (t.status === "let-go" && t.letGoAt && daysSince(t.letGoAt, now) <= 60)) &&
-        sameTask(t.title, p.title),
-    );
+    const twin =
+      Object.values(working).find((t) => !t.deleted && t.status === "open" && sameTask(t.title, p.title)) ??
+      Object.values(working).find(
+        (t) =>
+          !t.deleted &&
+          t.status === "let-go" &&
+          t.letGoReason === "faded" &&
+          !!t.letGoAt &&
+          daysSince(t.letGoAt, now) < TRASH_DAYS &&
+          sameTask(t.title, p.title),
+      );
 
     if (twin) {
       if (!res.createdIds.includes(twin.id) && !res.undo.some((u) => u.id === twin.id)) res.undo.push(state.db.tasks[twin.id]);
@@ -242,7 +251,7 @@ export function undoCapture(res: CaptureResult, now = new Date()) {
 }
 
 export function pick(ids: string[], now = new Date()): Rec[] {
-  const today = dayKey(now);
+  const today = workDay(now);
   const prev: Rec[] = [];
   const next: Task[] = [];
   ids.forEach((id, i) => {
@@ -267,25 +276,105 @@ export function pick(ids: string[], now = new Date()): Rec[] {
   return prev;
 }
 
+/** Put it on Today, at the top — for the thing that keeps slipping. */
+export function pickFirst(id: string, now = new Date()): Rec[] {
+  const today = workDay(now);
+  const t = state.db.tasks[id];
+  if (!t) return [];
+  const first = Object.values(state.db.tasks)
+    .filter((x) => x.pickedFor === today && x.status === "open" && x.pickedAt)
+    .map((x) => x.pickedAt!)
+    .sort()[0];
+  const at = first ? new Date(new Date(first).getTime() - 1000).toISOString() : iso(now);
+  write([{ ...t, status: "open", pickedFor: today, pickedAt: at, lastPickedFor: today, snoozedUntil: null, fadingSince: null, touchedAt: iso(now), updatedAt: iso(now) }]);
+  return [t];
+}
+
 export const unpick = (id: string, now = new Date()) => patchTask(id, { pickedFor: null, pickedAt: null }, now);
 
 export const complete = (id: string, now = new Date()) =>
   patchTask(id, { status: "done", doneAt: iso(now), fadingSince: null }, now);
 
-export const reopen = (id: string, now = new Date()) =>
-  patchTask(id, { status: "open", doneAt: null, letGoAt: null, letGoReason: null, fadingSince: null }, now);
+/** Back to open. Off Today unless it was picked today — an old pick must not count as carried over. */
+export function reopen(id: string, now = new Date()): Rec[] {
+  const t = state.db.tasks[id];
+  if (!t) return [];
+  const stillToday = t.pickedFor === workDay(now);
+  return patchTask(
+    id,
+    {
+      status: "open",
+      doneAt: null,
+      letGoAt: null,
+      letGoReason: null,
+      fadingSince: null,
+      pickedFor: stillToday ? t.pickedFor : null,
+      pickedAt: stillToday ? t.pickedAt : null,
+    },
+    now,
+  );
+}
 
-export const letGo = (id: string, now = new Date()) =>
+/** Delete: into Recently deleted, restorable for TRASH_DAYS. */
+export const remove = (id: string, now = new Date()) =>
   patchTask(id, { status: "let-go", letGoAt: iso(now), letGoReason: "you", fadingSince: null, pickedFor: null, pickedAt: null }, now, false);
 
-/** Rescue something that is fading. Resets its clock. */
-export const keep = (id: string, now = new Date()) => patchTask(id, { fadingSince: null }, now);
+/**
+ * Fold a duplicate into the task that stays. Nothing written on either is lost:
+ * details are joined, the earlier deadline and any star survive, and the merged
+ * one counts as one more time you wrote it down.
+ */
+export function mergeTasks(keepId: string, dropId: string, now = new Date()): Rec[] {
+  const keep = state.db.tasks[keepId];
+  const drop = state.db.tasks[dropId];
+  if (!keep || !drop || keepId === dropId) return [];
+  const details = [keep.details.trim(), drop.details.trim(), drop.title !== keep.title ? `Also written as: ${drop.title}` : ""]
+    .filter(Boolean)
+    .join("\n\n");
+  const due = keep.due && drop.due ? (keep.due < drop.due ? keep.due : drop.due) : keep.due ?? drop.due;
+  write([
+    {
+      ...keep,
+      details,
+      due,
+      starred: keep.starred || (drop.starred && starCount() < MAX_STARS),
+      bumps: keep.bumps + drop.bumps + 1,
+      skips: Math.max(keep.skips, drop.skips),
+      touchedAt: iso(now),
+      fadingSince: null,
+      updatedAt: iso(now),
+    },
+    { ...drop, deleted: true, updatedAt: iso(now) },
+  ]);
+  return [keep, drop];
+}
+
+/** Delete several at once — "clear everything below the line" — as one undoable step. */
+export function removeMany(ids: string[], now = new Date()): Rec[] {
+  const prev = ids.map((id) => state.db.tasks[id]).filter(Boolean);
+  write(
+    prev.map((t) => ({
+      ...t,
+      status: "let-go" as const,
+      letGoAt: iso(now),
+      letGoReason: "you" as const,
+      fadingSince: null,
+      pickedFor: null,
+      pickedAt: null,
+      updatedAt: iso(now),
+    })),
+  );
+  return prev;
+}
+
+/** Rescue something that is fading: it holds a place above the line for KEEP_DAYS. */
+export const keep = (id: string, now = new Date()) => patchTask(id, { fadingSince: null, keptAt: iso(now) }, now);
 
 export const snooze = (id: string, until: string, now = new Date()) =>
   patchTask(id, { snoozedUntil: until, pickedFor: null, pickedAt: null, fadingSince: null, wokeOn: null }, now);
 
 export const unsnooze = (id: string, now = new Date()) =>
-  patchTask(id, { snoozedUntil: null, wokeOn: dayKey(now), fadingSince: null }, now);
+  patchTask(id, { snoozedUntil: null, wokeOn: workDay(now), fadingSince: null }, now);
 
 export const setDue = (id: string, due: string | null, now = new Date()) => patchTask(id, { due }, now);
 
@@ -295,7 +384,9 @@ export function editTask(id: string, patch: { title?: string; details?: string }
   const title = patch.title === undefined ? t.title : patch.title.trim() || t.title;
   const details = patch.details === undefined ? t.details : patch.details;
   if (title === t.title && details === t.details) return [];
-  return patchTask(id, { title, details }, now);
+  // Rewriting the title is how a stuck task gets made smaller — that's a new
+  // commitment, so the carried-over count starts again.
+  return patchTask(id, { title, details, ...(title !== t.title ? { skips: 0 } : {}) }, now);
 }
 
 /** Returns false (and changes nothing) when starring would exceed MAX_STARS. */
@@ -372,9 +463,10 @@ export function sendTodos(noteId: string, now = new Date()): CaptureResult | nul
 // Housekeeping, sync and backup
 // ---------------------------------------------------------------------------
 
+/** Housekeeping is worked out on each device and never synced as an edit (see tidy). */
 export function runTidy(now = new Date()) {
   if (!state.loaded) return;
-  write(tidy(Object.values(state.db.tasks), dayKey(now), now));
+  write(tidy(Object.values(state.db.tasks), workDay(now), now), false);
 }
 
 function find(id: string): Rec | undefined {

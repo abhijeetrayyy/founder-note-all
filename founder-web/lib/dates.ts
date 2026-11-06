@@ -15,6 +15,18 @@ export function dayKey(d: Date = new Date()): DayKey {
   return `${d.getFullYear()}-${m}-${day}`;
 }
 
+/**
+ * The day starts at 4am, not midnight. Someone still working at 12:30am is
+ * finishing their day, not starting the next one — a midnight cut-off would
+ * empty Today under them and count what they picked as "carried over".
+ */
+export const DAY_STARTS_AT_HOUR = 4;
+
+/** The working day a moment belongs to. Use this, not dayKey, for "today". */
+export function workDay(d: Date = new Date()): DayKey {
+  return dayKey(new Date(d.getTime() - DAY_STARTS_AT_HOUR * 3_600_000));
+}
+
 export function fromKey(k: DayKey): Date {
   const [y, m, d] = k.split("-").map(Number);
   return new Date(y, m - 1, d);
@@ -31,11 +43,11 @@ export function diffDays(a: DayKey, b: DayKey): number {
   return Math.round((fromKey(a).getTime() - fromKey(b).getTime()) / 86_400_000);
 }
 
-/** Calendar days between the day an ISO timestamp fell on and today. Never negative. */
+/** Working days between an ISO timestamp and now. Never negative. */
 export function daysSince(iso: string, now: Date): number {
   const then = new Date(iso);
   if (Number.isNaN(then.getTime())) return 0;
-  return Math.max(0, diffDays(dayKey(now), dayKey(then)));
+  return Math.max(0, diffDays(workDay(now), workDay(then)));
 }
 
 const WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];

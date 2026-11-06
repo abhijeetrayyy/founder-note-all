@@ -108,7 +108,8 @@ export function Shell({ children }: { children: React.ReactNode }) {
         </button>
       </header>
 
-      <div className="mx-auto max-w-5xl px-4 sm:px-6">
+      {/* Pinned while you scroll: wherever you are in the app, the box is right there. */}
+      <div className="sticky top-0 z-20 mx-auto max-w-5xl bg-desk/90 px-4 pb-2 pt-[max(0.5rem,env(safe-area-inset-top))] backdrop-blur sm:px-6">
         <Capture />
         {saveFailed && (
           <p className="mt-3 rounded-lg border border-red/30 bg-red/5 px-3 py-2 text-[13px] text-red">
@@ -117,7 +118,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         )}
       </div>
 
-      <main className="mx-auto max-w-5xl px-4 pb-32 pt-8 sm:px-6 md:pb-20 md:pt-10">
+      <main className="mx-auto max-w-5xl px-4 pb-32 pt-6 sm:px-6 md:pb-20 md:pt-8">
         {loaded && today ? children : <div className="h-64" aria-busy="true" />}
       </main>
 
@@ -153,7 +154,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
       </nav>
 
       <Toaster />
-      {sheet?.kind === "task" && <TaskSheet id={sheet.id} />}
+      {sheet?.kind === "task" && <TaskSheet key={sheet.id} id={sheet.id} rewrite={sheet.rewrite} />}
       {sheet?.kind === "sync" && <SyncSheet />}
     </div>
   );

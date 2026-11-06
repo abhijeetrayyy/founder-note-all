@@ -2,13 +2,14 @@
 
 import clsx from "clsx";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { shortDay } from "@/lib/dates";
+import { shortDay, workDay } from "@/lib/dates";
 import { useToday } from "@/lib/hooks";
-import { MAX_STARS } from "@/lib/model";
-import { parseCapture, splitDump } from "@/lib/parse";
-import { capture, undoCapture, type CaptureResult } from "@/lib/store";
+import { LIST_HOLDS, MAX_STARS } from "@/lib/model";
+import { parseCapture, splitDump, type Literal } from "@/lib/parse";
+import { shelve } from "@/lib/rank";
+import { capture, getState, undoCapture, type CaptureResult } from "@/lib/store";
 import { toast } from "@/lib/toast";
-import { Plus, Star, Sun } from "./icons";
+import { Plus, Star, Sun, X } from "./icons";
 
 function say(r: CaptureResult, today: string): string {
   const n = r.added.length;
@@ -27,7 +28,31 @@ function say(r: CaptureResult, today: string): string {
     s = `Added ${n}${b ? `, ${b} already there` : ""}${onToday ? ` · ${onToday} on Today` : ""}`;
   }
   if (r.starRefused) s += ` · ${MAX_STARS} already starred, so no star`;
+  // Say so the moment the list overflows, not days later when things fade.
+  const now = new Date();
+  const over = shelve(Object.values(getState().db.tasks), workDay(now), now).over;
+  if (over > 0) s += ` · your list is ${over} over ${LIST_HOLDS}`;
   return s;
+}
+
+function Chip({ children, tone, onClear, label }: { children: React.ReactNode; tone: "pen" | "plain"; onClear: () => void; label: string }) {
+  return (
+    <button
+      type="button"
+      // Keep focus in the input so typing carries on after the tap.
+      onMouseDown={(e) => e.preventDefault()}
+      onClick={onClear}
+      title={`Tap if you didn't mean ${label}`}
+      aria-label={`Don't read this as ${label}`}
+      className={clsx(
+        "group flex items-center gap-1 rounded-md px-2 py-1 text-[12px]",
+        tone === "pen" ? "bg-pen-tint font-medium text-pen" : "bg-sunk text-ink-2",
+      )}
+    >
+      {children}
+      <X className="h-3 w-3 opacity-50 group-hover:opacity-100" />
+    </button>
+  );
 }
 
 /**
@@ -37,9 +62,14 @@ function say(r: CaptureResult, today: string): string {
 export function Capture() {
   const [text, setText] = useState("");
   const [focused, setFocused] = useState(false);
+  // Readings the person tapped away: "no, I meant the word".
+  const [literal, setLiteral] = useState<Literal>({});
   const ref = useRef<HTMLInputElement>(null);
   const today = useToday();
-  const parsed = useMemo(() => (text.trim() && today ? parseCapture(text, today) : null), [text, today]);
+  const parsed = useMemo(
+    () => (text.trim() && today ? parseCapture(text, today, literal) : null),
+    [text, today, literal],
+  );
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -63,9 +93,10 @@ export function Capture() {
 
   function submit(raw: string) {
     if (!raw.trim() || !today) return;
-    const res = capture(raw);
+    const res = capture(raw, new Date(), literal);
     if (!res.added.length && !res.bumped.length) return;
     setText("");
+    setLiteral({});
     toast(say(res, today), { label: "Undo", run: () => undoCapture(res) });
   }
 
@@ -88,14 +119,15 @@ export function Capture() {
         <input
           ref={ref}
           value={text}
-          onChange={(e) => setText(e.target.value)}
+          onChange={(e) => {
+            setText(e.target.value);
+            if (!e.target.value) setLiteral({});
+          }}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           onKeyDown={(e) => {
-            if (e.key === "Escape") {
-              setText("");
-              ref.current?.blur();
-            }
+            // Esc steps out of the box; what you typed stays put.
+            if (e.key === "Escape") ref.current?.blur();
           }}
           onPaste={(e) => {
             const pasted = e.clipboardData.getData("text");
@@ -112,17 +144,19 @@ export function Capture() {
         {parsed && (parsed.today || parsed.due || parsed.starred) ? (
           <span className="flex shrink-0 items-center gap-1.5">
             {parsed.starred && (
-              <span className="flex items-center gap-1 rounded-md bg-sunk px-2 py-1 text-[12px] text-ink-2">
+              <Chip tone="plain" label="a star" onClear={() => setLiteral((l) => ({ ...l, star: true }))}>
                 <Star filled className="h-3 w-3" /> Star
-              </span>
+              </Chip>
             )}
             {parsed.today && (
-              <span className="flex items-center gap-1 rounded-md bg-pen-tint px-2 py-1 text-[12px] font-medium text-pen">
+              <Chip tone="pen" label="today" onClear={() => setLiteral((l) => ({ ...l, today: true }))}>
                 <Sun className="h-3 w-3" /> Today
-              </span>
+              </Chip>
             )}
             {parsed.due && today && (
-              <span className="rounded-md bg-sunk px-2 py-1 text-[12px] text-ink-2">Due {shortDay(parsed.due, today)}</span>
+              <Chip tone="plain" label="a deadline" onClear={() => setLiteral((l) => ({ ...l, due: true }))}>
+                Due {shortDay(parsed.due, today)}
+              </Chip>
             )}
           </span>
         ) : (
@@ -132,10 +166,10 @@ export function Capture() {
         )}
       </label>
       {focused && !text && (
-        <p className="pointer-events-none absolute left-4 right-4 top-full mt-2 animate-fade text-[12.5px] text-ink-3">
-          Goes to your list. Type <b className="font-medium text-ink-2">today</b> to put it on Today, a day like{" "}
-          <b className="font-medium text-ink-2">fri</b> or <b className="font-medium text-ink-2">12 nov</b> for a deadline,{" "}
-          <b className="font-medium text-ink-2">!</b> to star. Paste a list to add many.
+        <p className="pointer-events-none absolute inset-x-0 top-full z-10 mt-2 animate-fade rounded-xl border border-hair bg-card px-4 py-3 text-[13px] leading-relaxed text-ink-2 shadow-lift">
+          Goes to your list. Add <b className="font-medium text-ink">today</b> to put it on Today, a day like{" "}
+          <b className="font-medium text-ink">fri</b> or <b className="font-medium text-ink">12 nov</b> for a deadline,{" "}
+          <b className="font-medium text-ink">!</b> to star it. Paste a list to add many at once.
         </p>
       )}
     </form>

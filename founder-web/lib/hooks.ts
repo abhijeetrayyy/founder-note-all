@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useSyncExternalStore } from "react";
-import { dayKey } from "./dates";
+import { workDay } from "./dates";
 import type { Note, Task } from "./model";
 import { shelve, type Shelf } from "./rank";
 import { getServerState, getState, subscribe } from "./store";
@@ -53,7 +53,7 @@ export function useNow(): Date | null {
 
 export function useToday(): string | null {
   const now = useNow();
-  return now ? dayKey(now) : null;
+  return now ? workDay(now) : null;
 }
 
 export function useTasks(): Task[] {
@@ -69,5 +69,5 @@ export function useNotes(): Note[] {
 export function useShelf(): Shelf | null {
   const tasks = useTasks();
   const now = useNow();
-  return useMemo(() => (now ? shelve(tasks, dayKey(now), now) : null), [tasks, now]);
+  return useMemo(() => (now ? shelve(tasks, workDay(now), now) : null), [tasks, now]);
 }

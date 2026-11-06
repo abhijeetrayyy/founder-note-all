@@ -2,15 +2,22 @@
 
 import clsx from "clsx";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useMemo, useState } from "react";
 import * as A from "@/lib/actions";
-import { dayKey, diffDays, longDate, weekday } from "@/lib/dates";
+import { dayKey, daysSince, diffDays, longDate, weekday } from "@/lib/dates";
 import { useTasks, useToday } from "@/lib/hooks";
-import type { Task } from "@/lib/model";
+import { TRASH_DAYS, type Task } from "@/lib/model";
 import { ChevronLeft, Restore, Search } from "@/components/icons";
 import { TaskTitle } from "@/components/task-bits";
 
 const SHOW = 300;
+
+function deletedWhy(t: Task): string {
+  const left = t.letGoAt ? Math.max(0, TRASH_DAYS - daysSince(t.letGoAt, new Date())) : TRASH_DAYS;
+  const how = t.letGoReason === "faded" ? "Faded off your list" : "Deleted";
+  return `${how} · ${left === 0 ? "goes today" : `${left} ${left === 1 ? "day" : "days"} left`}`;
+}
 
 function dayLabel(k: string, today: string): string {
   const d = diffDays(today, k);
@@ -20,9 +27,18 @@ function dayLabel(k: string, today: string): string {
 }
 
 export default function ArchivePage() {
+  return (
+    <Suspense fallback={null}>
+      <Archive />
+    </Suspense>
+  );
+}
+
+function Archive() {
   const tasks = useTasks();
   const today = useToday();
-  const [tab, setTab] = useState<"done" | "let-go">("done");
+  const params = useSearchParams();
+  const [tab, setTab] = useState<"done" | "let-go">(params.get("tab") === "deleted" ? "let-go" : "done");
   const [q, setQ] = useState("");
 
   const groups = useMemo(() => {
@@ -54,14 +70,18 @@ export default function ArchivePage() {
       <Link href="/list" className="btn-quiet -ml-2 px-2">
         <ChevronLeft className="h-4 w-4" /> List
       </Link>
-      <h1 className="mt-2 font-display text-[30px] font-semibold leading-none tracking-[-0.03em]">Done and let go</h1>
-      <p className="mt-2 text-[14px] text-ink-2">Nothing here is lost. Restore anything back to your list.</p>
+      <h1 className="mt-2 font-display text-[30px] font-semibold leading-none tracking-[-0.03em]">Done and deleted</h1>
+      <p className="mt-2 text-[14px] text-ink-2">
+        {tab === "done"
+          ? "Everything you finished. Reopen anything you didn't really finish."
+          : `Deleted tasks stay here for ${TRASH_DAYS} days, then they're gone for good.`}
+      </p>
 
       <div className="mt-6 flex flex-wrap items-center gap-3">
         <div role="tablist" className="inline-flex rounded-lg bg-sunk p-1">
           {([
             ["done", `Done · ${counts.done}`],
-            ["let-go", `Let go · ${counts.letGo}`],
+            ["let-go", `Recently deleted · ${counts.letGo}`],
           ] as const).map(([key, label]) => (
             <button
               key={key}
@@ -70,7 +90,7 @@ export default function ArchivePage() {
               aria-selected={tab === key}
               onClick={() => setTab(key)}
               className={clsx(
-                "rounded-md px-3 py-1.5 text-[13.5px] font-medium transition-colors",
+                "min-h-9 rounded-md px-3 py-1.5 text-[13.5px] font-medium transition-colors",
                 tab === key ? "bg-card text-ink shadow-card" : "text-ink-2 hover:text-ink",
               )}
             >
@@ -92,7 +112,7 @@ export default function ArchivePage() {
 
       {groups.length === 0 ? (
         <p className="mt-8 text-[14px] text-ink-2">
-          {q ? "Nothing matches that." : tab === "done" ? "Finished tasks land here." : "Things you let go, or that faded off the list, land here."}
+          {q ? "Nothing matches that." : tab === "done" ? "Finished tasks land here." : "Nothing deleted in the last 30 days."}
         </p>
       ) : (
         groups.map((g) => (
@@ -105,7 +125,7 @@ export default function ArchivePage() {
                     task={t}
                     struck={tab === "done"}
                     faded={tab === "let-go"}
-                    why={tab === "let-go" ? (t.letGoReason === "faded" ? "Faded off the list" : "You let it go") : null}
+                    why={tab === "let-go" ? deletedWhy(t) : null}
                     tone="quiet"
                   />
                   <button type="button" onClick={() => A.restoreTask(t.id)} className="btn-pen shrink-0 px-2.5">

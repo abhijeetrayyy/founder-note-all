@@ -6,27 +6,49 @@ The app is `founder-web/`: three screens — **Today**, **List**, **Notes** — 
 
 ## How it works
 
-**Capture.** Type in the box and press Enter. It goes to your list. Paste several lines and each becomes its own task. Words it understands:
+**Capture.** Type in the box and press Enter. It goes to your list. The box stays pinned to the top while you scroll. Paste several lines and each becomes its own task; lines already ticked off (`[x]`) are skipped. Words it understands:
 
 | You type | It does |
 | --- | --- |
 | `today` / `tonight` | Puts it straight on Today |
-| `tomorrow`, `fri`, `next week`, `in 3 days`, `12 nov` | Sets a deadline |
+| `tomorrow`, `fri`, `by Monday`, `next week`, `in 3 days`, `12 nov` | Sets a deadline |
 | `!` (alone, or at the start) | Stars it |
 
-Writing something that's already on the list doesn't add a twin. It bumps the one that's there ("You wrote this down 3 times").
+What it understood shows as chips beside the text. If you meant the word (say, "USA Today"), tap the chip and it stays part of the title. Writing something that's already on the list bumps that task instead of adding a twin ("You wrote this down 3 times").
 
-**Today** is an index card. Pick a few from *Up next*, finish them, then pick more. When the card is empty, **Pick these 3** takes the top three. Anything you don't finish goes back to the list at midnight, counted as *carried over*. After it's been carried three times, the list tells you to do it or let it go.
+**Today** is an index card. Pick a few from *Up next*, finish them, then pick more. When the card is empty, **Pick these 3** takes the top three. The day turns over at **4am**, not midnight, so late nights aren't punished. Anything you didn't finish goes back to the list, marked as carried over.
 
-**The list ranks itself** using facts the task already carries: deadlines first, then stars, carried-over tasks, and things you wrote down more than once. Every day a task sits untouched costs it a little. Each row says why it's where it is.
+**The list ranks itself** by deadlines first, then stars, tasks left over from yesterday, and things you wrote down more than once. Every day a task sits untouched costs it a little, and each row says why it's where it is. Two limits stop tasks gaming the ranking:
 
-**The list stays small.** It holds **30**. Anything below the line, or untouched for **3 weeks** with no star or deadline holding it up, starts to *fade*. **7 days** later it's cleared to the archive unless you hit **Keep**. Nothing is deleted: *Done and let go* holds it all, and you can restore anything.
+- After three carry-overs a task stops climbing; the list asks about it instead.
+- A deadline missed by more than a week stops outranking everything.
+
+**One thing to decide.** At the top of List, the app asks one question at a time, with likely answers as buttons:
+- *Overdue:* do it today, move it a week, or delete it.
+- *Carried over 3 times:* do it first today, make it smaller (rewrite it as the first step), or delete it.
+- *Looks like a duplicate:* merge them; nothing written on either is lost.
+- *Untouched 2 weeks:* keep it, not this month, or delete it.
+
+Skip stays quiet for a week. It asks at most **3 questions a day**, so it can't nag.
+
+**The list stays small.** It holds **30**, and shows how long that is at your pace ("≈ 8 days of work"). Some things fade, and are deleted 7 days later unless you tap **Keep**:
+- anything below the line
+- anything untouched for 3 weeks with no star or live deadline holding it up
+
+Keep holds a task's place for a week. Something you just wrote never starts below the line; older tasks give way instead. **Delete all below the line** clears them in one tap. The list tells you once a week what faded. Something that faded comes back with its history if you write it down again.
+
+**Deleting.** Every task has **Delete**:
+- in its sheet (tap the title)
+- as a trash icon on hover (desktop)
+- by swiping left (phone)
+
+Swipe right puts it on Today. On Today, swipe right is Done and swipe left sends it back to the list. Nothing asks "are you sure?": you get **Undo**, and deleted tasks stay in **Recently deleted** for 30 days before they're gone for good.
 
 Other limits: **5 stars** at most (if everything is starred, nothing is). Deadlines more than a week out and snoozed tasks wait under **Later**, out of the way, and come back on their own.
 
-**Notes** are plain text. The first line is the title. Write `[ ] something` on a line and **Send to list** turns it into a task, then marks the line `[>]`.
+**Notes** are plain text. The first line is the title. Write `[ ] something` on a line and **Send to list** turns it into a task, then marks the line `[>]`. Swipe a note left to delete it.
 
-All of these numbers are in one place: `founder-web/lib/model.ts`.
+All of the limits are in `founder-web/lib/model.ts`, and the questions' rules are in `founder-web/lib/suggest.ts`.
 
 ## Run it
 
@@ -34,7 +56,7 @@ All of these numbers are in one place: `founder-web/lib/model.ts`.
 cd founder-web
 npm install
 npm run dev        # http://localhost:3000
-npm test           # the ranking, fading, capture and sync-merge rules
+npm test           # ranking, fading, questions, capture parsing, undo and sync merge
 npm run build      # static site in out/ — deploy anywhere (Vercel works as-is)
 ```
 
@@ -53,9 +75,9 @@ To share one list between your phone and your laptop, turn on sync:
 3. Put the project URL and anon key in `founder-web/.env.local` (see `.env.local.example`), then rebuild and redeploy.
 4. Open **Sync & backup** in the app and sign in. Everything already on that device goes up on the first sign-in.
 
-Each task and note syncs as one record. If the same record was edited on two devices, the most recent edit wins.
+Each task and note syncs as one record. If the same record was edited on two devices, the most recent edit wins. The app's own housekeeping (rollover at 4am, fading, emptying Recently deleted) is never synced as an edit. Each device works it out for itself, so an old laptop waking up can't overwrite what you did on your phone.
 
-> The Supabase project in the current `.env.local` no longer resolves (it was probably paused and removed while the app sat unused). Until you replace those two values, the app runs device-only.
+Free Supabase projects pause after about a week without use. If that happens, the app keeps working on each device and catches up when you resume the project in the Supabase dashboard.
 
 ## What's not here any more
 

@@ -3,10 +3,10 @@
 import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
 import * as A from "@/lib/actions";
-import { addDays, dayKey, shortDay } from "@/lib/dates";
+import { addDays, dayKey, daysSince, shortDay } from "@/lib/dates";
 import { useShelf, useStore, useToday } from "@/lib/hooks";
 import type { Shelf } from "@/lib/rank";
-import { FADE_DAYS, type Task } from "@/lib/model";
+import { FADE_DAYS, LIST_HOLDS, STALE_DAYS, TRASH_DAYS, type Task } from "@/lib/model";
 import { deleteTask, editTask, restore, setDue, unsnooze } from "@/lib/store";
 import { toast } from "@/lib/toast";
 import { closeSheet } from "@/lib/ui";
@@ -17,7 +17,9 @@ function where(t: Task, today: string, shelf: Shelf | null): { text: string; ton
   if (t.status === "done") return { text: `Done ${t.doneAt ? shortDay(dayKey(new Date(t.doneAt)), today) : ""}`, tone: "text-ink-2" };
   if (t.status === "let-go") {
     const when = t.letGoAt ? shortDay(dayKey(new Date(t.letGoAt)), today) : "";
-    return { text: t.letGoReason === "faded" ? `Cleared ${when} after fading` : `Let go ${when}`, tone: "text-ink-3" };
+    const left = t.letGoAt ? Math.max(0, TRASH_DAYS - daysSince(t.letGoAt, new Date())) : TRASH_DAYS;
+    const what = t.letGoReason === "faded" ? `Faded off your list ${when}` : `Deleted ${when}`;
+    return { text: `${what} · restorable for ${left} more ${left === 1 ? "day" : "days"}`, tone: "text-ink-3" };
   }
   if (t.pickedFor === today) return { text: "On Today", tone: "text-pen" };
   if (t.snoozedUntil && t.snoozedUntil > today) return { text: `Snoozed till ${shortDay(t.snoozedUntil, today)}`, tone: "text-ink-2" };
@@ -43,12 +45,20 @@ function AutoText({
   className,
   placeholder,
   minRows = 1,
+  singleLine,
+  selectOnOpen,
+  label,
 }: {
   value: string;
   onSave: (v: string) => void;
   className: string;
   placeholder?: string;
   minRows?: number;
+  /** Titles: Enter saves instead of adding a line break. */
+  singleLine?: boolean;
+  /** Focus and select everything on open, ready to be retyped. */
+  selectOnOpen?: boolean;
+  label: string;
 }) {
   const [v, setV] = useState(value);
   const ref = useRef<HTMLTextAreaElement>(null);
@@ -65,6 +75,13 @@ function AutoText({
     el.style.height = `${el.scrollHeight}px`;
   }, [v]);
 
+  useEffect(() => {
+    if (!selectOnOpen) return;
+    const el = ref.current;
+    el?.focus();
+    el?.select();
+  }, [selectOnOpen]);
+
   // Flush on unmount so closing the sheet mid-sentence still saves.
   useEffect(() => () => {
     if (timer.current) clearTimeout(timer.current);
@@ -77,8 +94,18 @@ function AutoText({
       value={v}
       rows={minRows}
       placeholder={placeholder}
+      aria-label={label}
+      data-big={singleLine ? "" : undefined}
+      enterKeyHint={singleLine ? "done" : undefined}
+      onKeyDown={(e) => {
+        if (singleLine && e.key === "Enter") {
+          e.preventDefault();
+          e.currentTarget.blur();
+        }
+      }}
       onChange={(e) => {
-        setV(e.target.value);
+        const next = singleLine ? e.target.value.replace(/\n/g, " ") : e.target.value;
+        setV(next);
         if (timer.current) clearTimeout(timer.current);
         timer.current = setTimeout(() => save.current(latest.current), 400);
       }}
@@ -88,7 +115,7 @@ function AutoText({
   );
 }
 
-export function TaskSheet({ id }: { id: string }) {
+export function TaskSheet({ id, rewrite }: { id: string; rewrite?: boolean }) {
   const { db } = useStore();
   const today = useToday();
   const shelf = useShelf();
@@ -122,15 +149,24 @@ export function TaskSheet({ id }: { id: string }) {
     <Sheet label="Task" onClose={closeSheet}>
       <div className="px-5 pb-5 pt-5 sm:px-6">
         <p className={clsx("pr-10 text-[12.5px] font-medium", place.tone)}>{place.text}</p>
+        {rewrite && (
+          <p className="mt-3 rounded-lg bg-pen-tint px-3 py-2 text-[13.5px] text-pen">
+            Rewrite it as the first step — something you could start in ten minutes. Put the rest in the details.
+          </p>
+        )}
 
         <AutoText
           key={`title-${t.id}`}
+          label="Title"
           value={t.title}
           onSave={(v) => editTask(t.id, { title: v })}
+          singleLine
+          selectOnOpen={rewrite}
           className="mt-2 font-display text-[22px] font-medium leading-tight tracking-tight"
         />
         <AutoText
           key={`details-${t.id}`}
+          label="Details"
           value={t.details}
           onSave={(v) => editTask(t.id, { details: v })}
           placeholder="Details, links, the first step…"
@@ -171,32 +207,24 @@ export function TaskSheet({ id }: { id: string }) {
                 <Moon className="h-4 w-4" /> Not now
               </button>
             )}
-            <span className="relative">
-              <button
-                type="button"
-                className="btn border border-hair text-ink-2 hover:bg-sunk"
-                onClick={() => {
-                  const el = dateInput.current;
-                  if (!el) return;
-                  try {
-                    el.showPicker();
-                  } catch {
-                    el.focus();
-                  }
-                }}
-              >
-                {t.due ? `Due ${shortDay(t.due, today)}` : "Deadline"}
-              </button>
+            {/* The real date input lies over the label, so a tap lands on it and every
+                phone opens its own picker; desktop browsers get showPicker on click. */}
+            <label className="btn relative cursor-pointer border border-hair text-ink-2 hover:bg-sunk">
+              {t.due ? `Due ${shortDay(t.due, today)}` : "Deadline"}
               <input
                 ref={dateInput}
                 type="date"
-                tabIndex={-1}
                 value={t.due ?? ""}
                 onChange={(e) => setDue(t.id, e.target.value || null)}
-                className="pointer-events-none absolute bottom-0 left-0 h-px w-px opacity-0"
+                onClick={(e) => {
+                  try {
+                    e.currentTarget.showPicker();
+                  } catch {}
+                }}
+                className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
                 aria-label="Deadline"
               />
-            </span>
+            </label>
             {t.due && (
               <button type="button" className="btn-quiet h-9 px-2 text-[13px]" onClick={() => setDue(t.id, null)}>
                 Clear deadline
@@ -222,8 +250,8 @@ export function TaskSheet({ id }: { id: string }) {
               <button type="button" className="btn-ink" onClick={after(() => A.done(t.id))}>
                 <Check className="h-4 w-4" strokeWidth={2.5} /> Mark done
               </button>
-              <button type="button" className="btn-quiet ml-auto" onClick={after(() => A.letGo(t.id))}>
-                Let go
+              <button type="button" className="btn ml-auto text-red hover:bg-red/5" onClick={after(() => A.remove(t.id))}>
+                <Trash className="h-4 w-4" /> Delete
               </button>
             </>
           ) : (
@@ -233,13 +261,13 @@ export function TaskSheet({ id }: { id: string }) {
               </button>
               <button
                 type="button"
-                className="btn-quiet ml-auto"
+                className="btn ml-auto text-red hover:bg-red/5"
                 onClick={after(() => {
                   const prev = deleteTask(t.id);
-                  toast("Deleted", { label: "Undo", run: () => restore(prev) });
+                  toast("Deleted for good", { label: "Undo", run: () => restore(prev) });
                 })}
               >
-                <Trash className="h-4 w-4" /> Delete
+                <Trash className="h-4 w-4" /> Delete for good
               </button>
             </>
           )}
@@ -248,7 +276,8 @@ export function TaskSheet({ id }: { id: string }) {
         <p className="mt-4 font-mono text-[11.5px] text-ink-3">{facts.join(" · ")}</p>
         {open && !onToday && (
           <p className="mt-1 text-[12px] text-ink-3">
-            Untouched for 3 weeks, or ranked below 30, it fades — and clears {FADE_DAYS} days later unless kept.
+            Untouched for {STALE_DAYS / 7} weeks, or ranked below {LIST_HOLDS}, a task fades — and is deleted {FADE_DAYS} days later
+            unless you keep it.
           </p>
         )}
       </div>

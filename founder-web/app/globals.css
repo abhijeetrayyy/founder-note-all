@@ -61,9 +61,10 @@ body {
   }
 }
 
-/* Inputs at 16px on touch screens, or iOS zooms the page on focus. */
+/* Inputs at 16px on touch screens, or iOS zooms the page on focus.
+   Fields already bigger than that (a task's title) opt out with data-big. */
 @media (pointer: coarse) {
-  input, textarea, select { font-size: 16px !important; }
+  input, textarea:not([data-big]), select { font-size: 16px !important; }
 }
 
 @layer components {
@@ -88,6 +89,12 @@ body {
 
   .icon-btn {
     @apply inline-flex items-center justify-center rounded-lg h-9 w-9 text-ink-3 hover:text-ink hover:bg-sunk transition-colors;
+  }
+
+  /* Fingers need 44px; a mouse is happy with 36. */
+  @media (pointer: coarse) {
+    .btn { height: 2.75rem; }
+    .icon-btn { height: 2.75rem; width: 2.75rem; }
   }
 }
 

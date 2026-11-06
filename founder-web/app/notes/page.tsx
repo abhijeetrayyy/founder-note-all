@@ -9,6 +9,7 @@ import { noteTitle, notePreview, type Note } from "@/lib/model";
 import { createNote, deleteNote, editNote, getState, openTodos, restore, sendTodos, togglePin, undoCapture } from "@/lib/store";
 import { toast } from "@/lib/toast";
 import { ChevronLeft, Pin, Plus, Search, Send, Trash } from "@/components/icons";
+import { Swipe } from "@/components/swipe";
 
 const PLACEHOLDER = `Start writing — the first line is the title.
 
@@ -101,6 +102,18 @@ function NoteItem({ note, active, onOpen, today }: { note: Note; active: boolean
   const preview = notePreview(note);
   return (
     <li>
+      <Swipe
+        surface="bg-desk"
+        right={{
+          label: "Delete",
+          tone: "red",
+          icon: <Trash className="h-4 w-4" />,
+          run: () => {
+            const prev = deleteNote(note.id);
+            toast("Note deleted", { label: "Undo", run: () => restore(prev) });
+          },
+        }}
+      >
       <button
         type="button"
         onClick={onOpen}
@@ -119,6 +132,7 @@ function NoteItem({ note, active, onOpen, today }: { note: Note; active: boolean
         </span>
         {preview && <span className="mt-0.5 line-clamp-2 text-[13px] text-ink-3">{preview}</span>}
       </button>
+      </Swipe>
     </li>
   );
 }

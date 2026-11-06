@@ -31,17 +31,34 @@ export function pick(ids: string[]) {
   toast(label, undo(S.pick(ids)));
 }
 
+export function pickFirst(id: string) {
+  toast(`First on Today: ${title(id)}`, undo(S.pickFirst(id)));
+}
+
 export function unpick(id: string) {
   toast("Back on your list", undo(S.unpick(id)));
 }
 
-export function letGo(id: string) {
-  toast("Let go. It's in the archive if you need it.", undo(S.letGo(id)));
+export function remove(id: string) {
+  toast(`Deleted: ${title(id)}`, undo(S.remove(id)));
+}
+
+export function removeMany(ids: string[]) {
+  if (ids.length === 0) return;
+  toast(`Deleted ${ids.length}. They're in Recently deleted for 30 days.`, undo(S.removeMany(ids)));
+}
+
+export function setDue(id: string, due: string | null, label?: string) {
+  toast(due && label ? `Due ${label}` : "Deadline cleared", undo(S.setDue(id, due)));
+}
+
+/** Keep whichever ranks higher (the first), fold the other into it. */
+export function merge(keepId: string, dropId: string) {
+  toast("Merged into one", undo(S.mergeTasks(keepId, dropId)));
 }
 
 export function keep(id: string) {
-  S.keep(id);
-  toast("Kept. It's back on the list.");
+  toast("Kept. Its clock starts again.", undo(S.keep(id)));
 }
 
 export function snooze(id: string, until: string, label: string) {

@@ -9,6 +9,8 @@ import { useNow, useShelf, useToday } from "@/lib/hooks";
 import { BUSY_TODAY, PICK_BATCH, type Task } from "@/lib/model";
 import { rate, type Rated } from "@/lib/rank";
 import { ArrowRight, Back, Plus } from "@/components/icons";
+import { DeleteButton, swipeBack, swipeDelete, swipeDone, swipeHintSeen, swipeToday } from "@/components/row-actions";
+import { Swipe } from "@/components/swipe";
 import { CheckCircle, TaskTitle } from "@/components/task-bits";
 
 const MIN_ROWS = 4;
@@ -18,26 +20,31 @@ function OpenRow({ task, today, now }: { task: Task; today: string; now: Date })
   const r = rate(task, today, now);
   const showWhy = r.tone === "hot" || r.tone === "warm";
   return (
-    <li className="group flex min-h-[56px] items-center gap-3 border-b border-rule px-5 sm:px-6">
-      <CheckCircle
-        done={checking}
-        label={`Mark "${task.title}" done`}
-        onToggle={() => {
-          if (checking) return;
-          setChecking(true);
-          setTimeout(() => A.done(task.id), 320);
-        }}
-      />
-      <TaskTitle task={task} why={showWhy ? r.why : null} tone={r.tone} struck={checking} />
-      <button
-        type="button"
-        onClick={() => A.unpick(task.id)}
-        aria-label={`Send "${task.title}" back to the list`}
-        title="Back to list"
-        className="icon-btn hidden opacity-0 transition-opacity focus:opacity-100 group-hover:opacity-100 md:inline-flex"
-      >
-        <Back className="h-4 w-4" />
-      </button>
+    <li className="border-b border-rule">
+      <Swipe left={swipeDone(task.id)} right={swipeBack(task.id)} onSwiped={swipeHintSeen}>
+        <div className="group flex min-h-[56px] items-center gap-3 px-5 sm:px-6">
+          <CheckCircle
+            done={checking}
+            label={`Mark "${task.title}" done`}
+            onToggle={() => {
+              if (checking) return;
+              setChecking(true);
+              setTimeout(() => A.done(task.id), 320);
+            }}
+          />
+          <TaskTitle task={task} why={showWhy ? r.why : null} tone={r.tone} struck={checking} />
+          <DeleteButton id={task.id} title={task.title} />
+          <button
+            type="button"
+            onClick={() => A.unpick(task.id)}
+            aria-label={`Send "${task.title}" back to the list`}
+            title="Back to list"
+            className="icon-btn hidden opacity-0 transition-opacity focus:opacity-100 group-hover:opacity-100 md:inline-flex"
+          >
+            <Back className="h-4 w-4" />
+          </button>
+        </div>
+      </Swipe>
     </li>
   );
 }
@@ -55,10 +62,13 @@ function TodayCard({ open, done, listEmpty }: { open: Task[]; done: Task[]; list
   const today = useToday()!;
   const now = useNow()!;
   const total = open.length + done.length;
+  // Only what was picked for today counts as "everything you picked" — a task
+  // ticked off straight from the list is done today, but was never on the plan.
+  const pickedDone = done.filter((t) => t.pickedFor === today).length;
   const message =
     open.length > 0
       ? null
-      : done.length > 0
+      : pickedDone > 0
         ? "Everything you picked is done. Pick more when you're ready."
         : listEmpty
           ? "Nothing here yet. Dump what's on your mind into the box above."
@@ -105,12 +115,18 @@ function TodayCard({ open, done, listEmpty }: { open: Task[]; done: Task[]; list
 }
 
 function NextRow({ r }: { r: Rated }) {
+  const t = r.task;
   return (
-    <li className="flex items-center gap-2 border-b border-hair last:border-b-0">
-      <TaskTitle task={r.task} why={r.why} tone={r.tone} />
-      <button type="button" onClick={() => A.pick([r.task.id])} className="btn-pen shrink-0 px-2.5" aria-label={`Put "${r.task.title}" on Today`}>
-        <Plus className="h-4 w-4" /> Today
-      </button>
+    <li className="border-b border-hair last:border-b-0">
+      <Swipe left={swipeToday(t.id)} right={swipeDelete(t.id)} surface="bg-desk" onSwiped={swipeHintSeen}>
+        <div className="group flex items-center gap-2">
+          <TaskTitle task={t} why={r.why} tone={r.tone} />
+          <DeleteButton id={t.id} title={t.title} />
+          <button type="button" onClick={() => A.pick([t.id])} className="btn-pen shrink-0 px-2.5" aria-label={`Put "${t.title}" on Today`}>
+            <Plus className="h-4 w-4" /> Today
+          </button>
+        </div>
+      </Swipe>
     </li>
   );
 }
@@ -174,7 +190,7 @@ function UpNext({ ranked, fading, count, openToday, doneToday }: {
 
       {fading > 0 && (
         <Link href="/list#fading" className="mt-5 flex items-center gap-1 text-[13px] text-red hover:underline">
-          {fading} fading from your list — keep or let go <ArrowRight className="h-3.5 w-3.5" />
+          {fading} fading from your list — keep or delete <ArrowRight className="h-3.5 w-3.5" />
         </Link>
       )}
     </section>
@@ -183,6 +199,7 @@ function UpNext({ ranked, fading, count, openToday, doneToday }: {
 
 export default function TodayPage() {
   const shelf = useShelf();
+  const today = useToday();
   if (!shelf) return null;
   const count = shelf.ranked.length + shelf.fading.length;
   return (
@@ -193,7 +210,7 @@ export default function TodayPage() {
         fading={shelf.fading.length}
         count={count}
         openToday={shelf.today.length}
-        doneToday={shelf.doneToday.length}
+        doneToday={shelf.doneToday.filter((t) => t.pickedFor === today).length}
       />
     </div>
   );

@@ -4,10 +4,17 @@ import type { DayKey } from "./dates";
  * The whole data model: tasks and notes. Nothing else.
  *
  * A task is something you might do. It lives on the List until you pick it for
- * a day (Today), finish it (done), or stop carrying it (let go). Let-go is never
- * a hard delete — it moves to the archive, where it can be restored.
+ * a day (Today), finish it (done), or you delete it. Delete is forgiving: the
+ * task sits in Recently deleted for TRASH_DAYS, restorable, and only then is it
+ * gone for good — the same promise Photos and Notes make, so nobody needs a
+ * "are you sure?" dialog.
  */
 
+/**
+ * "let-go" is what the app calls Deleted. The stored value keeps its old name
+ * on purpose: renaming it would make an older copy of the app, still cached on
+ * a phone, read deleted tasks as open and sync them back to life.
+ */
 export type TaskStatus = "open" | "done" | "let-go";
 
 export interface Task {
@@ -42,9 +49,12 @@ export interface Task {
   touchedAt: string;
   /** When it slipped below the line. Cleared to the archive FADE_DAYS later. */
   fadingSince: string | null;
+  /** When you last tapped Keep. Holds its place above the line for KEEP_DAYS. */
+  keptAt: string | null;
   doneAt: string | null;
+  /** When it was deleted. */
   letGoAt: string | null;
-  /** "you" = you let it go; "faded" = the list cleared it after it sat below the line. */
+  /** "you" = you deleted it; "faded" = the list cleared it after it sat below the line. */
   letGoReason: "you" | "faded" | null;
 
   /** Sync bookkeeping: last write wins on this, and deleted rows are tombstones. */
@@ -73,10 +83,27 @@ export type Rec = Task | Note;
 export const LIST_HOLDS = 30;
 /** Untouched this long and nothing (a star, a date) is holding it up → it fades. */
 export const STALE_DAYS = 21;
-/** How long something fades before it is cleared to the archive. */
+/** How long something fades before it is cleared to Recently deleted. */
 export const FADE_DAYS = 7;
+/** How long a deleted task can still be restored before it is gone for good. */
+export const TRASH_DAYS = 30;
+/** Keep means it: a kept task holds a place above the line for this long. */
+export const KEEP_DAYS = 7;
+/**
+ * A task you just wrote down never starts below the line. A big dump can push
+ * the list past LIST_HOLDS for a couple of days; the oldest give way, not the
+ * thing you thought of a minute ago.
+ */
+export const NEW_GRACE_DAYS = 2;
+/**
+ * A deadline missed by more than this has stopped being a deadline. It no
+ * longer outranks everything; the list asks for a new date instead.
+ */
+export const OVERDUE_HOLD_DAYS = 7;
 /** If everything is starred, nothing is. */
 export const MAX_STARS = 5;
+/** Carried over this many times, a task stops ranking up and the list asks about it. */
+export const CARRIED_LIMIT = 3;
 /** How many the app suggests at a time. Pick a few, finish, pick more. */
 export const PICK_BATCH = 3;
 /** More open picks than this and Today stops being a plan. */
@@ -118,6 +145,7 @@ export function makeTask(title: string, now: Date, extra: Partial<Task> = {}): T
     createdAt: iso,
     touchedAt: iso,
     fadingSince: null,
+    keptAt: null,
     doneAt: null,
     letGoAt: null,
     letGoReason: null,
@@ -181,6 +209,7 @@ export function normalize(raw: unknown): Rec | null {
     createdAt,
     touchedAt: str(r.touchedAt, createdAt),
     fadingSince: strOrNull(r.fadingSince),
+    keptAt: strOrNull(r.keptAt),
     doneAt: strOrNull(r.doneAt),
     letGoAt: strOrNull(r.letGoAt),
     letGoReason: r.letGoReason === "you" || r.letGoReason === "faded" ? r.letGoReason : null,

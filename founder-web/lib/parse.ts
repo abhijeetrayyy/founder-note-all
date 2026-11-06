@@ -59,45 +59,60 @@ function dateFrom(day: number, month: number, year: number | null, today: DayKey
 
 type Rule = { re: RegExp; due: (m: RegExpMatchArray, today: DayKey) => DayKey | null };
 
+/** "tomorrow's agenda" is about an agenda, not a deadline. */
+const NP = String.raw`(?!['’]s\b)`;
+const MONTH_NAMES = Object.keys(MONTHS).join("|");
+const WEEKDAY_NAMES = Object.keys(WEEKDAYS).join("|");
+
+/** "SAT", "SUN": capitals mean an acronym or a name, never a day. */
+const allCaps = (w: string) => w.length > 1 && w === w.toUpperCase();
+
 const RULES: Rule[] = [
-  { re: new RegExp(String.raw`\b${PREP}(?:tomorrow|tmrw|tmr)\b`, "i"), due: (_m, t) => addDays(t, 1) },
-  { re: new RegExp(String.raw`\b${PREP}next week\b`, "i"), due: (_m, t) => nextWeekday(t, 1, false) },
-  { re: new RegExp(String.raw`\b${PREP}(?:the )?weekend\b`, "i"), due: (_m, t) => nextWeekday(t, 6, true) },
+  { re: new RegExp(String.raw`\b${PREP}(?:tomorrow|tmrw|tmr)\b${NP}`, "gi"), due: (_m, t) => addDays(t, 1) },
+  { re: new RegExp(String.raw`\b${PREP}next week\b${NP}`, "gi"), due: (_m, t) => nextWeekday(t, 1, false) },
+  // "this weekend", "by the weekend", or "weekend" as the last word — but not "plan weekend offsite".
   {
-    re: new RegExp(String.raw`\b${PREP}in (\d{1,3}) (day|days|week|weeks)\b`, "i"),
+    re: new RegExp(String.raw`(?:\b(?:this|(?:by|on|over|for)(?: the)?)\s+weekend\b|\bweekend(?=\s*$))${NP}`, "gi"),
+    due: (_m, t) => nextWeekday(t, 6, true),
+  },
+  {
+    re: new RegExp(String.raw`\b${PREP}in (\d{1,3}) (day|days|week|weeks)\b`, "gi"),
     due: (m, t) => addDays(t, Number(m[1]) * (m[2].toLowerCase().startsWith("week") ? 7 : 1)),
   },
   // "12 nov", "12th november 2027"
   {
-    re: new RegExp(String.raw`\b${PREP}(\d{1,2})(?:st|nd|rd|th)? (${Object.keys(MONTHS).join("|")})\b(?:,? (\d{4}))?`, "i"),
+    re: new RegExp(String.raw`\b${PREP}(\d{1,2})(?:st|nd|rd|th)? (${MONTH_NAMES})\b(?:,? (\d{4}))?${NP}`, "gi"),
     due: (m, t) => dateFrom(Number(m[1]), MONTHS[m[2].toLowerCase()], m[3] ? Number(m[3]) : null, t),
   },
   // "nov 12", "november 12th, 2027"
   {
-    re: new RegExp(String.raw`\b${PREP}(${Object.keys(MONTHS).join("|")}) (\d{1,2})(?:st|nd|rd|th)?\b(?:,? (\d{4}))?`, "i"),
+    re: new RegExp(String.raw`\b${PREP}(${MONTH_NAMES}) (\d{1,2})(?:st|nd|rd|th)?\b(?:,? (\d{4}))?`, "gi"),
     due: (m, t) => dateFrom(Number(m[2]), MONTHS[m[1].toLowerCase()], m[3] ? Number(m[3]) : null, t),
   },
   // "next friday" — the coming one, never today.
   {
-    re: new RegExp(String.raw`\b${PREP}next (${Object.keys(WEEKDAYS).join("|")})\b`, "i"),
-    due: (m, t) => nextWeekday(t, WEEKDAYS[m[1].toLowerCase()], false),
+    re: new RegExp(String.raw`\b${PREP}next (${WEEKDAY_NAMES})\b${NP}`, "gi"),
+    due: (m, t) => (allCaps(m[1]) ? null : nextWeekday(t, WEEKDAYS[m[1].toLowerCase()], false)),
   },
 ];
 
 /**
- * Weekdays need more care than the rest: "sat" and "sun" are ordinary words.
- * Full names count anywhere; short forms only after "on/by/due" or as the last
- * word, which is where people actually put them ("call sam fri").
+ * Weekdays need more care than the rest: "sat" and "sun" are ordinary words,
+ * and "Sun" may be a person. Full names count anywhere. Short forms count only
+ * as the last word ("call sam fri"), typed in lowercase — or capitalised right
+ * after "on/by/due" ("ship deck by Fri"). Never in capitals.
  */
 function matchWeekday(text: string, today: DayKey): { start: number; end: number; due: DayKey } | null {
-  const re = /\b(?:(by|on|due|before|this|until)\s+)?(sunday|monday|tuesday|wednesday|thursday|friday|saturday|sun|mon|tues|tue|wed|thurs|thur|thu|fri|sat)\b/gi;
+  const re = new RegExp(String.raw`\b(?:(by|on|due|before|this|until)\s+)?(${WEEKDAY_NAMES})\b${NP}`, "gi");
   for (const m of text.matchAll(re)) {
-    const word = m[2].toLowerCase();
-    const atEnd = text.slice((m.index ?? 0) + m[0].length).trim() === "";
-    if (FULL_WEEKDAYS.has(word) || m[1] || atEnd) {
-      const start = m.index ?? 0;
-      return { start, end: start + m[0].length, due: nextWeekday(today, WEEKDAYS[word], true) };
-    }
+    const word = m[2];
+    const lower = word.toLowerCase();
+    const start = m.index ?? 0;
+    const atEnd = text.slice(start + m[0].length).trim() === "";
+    const ok = FULL_WEEKDAYS.has(lower)
+      ? !allCaps(word)
+      : !allCaps(word) && atEnd && (word === lower || !!m[1]);
+    if (ok) return { start, end: start + m[0].length, due: nextWeekday(today, WEEKDAYS[lower], true) };
   }
   return null;
 }
@@ -110,38 +125,55 @@ function tidyTitle(s: string): string {
     .trim();
 }
 
-export function parseCapture(raw: string, today: DayKey): Parsed {
+/** Readings the person has turned off by tapping the chip — "no, I meant the word". */
+export interface Literal {
+  today?: boolean;
+  due?: boolean;
+  star?: boolean;
+}
+
+export function parseCapture(raw: string, today: DayKey, literal: Literal = {}): Parsed {
   let text = ` ${raw.trim()} `;
   let starred = false;
   let isToday = false;
   let due: DayKey | null = null;
 
   // Star: a standalone run of "!" anywhere, or one stuck to the front.
-  if (/\s!+(?=\s)/.test(text) || /^\s!+(?=\S)/.test(text)) {
+  if (!literal.star && (/\s!+(?=\s)/.test(text) || /^\s!+(?=\S)/.test(text))) {
     starred = true;
     text = text.replace(/\s!+(?=\s)/g, " ").replace(/^\s!+(?=\S)/, " ");
   }
 
-  const todayRe = /\b(?:(?:for|by|due|on)\s+)?(?:today|tonight|tonite)\b/i;
-  if (todayRe.test(text)) {
-    isToday = true;
-    text = text.replace(todayRe, " ");
+  if (!literal.today) {
+    // "USA Today", "Today's numbers": a capital in mid-sentence is a name, and a
+    // possessive is a noun. Only the plain word, or "Today" at the very start, counts.
+    const todayRe = new RegExp(String.raw`\b(?:(?:for|by|due|on)\s+)?(today|tonight|tonite)\b${NP}`, "gi");
+    for (const m of text.matchAll(todayRe)) {
+      const start = m.index ?? 0;
+      const atStart = text.slice(0, start).trim() === "";
+      if (/^[A-Z]/.test(m[1]) && !atStart) continue;
+      isToday = true;
+      text = text.slice(0, start) + " " + text.slice(start + m[0].length);
+      break;
+    }
   }
 
-  for (const rule of RULES) {
-    const m = text.match(rule.re);
-    if (!m || m.index === undefined) continue;
-    const d = rule.due(m, today);
-    if (!d) continue;
-    due = d;
-    text = text.slice(0, m.index) + " " + text.slice(m.index + m[0].length);
-    break;
-  }
-  if (!due) {
-    const w = matchWeekday(text, today);
-    if (w) {
-      due = w.due;
-      text = text.slice(0, w.start) + " " + text.slice(w.end);
+  if (!literal.due) {
+    outer: for (const rule of RULES) {
+      for (const m of text.matchAll(rule.re)) {
+        const d = rule.due(m, today);
+        if (!d || m.index === undefined) continue;
+        due = d;
+        text = text.slice(0, m.index) + " " + text.slice(m.index + m[0].length);
+        break outer;
+      }
+    }
+    if (!due) {
+      const w = matchWeekday(text, today);
+      if (w) {
+        due = w.due;
+        text = text.slice(0, w.start) + " " + text.slice(w.end);
+      }
     }
   }
 
@@ -156,19 +188,24 @@ export function parseCapture(raw: string, today: DayKey): Parsed {
   return { title: title || raw.trim(), today: isToday, due, starred };
 }
 
+/** Lines already ticked off or moved elsewhere ("[x]", "[>]") aren't new tasks. */
+const SETTLED_LINE = /^\s*(?:[-*•]\s+)?\[[xX>]\]/;
+
 /**
  * A brain dump: one task per line.
  *
- * Strips the bullets and checkboxes people paste in from other apps, so a list
- * copied out of Notes or a doc arrives as clean titles.
+ * Strips the bullets, numbers and checkboxes people paste in from other apps,
+ * so a list copied out of Notes or a doc arrives as clean titles. A bullet has
+ * to be followed by a space — "1.5x growth plan" keeps its number.
  */
 export function splitDump(text: string): string[] {
   return text
     .split(/\r?\n/)
+    .filter((l) => !SETTLED_LINE.test(l))
     .map((l) =>
       l
-        .replace(/^\s*(?:[-*•·◦▪>]+|\d+[.)]|\[[ xX>]?\])\s*/, "")
-        .replace(/^\[[ xX>]?\]\s*/, "")
+        .replace(/^\s*(?:[-*•·◦▪>]+\s+|\d+[.)]\s+)/, "")
+        .replace(/^\[\s?\]\s*/, "")
         .trim(),
     )
     .filter(Boolean);
