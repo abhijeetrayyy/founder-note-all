@@ -1,98 +1,64 @@
-# FounderOS — Setup & Run Guide
+# FounderOS
 
-This workspace contains the FounderOS founder execution system across two codebases:
+Dump tasks, pick a few for today, keep the list honest. Plus notes.
 
-- `notes app/` — Flutter mobile app (offline-first SQLite + Supabase cloud sync)
-- `founder-web/` — Next.js 15 web app (server-rendered, Supabase-backed)
-- `supabase/schema.sql` — complete database schema, RLS, indexes, triggers, and helper functions
+The app is `founder-web/`: three screens — **Today**, **List**, **Notes** — and one capture box that sits on every screen.
 
-## 1. Supabase project
+## How it works
 
-1. Create a new Supabase project at https://supabase.com.
-2. Open the SQL Editor and run the entire contents of `supabase/schema.sql`.
-3. Go to Project Settings → API and copy:
-   - `URL`
-   - `anon public` key
-   - `service_role` key (for server-side admin operations only)
+**Capture.** Type in the box and press Enter. It goes to your list. Paste several lines and each becomes its own task. Words it understands:
 
-## 2. Web app (`founder-web/`)
+| You type | It does |
+| --- | --- |
+| `today` / `tonight` | Puts it straight on Today |
+| `tomorrow`, `fri`, `next week`, `in 3 days`, `12 nov` | Sets a deadline |
+| `!` (alone, or at the start) | Stars it |
 
-### Environment variables
+Writing something that's already on the list doesn't add a twin. It bumps the one that's there ("You wrote this down 3 times").
 
-Create `founder-web/.env.local`:
+**Today** is an index card. Pick a few from *Up next*, finish them, then pick more. When the card is empty, **Pick these 3** takes the top three. Anything you don't finish goes back to the list at midnight, counted as *carried over*. After it's been carried three times, the list tells you to do it or let it go.
+
+**The list ranks itself** using facts the task already carries: deadlines first, then stars, carried-over tasks, and things you wrote down more than once. Every day a task sits untouched costs it a little. Each row says why it's where it is.
+
+**The list stays small.** It holds **30**. Anything below the line, or untouched for **3 weeks** with no star or deadline holding it up, starts to *fade*. **7 days** later it's cleared to the archive unless you hit **Keep**. Nothing is deleted: *Done and let go* holds it all, and you can restore anything.
+
+Other limits: **5 stars** at most (if everything is starred, nothing is). Deadlines more than a week out and snoozed tasks wait under **Later**, out of the way, and come back on their own.
+
+**Notes** are plain text. The first line is the title. Write `[ ] something` on a line and **Send to list** turns it into a task, then marks the line `[>]`.
+
+All of these numbers are in one place: `founder-web/lib/model.ts`.
+
+## Run it
 
 ```bash
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-```
-
-### Run locally
-
-```bash
-cd "founder-web"
+cd founder-web
 npm install
-npm run dev
+npm run dev        # http://localhost:3000
+npm test           # the ranking, fading, capture and sync-merge rules
+npm run build      # static site in out/ — deploy anywhere (Vercel works as-is)
 ```
 
-Open http://localhost:3000.
+Shortcuts: `/` or `n` jumps to the capture box, `⌘K` works from anywhere, and `Esc` closes things.
 
-### Build
+On a phone, open the deployed URL and choose **Add to Home Screen**. It runs full-screen and works offline.
 
-```bash
-npm run typecheck
-npm run build
-npm start
-```
+## Data and sync
 
-## 3. Mobile app (`notes app/`)
+Everything saves **on the device first** (browser storage), so the app opens instantly, works offline, and never breaks because a server is down. **Sync & backup** (top right) also lets you download a backup file and restore one.
 
-### Configure Supabase
+To share one list between your phone and your laptop, turn on sync:
 
-Edit `lib/config/supabase_config.dart` or pass values at build time:
+1. Create a Supabase project (or restore the old one).
+2. Run `founder-web/supabase/schema.sql` in its SQL editor. That's one table and one function, and it doesn't touch any other table.
+3. Put the project URL and anon key in `founder-web/.env.local` (see `.env.local.example`), then rebuild and redeploy.
+4. Open **Sync & backup** in the app and sign in. Everything already on that device goes up on the first sign-in.
 
-```bash
-flutter build apk --debug \
-  --dart-define=SUPABASE_URL=https://your-project.supabase.co \
-  --dart-define=SUPABASE_ANON_KEY=your-anon-key
-```
+Each task and note syncs as one record. If the same record was edited on two devices, the most recent edit wins.
 
-### Run locally
+> The Supabase project in the current `.env.local` no longer resolves (it was probably paused and removed while the app sat unused). Until you replace those two values, the app runs device-only.
 
-```bash
-cd "notes app"
-flutter pub get
-flutter run
-```
+## What's not here any more
 
-### Build debug APK
+Goals, habits, journal, focus timer, rituals, projects, stats and weekly review were removed on purpose. Git history has them.
 
-```bash
-flutter build apk --debug
-```
-
-Output: `build/app/outputs/flutter-apk/app-debug.apk`
-
-## 4. Features
-
-- **Auth**: email/password signup & sign-in on both platforms, backed by Supabase Auth.
-- **Tasks**: capture, prioritize, schedule, energy-tag, and complete tasks.
-- **Notes**: pinned, categorized, project-linked notes.
-- **Projects**: group tasks and notes by outcome.
-- **Goals**: track progress with sliders.
-- **Habits**: daily check-ins with logs.
-- **Journal**: mood + reflection entries.
-- **Daily Planning**: intention, blockers, MITs, energy check-in.
-- **Focus Timer**: pomodoro/deep-work/quick-sprint timer.
-- **Stats & Review**: weekly metrics and reflection prompts.
-- **Quick Add**: natural-language capture (`Call investor tomorrow at 2pm #sales`) on both platforms.
-
-## 5. Cloud sync (mobile)
-
-The mobile app is offline-first. After signing in, go to **Settings → Sync to cloud** to push local SQLite data to Supabase. Pull sync and automatic background sync can be added on top of `lib/services/supabase_sync_service.dart`.
-
-## 6. Common issues
-
-- **Kotlin version errors during Android build**: `android/build.gradle` and `android/settings.gradle` are set to Kotlin `2.2.0` to match the latest `supabase_flutter` transitive dependencies.
-- **minSdk error**: `android/app/build.gradle` uses `minSdk 23` because the `passkeys_android` transitive dependency requires it.
-- **Supabase types**: the web app currently uses runtime casts against a hand-written `lib/supabase/types.ts`. Regenerate proper types with the Supabase CLI when the schema changes.
+`notes app/` (the Flutter app) and `supabase/schema.sql` at the repo root belong to that older version. They haven't been changed and don't talk to the new app.

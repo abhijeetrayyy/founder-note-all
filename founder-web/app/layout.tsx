@@ -1,47 +1,35 @@
 import type { Metadata, Viewport } from "next";
-import { IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
+import { Bricolage_Grotesque, Geist, Geist_Mono } from "next/font/google";
+import { Shell } from "@/components/shell";
 import "./globals.css";
-import { ToastProvider } from "@/components/ui/toast";
 
-// No serif. The serif headline was the most recognisable thing about the old
-// system and also the thing that made it read as an article. IBM Plex was drawn
-// for interfaces and instrumentation, and its mono is a true sibling — so
-// numbers and labels sit in the same voice as everything else.
-const sans = IBM_Plex_Sans({
-  subsets: ["latin"],
-  variable: "--font-sans",
-  weight: ["400", "500", "600"],
-  display: "swap",
-});
-const mono = IBM_Plex_Mono({
-  subsets: ["latin"],
-  variable: "--font-mono",
-  weight: ["400", "500"],
-  display: "swap",
-});
+const sans = Geist({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
+const mono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono", display: "swap" });
+// Only for the day's name on the Today card and page titles — used sparingly.
+const display = Bricolage_Grotesque({ subsets: ["latin"], variable: "--font-display", weight: ["500", "600"], display: "swap" });
 
 export const metadata: Metadata = {
   title: "FounderOS",
-  description: "The execution system for founders who get stuck choosing what to do next.",
+  description: "Dump tasks, pick a few for today, keep the list honest. Plus notes.",
   manifest: "/manifest.json",
+  appleWebApp: { capable: true, title: "FounderOS", statusBarStyle: "default" },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
   viewportFit: "cover",
-  themeColor: "#0B0B0D",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#EAEDF1" },
+    { media: "(prefers-color-scheme: dark)", color: "#101214" },
+  ],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="apple-touch-icon" href="/icons/icon-192.svg" />
-      </head>
-      <body className={`${sans.variable} ${mono.variable} font-sans antialiased bg-void text-foreground`}>
-        <ToastProvider>{children}</ToastProvider>
+    <html lang="en" className={`${sans.variable} ${mono.variable} ${display.variable}`}>
+      <body>
+        <Shell>{children}</Shell>
       </body>
     </html>
   );
