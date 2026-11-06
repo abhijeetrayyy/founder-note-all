@@ -2,13 +2,14 @@
 
 import clsx from "clsx";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { ago } from "@/lib/dates";
 import { useNow, useShelf, useStore, useSync, useToday } from "@/lib/hooks";
+import { isNative, setupBackButton } from "@/lib/native";
 import { load, runTidy } from "@/lib/store";
 import { startSync, type SyncStatus } from "@/lib/sync";
-import { openSync, useSheet } from "@/lib/ui";
+import { closeSheet, getSheet, openSync, useSheet } from "@/lib/ui";
 import { Capture } from "./capture";
 import { ListIcon, NoteIcon, Sun } from "./icons";
 import { SyncSheet } from "./sync-sheet";
@@ -51,12 +52,30 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const sync = useSync();
   const shelf = useShelf();
 
+  const router = useRouter();
+
   useEffect(() => {
     load();
     void startSync();
-    if ("serviceWorker" in navigator && process.env.NODE_ENV === "production") {
+    // Offline caching is for the browser. The phone app already carries every
+    // file inside the APK, and a cache there would only serve stale copies.
+    if ("serviceWorker" in navigator && process.env.NODE_ENV === "production" && !isNative()) {
       navigator.serviceWorker.register("/sw.js").catch(() => {});
     }
+    void setupBackButton(() => {
+      if (getSheet()) {
+        closeSheet();
+        return true;
+      }
+      // An open note: back returns to the list of notes.
+      if (window.location.pathname === "/notes" && new URLSearchParams(window.location.search).has("n")) {
+        router.replace("/notes", { scroll: false });
+        return true;
+      }
+      return false;
+    });
+    // Set up once; the router object is stable for the life of the app.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Housekeeping on open and again whenever the day turns over.

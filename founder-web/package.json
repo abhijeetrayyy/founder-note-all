@@ -8,7 +8,9 @@
     "start": "npx serve out",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "android:sync": "NEXT_DIST_DIR=.next-android next build && cap sync android",
+    "android:apk": "npm run android:sync && cd android && ./gradlew assembleDebug"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.108.2",
@@ -18,6 +20,10 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@capacitor/android": "^8.6.0",
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/cli": "^8.6.0",
+    "@capacitor/core": "^8.6.0",
     "@types/node": "^22.9.0",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",

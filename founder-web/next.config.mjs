@@ -7,6 +7,9 @@
 const nextConfig = {
   output: "export",
   images: { unoptimized: true },
+  // Lets the Android build compile somewhere other than .next, so it never
+  // trips over a dev server that's running at the same time.
+  distDir: process.env.NEXT_DIST_DIR || ".next",
 };
 
 export default nextConfig;

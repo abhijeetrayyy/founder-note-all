@@ -11,6 +11,9 @@ import { capture, getState, undoCapture, type CaptureResult } from "@/lib/store"
 import { toast } from "@/lib/toast";
 import { Plus, Star, Sun, X } from "./icons";
 
+const CAPTURES_KEY = "fos.captures";
+const HINT_FOR = 5;
+
 function say(r: CaptureResult, today: string): string {
   const n = r.added.length;
   const b = r.bumped.length;
@@ -64,6 +67,13 @@ export function Capture() {
   const [focused, setFocused] = useState(false);
   // Readings the person tapped away: "no, I meant the word".
   const [literal, setLiteral] = useState<Literal>({});
+  // The tips are for the first few captures; after that they're in the way.
+  const [captures, setCaptures] = useState(HINT_FOR);
+  useEffect(() => {
+    try {
+      setCaptures(Number(localStorage.getItem(CAPTURES_KEY) ?? 0));
+    } catch {}
+  }, []);
   const ref = useRef<HTMLInputElement>(null);
   const today = useToday();
   const parsed = useMemo(
@@ -97,6 +107,12 @@ export function Capture() {
     if (!res.added.length && !res.bumped.length) return;
     setText("");
     setLiteral({});
+    setCaptures((n) => {
+      try {
+        localStorage.setItem(CAPTURES_KEY, String(n + 1));
+      } catch {}
+      return n + 1;
+    });
     toast(say(res, today), { label: "Undo", run: () => undoCapture(res) });
   }
 
@@ -165,7 +181,7 @@ export function Capture() {
           )
         )}
       </label>
-      {focused && !text && (
+      {focused && !text && captures < HINT_FOR && (
         <p className="pointer-events-none absolute inset-x-0 top-full z-10 mt-2 animate-fade rounded-xl border border-hair bg-card px-4 py-3 text-[13px] leading-relaxed text-ink-2 shadow-lift">
           Goes to your list. Add <b className="font-medium text-ink">today</b> to put it on Today, a day like{" "}
           <b className="font-medium text-ink">fri</b> or <b className="font-medium text-ink">12 nov</b> for a deadline,{" "}

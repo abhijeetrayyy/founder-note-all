@@ -62,7 +62,27 @@ npm run build      # static site in out/ — deploy anywhere (Vercel works as-is
 
 Shortcuts: `/` or `n` jumps to the capture box, `⌘K` works from anywhere, and `Esc` closes things.
 
-On a phone, open the deployed URL and choose **Add to Home Screen**. It runs full-screen and works offline.
+## Android app
+
+The Android app is this same app inside a native shell ([Capacitor](https://capacitorjs.com)). Everything is bundled into the APK, so it opens instantly and works with no network. Sync works exactly like the web version: sign in from **Sync & backup**.
+
+```bash
+cd founder-web
+npm run android:apk
+```
+
+The APK lands in `founder-web/android/app/build/outputs/apk/debug/app-debug.apk`. It needs Android Studio's Java (`export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"`) and the Android SDK.
+
+Install it either way:
+
+- **USB:** turn on Developer options → USB debugging on the phone, plug it in, then `adb install -r <apk>`.
+- **File:** copy the APK to the phone (Drive, email, cable), tap it, and allow "Install unknown apps" for whatever opened it.
+
+Builds from this Mac install over each other, because they're signed with the same debug key. If an older FounderOS app is already on the phone and refuses to update, uninstall it first.
+
+The app icon and launch screen come from `founder-web/assets/`. To regenerate them, run `npx @capacitor/assets generate --android`.
+
+You can also skip the APK: open the deployed URL in Chrome on the phone and choose **Add to Home Screen**. It runs full-screen and works offline.
 
 ## Data and sync
 

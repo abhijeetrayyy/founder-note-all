@@ -44,6 +44,14 @@ html {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Controls are things you press, not text you select: a long press on a row
+   (or the start of a swipe) shouldn't pop up a selection handle. */
+button, [role="tab"], nav a {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
 body {
   @apply bg-desk text-ink font-sans antialiased;
   min-height: 100dvh;

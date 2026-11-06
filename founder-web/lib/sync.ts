@@ -180,6 +180,10 @@ function watch(c: SupabaseClient) {
 
   window.addEventListener("online", () => scheduleSync(0));
   window.addEventListener("focus", () => scheduleSync(0));
+  // Coming back to the phone app fires no "focus" — only a visibility change.
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") scheduleSync(0);
+  });
   setInterval(() => {
     if (document.visibilityState === "visible") scheduleSync(0);
   }, 60_000);
